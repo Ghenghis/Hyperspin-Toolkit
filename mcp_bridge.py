@@ -822,6 +822,138 @@ def tool_rl_summary(rl_root: str | None = None, **kwargs) -> dict:
     return rl_summary(rl_root)
 
 
+# ── M55 — BIOS Management Handlers ──────────────────────────────────
+
+def tool_bios_audit(systems: list | None = None, **kwargs) -> dict:
+    """M55 — Run a full BIOS audit across all known systems or a subset."""
+    from engines.bios_manager import full_bios_audit
+    report = full_bios_audit(systems=systems)
+    return report.to_dict()
+
+
+def tool_bios_system(system: str, **kwargs) -> dict:
+    """M55 — Audit BIOS files for a single system."""
+    from engines.bios_manager import audit_system
+    result = audit_system(system)
+    return result.to_dict()
+
+
+def tool_bios_missing(**kwargs) -> dict:
+    """M55 — Get a summary of all missing BIOS files across systems."""
+    from engines.bios_manager import get_missing_bios_summary
+    return get_missing_bios_summary()
+
+
+def tool_bios_list_systems(**kwargs) -> dict:
+    """M55 — List all systems with known BIOS requirements."""
+    from engines.bios_manager import list_systems
+    return {"systems": list_systems()}
+
+
+# ── M56 — DAT File Verification Handlers ────────────────────────────
+
+def tool_dat_verify_system(system: str, rom_dir: str, dat_path: str,
+                           use_sha1: bool = False, **kwargs) -> dict:
+    """M56 — Verify a system's ROM set against a DAT file with completion tracking and 1G1R."""
+    from engines.dat_verifier import verify_system
+    comp = verify_system(system, rom_dir, dat_path, use_sha1=use_sha1)
+    return comp.to_dict()
+
+
+def tool_dat_index(dat_dir: str, **kwargs) -> dict:
+    """M56 — Index all DAT files in a directory and return metadata."""
+    from engines.dat_verifier import get_dat_summary
+    return get_dat_summary(dat_dir)
+
+
+def tool_dat_metadata(dat_path: str, **kwargs) -> dict:
+    """M56 — Parse metadata from a single DAT file (source, version, game count)."""
+    from engines.dat_verifier import parse_dat_metadata
+    from pathlib import Path as _Path
+    return parse_dat_metadata(_Path(dat_path)).to_dict()
+
+
+def tool_dat_1g1r(dat_path: str, region_priority: list | None = None, **kwargs) -> dict:
+    """M56 — Curate a 1G1R set from a DAT file with configurable region priority."""
+    from engines.dat_verifier import curate_1g1r
+    from engines.rom_audit import parse_dat_file
+    from pathlib import Path as _Path
+    entries = parse_dat_file(_Path(dat_path))
+    result = curate_1g1r(entries, region_priority=region_priority)
+    return {"total": len(result), "games": [r.to_dict() for r in result[:100]],
+            "truncated": len(result) > 100}
+
+
+# ── M57 — HyperSpin Settings Handlers ──────────────────────────────
+
+def tool_hs_settings_validate(hs_root: str | None = None, **kwargs) -> dict:
+    """M57 — Validate all HyperSpin settings (main INI + per-system)."""
+    from engines.hyperspin_settings import audit_all_settings
+    report = audit_all_settings(hs_root)
+    return report.to_dict()
+
+
+def tool_hs_settings_get(ini_path: str, section: str, key: str, **kwargs) -> dict:
+    """M57 — Read a single setting from a HyperSpin INI file."""
+    from engines.hyperspin_settings import get_setting
+    from pathlib import Path as _Path
+    val = get_setting(_Path(ini_path), section, key)
+    return {"section": section, "key": key, "value": val}
+
+
+def tool_hs_settings_set(ini_path: str, section: str, key: str, value: str, **kwargs) -> dict:
+    """M57 — Write a single setting to a HyperSpin INI file."""
+    from engines.hyperspin_settings import set_setting
+    from pathlib import Path as _Path
+    ok = set_setting(_Path(ini_path), section, key, value)
+    return {"success": ok, "section": section, "key": key, "value": value}
+
+
+def tool_hs_settings_preset(ini_path: str, preset: str, **kwargs) -> dict:
+    """M57 — Apply a settings preset (performance, quality, cabinet) to a HyperSpin INI."""
+    from engines.hyperspin_settings import apply_preset
+    from pathlib import Path as _Path
+    ok = apply_preset(_Path(ini_path), preset)
+    return {"success": ok, "preset": preset}
+
+
+def tool_hs_settings_systems(hs_root: str | None = None, **kwargs) -> dict:
+    """M57 — List all systems with HyperSpin Settings INI files."""
+    from engines.hyperspin_settings import list_configured_systems
+    systems = list_configured_systems(hs_root)
+    return {"systems": systems, "count": len(systems)}
+
+
+# ── M63 — Self-Healing Framework Handlers ────────────────────────────
+
+def tool_heal_diagnose(hs_root: str | None = None, checks: list | None = None, **kwargs) -> dict:
+    """M63 — Run diagnostic checks on HyperSpin installation and report all issues."""
+    from engines.self_healer import run_diagnostics
+    report = run_diagnostics(hs_root, checks=checks)
+    return report.to_dict()
+
+
+def tool_heal_repair(hs_root: str | None = None, dry_run: bool = True,
+                     categories: list | None = None, **kwargs) -> dict:
+    """M63 — Auto-repair detected issues. Dry-run by default for safety."""
+    from engines.self_healer import heal
+    report = heal(hs_root, dry_run=dry_run, categories=categories)
+    return report.to_dict()
+
+
+def tool_heal_history(output_dir: str | None = None, **kwargs) -> dict:
+    """M63 — View history of previous healing/repair operations."""
+    from engines.self_healer import load_healing_history
+    history = load_healing_history(output_dir)
+    return {"reports": history[:20], "total": len(history)}
+
+
+def tool_heal_checks(**kwargs) -> dict:
+    """M63 — List all registered diagnostic checks and repair capabilities."""
+    from engines.self_healer import list_checks, list_repair_prefixes
+    return {"checks": list_checks(), "repair_prefixes": list_repair_prefixes()}
+
+
 # ── MCP Tool Definitions ────────────────────────────────────────────
 
 TOOLS = [
@@ -1765,6 +1897,191 @@ TOOLS = [
             },
         },
         "handler": tool_plugin_events_emit,
+    },
+    # ── M55 — BIOS Management ──
+    {
+        "name": "bios_audit",
+        "description": "M55 — Full BIOS audit across all known systems. Checks MD5 hashes against known-good database, reports valid/bad_hash/missing per file, and computes per-system health scores.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "systems": {"type": "array", "items": {"type": "string"}, "description": "Optional list of systems to audit (default: all)"},
+            },
+        },
+        "handler": tool_bios_audit,
+    },
+    {
+        "name": "bios_system",
+        "description": "M55 — Audit BIOS files for a single system (e.g. 'PlayStation', 'Sega Saturn').",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"system": {"type": "string", "description": "System name"}},
+            "required": ["system"],
+        },
+        "handler": tool_bios_system,
+    },
+    {
+        "name": "bios_missing",
+        "description": "M55 — Get summary of all missing BIOS files across systems.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_bios_missing,
+    },
+    {
+        "name": "bios_list_systems",
+        "description": "M55 — List all systems with known BIOS requirements in the database.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_bios_list_systems,
+    },
+    # ── M56 — DAT File Verification ──
+    {
+        "name": "dat_verify_system",
+        "description": "M56 — Verify a system's ROM set against a DAT file. Returns completion %, 1G1R stats, missing/extra game lists.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "rom_dir", "dat_path"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "rom_dir": {"type": "string", "description": "Path to ROM directory"},
+                "dat_path": {"type": "string", "description": "Path to DAT file"},
+                "use_sha1": {"type": "boolean", "description": "Also verify SHA1 hashes", "default": False},
+            },
+        },
+        "handler": tool_dat_verify_system,
+    },
+    {
+        "name": "dat_index",
+        "description": "M56 — Index all DAT files in a directory. Returns per-source summary (No-Intro, Redump, TOSEC, MAME) with game/ROM counts.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_dir"],
+            "properties": {"dat_dir": {"type": "string", "description": "Directory containing DAT files"}},
+        },
+        "handler": tool_dat_index,
+    },
+    {
+        "name": "dat_metadata",
+        "description": "M56 — Parse metadata from a single DAT file: source, version, author, game count.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_path"],
+            "properties": {"dat_path": {"type": "string", "description": "Path to DAT file"}},
+        },
+        "handler": tool_dat_metadata,
+    },
+    {
+        "name": "dat_1g1r",
+        "description": "M56 — Curate a 1G1R (1 Game 1 ROM) set from a DAT file. Picks best region variant per game.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_path"],
+            "properties": {
+                "dat_path": {"type": "string", "description": "Path to DAT file"},
+                "region_priority": {"type": "array", "items": {"type": "string"}, "description": "Region priority order (default: USA first)"},
+            },
+        },
+        "handler": tool_dat_1g1r,
+    },
+    # ── M57 — HyperSpin Settings ──
+    {
+        "name": "hs_settings_validate",
+        "description": "M57 — Validate all HyperSpin settings: main INI + per-system INIs. Reports broken paths, invalid values, health scores.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"hs_root": {"type": "string", "description": "HyperSpin root directory (optional)"}},
+        },
+        "handler": tool_hs_settings_validate,
+    },
+    {
+        "name": "hs_settings_get",
+        "description": "M57 — Read a single setting from a HyperSpin INI file.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["ini_path", "section", "key"],
+            "properties": {
+                "ini_path": {"type": "string", "description": "Path to INI file"},
+                "section": {"type": "string", "description": "INI section name"},
+                "key": {"type": "string", "description": "Setting key"},
+            },
+        },
+        "handler": tool_hs_settings_get,
+    },
+    {
+        "name": "hs_settings_set",
+        "description": "M57 — Write a single setting to a HyperSpin INI file.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["ini_path", "section", "key", "value"],
+            "properties": {
+                "ini_path": {"type": "string", "description": "Path to INI file"},
+                "section": {"type": "string", "description": "INI section name"},
+                "key": {"type": "string", "description": "Setting key"},
+                "value": {"type": "string", "description": "New value"},
+            },
+        },
+        "handler": tool_hs_settings_set,
+    },
+    {
+        "name": "hs_settings_preset",
+        "description": "M57 — Apply a settings preset to HyperSpin.ini. Presets: 'performance', 'quality', 'cabinet'.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["ini_path", "preset"],
+            "properties": {
+                "ini_path": {"type": "string", "description": "Path to HyperSpin.ini"},
+                "preset": {"type": "string", "enum": ["performance", "quality", "cabinet"]},
+            },
+        },
+        "handler": tool_hs_settings_preset,
+    },
+    {
+        "name": "hs_settings_systems",
+        "description": "M57 — List all systems that have HyperSpin Settings INI files.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"hs_root": {"type": "string", "description": "HyperSpin root (optional)"}},
+        },
+        "handler": tool_hs_settings_systems,
+    },
+    # ── M63 — Self-Healing Framework ──
+    {
+        "name": "heal_diagnose",
+        "description": "M63 — Run diagnostic checks on HyperSpin installation. Detects missing dirs, broken INI paths, empty databases, missing media.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "hs_root": {"type": "string", "description": "HyperSpin root (optional)"},
+                "checks": {"type": "array", "items": {"type": "string"}, "description": "Specific checks to run (optional, default: all)"},
+            },
+        },
+        "handler": tool_heal_diagnose,
+    },
+    {
+        "name": "heal_repair",
+        "description": "M63 — Auto-repair detected issues. DRY-RUN by default — set dry_run=false to actually fix. Creates backups before modifying.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "hs_root": {"type": "string", "description": "HyperSpin root (optional)"},
+                "dry_run": {"type": "boolean", "description": "Preview only, don't modify (default: true)", "default": True},
+                "categories": {"type": "array", "items": {"type": "string"}, "description": "Only repair these categories (optional)"},
+            },
+        },
+        "handler": tool_heal_repair,
+    },
+    {
+        "name": "heal_history",
+        "description": "M63 — View history of previous healing/repair operations.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"output_dir": {"type": "string", "description": "Report directory (optional)"}},
+        },
+        "handler": tool_heal_history,
+    },
+    {
+        "name": "heal_checks",
+        "description": "M63 — List all registered diagnostic checks and repair capabilities.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_heal_checks,
     },
 ]
 
