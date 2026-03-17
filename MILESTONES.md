@@ -1,4 +1,16 @@
-## HyperSpin Extreme Toolkit — 63 Milestone Roadmap
+## KINHANK Toolkit (formerly HyperSpin Extreme Toolkit) — 66 Milestone Roadmap
+
+### Project Scope
+
+This toolkit manages **all KINHANK gaming HDD variants** sold on AliExpress/Amazon:
+
+| Variant | Product                  | Frontend(s)                                                | Key Signature                             |
+| ------- | ------------------------ | ---------------------------------------------------------- | ----------------------------------------- |
+| **A**   | 12T HyperSpin Attraction | HyperSpin + RocketLauncher                                 | `\Arcade\HyperSpin.exe` + `Databases\`    |
+| **B**   | 12T 5-in-1 T3            | AttractMode + RetroFE + LaunchBox + Playnite + TeknoParrot | `\Arcade\attract.cfg` + `\CORE - TYPE R\` |
+| **C**   | 2T Batocera              | EmulationStation / Batocera                                | `batocera-boot.conf` + `\roms\`           |
+
+The toolkit auto-detects variants, supports multi-frontend layouts, and provides auditing, repair, and management across all KINHANK drive types.
 
 ## Phase 1: Foundation (Milestones 1–5)
 
@@ -472,7 +484,7 @@
 *   Scan all gaming HDDs and generate file manifests (path, size, hash, type)
 *   Record file counts, total sizes, folder trees per drive
 *   Store index in SQLite `drive_index` table with full-text search
-*   Auto-detect collection type using `drive_registry.json` identifiers
+*   Auto-detect collection type using `drive_registry.json` identifiers and M64 fingerprinting
 *   Generate per-drive JSON manifests saved to each drive root
 *   Cross-drive duplicate file detection (feeds into M26)
 *   **Status**: 🔶 Partial — `engines/drive_indexer.py` + `engines/drive_index.py` exist; needs cross-HDD scanning, hashing, and manifest export
@@ -537,6 +549,7 @@
 *   Batch conversion with progress tracking and error reporting
 *   Cross-frontend collection comparison (what systems/games exist where)
 *   Theme format awareness (different frontends use different media layouts)
+*   KINHANK variant awareness: handle Variant A (HyperSpin), B (AttractMode/RetroFE), C (Batocera) layouts
 *   **Status**: 📋 Planned — 0% built, requires `engines/frontend_converter.py`
 
 ## Phase 13: RocketLauncher Deep Integration (Milestones 59–60)
@@ -636,7 +649,40 @@
     *   What was found, what was fixed, what needs manual attention
     *   Repair history with before/after snapshots
     *   Suggested manual fixes for issues that can't be auto-repaired
-*   **Status**: 📋 Planned — 0% built, requires `engines/self_healer.py` + `scripts/repair_runner.ps1`
+*   **Status**: ✅ Complete — `engines/self_healer.py` + `tests/test_self_healer.py` (356 lines), MCP tools: `self_heal_scan`, `self_heal_repair`, `self_heal_report`, `self_heal_dry_run`
+
+## Phase 15: KINHANK Variant Management (Milestones 64–66)
+
+### M64 — Drive Fingerprint Engine
+
+*   Auto-detect KINHANK variant (A/B/C) from any drive letter based on directory signatures
+*   Fingerprint rules: presence of key files (`HyperSpin.exe`, `attract.cfg`, `CORE.exe`, `batocera-boot.conf`)
+*   Count systems/collections/ROMs per detected frontend
+*   Generate drive report card: variant, frontend(s), system count, game count, health status
+*   Clone detection: identify 1:1 duplicate drives by comparing file trees
+*   Drive registry integration: store fingerprints in `drive_registry.json`
+*   **Status**: ✅ Complete — `engines/drive_fingerprint.py` + MCP tool: `drive_fingerprint`
+
+### M65 — Cross-Variant Game List Extractor
+
+*   Extract game lists from any KINHANK variant:
+    *   Variant A: Parse HyperSpin XML databases in `\Arcade\Databases\{System}\`
+    *   Variant B: Parse AttractMode romlists in `\Arcade\romlists\` + Playnite library
+    *   Variant C: Scan Batocera ROM directories in `\roms\{system}\`
+*   Generate standardized CSV/JSON game inventory per drive
+*   Cross-drive comparison: what games exist on which drives
+*   Missing game detection: compare against KINHANK official game lists
+*   **Status**: 🔶 Partial — Variant A extraction done (`D:\Arcade\Game-List-HyperSpin-Attraction.csv`); Variant B/C pending
+
+### M66 — Cross-Variant Integrity Checker
+
+*   Compare drive contents against known-good KINHANK reference (official game lists)
+*   Detect incomplete/broken drives: missing frontends, empty collections, skeleton installs
+*   Clone validation: byte-level or file-tree comparison between drive pairs
+*   Content gap analysis: what a drive is missing compared to a reference drive
+*   Corruption detection: zero-byte files, truncated ROMs, broken archives
+*   Generate integrity report with severity levels and recommended actions
+*   **Status**: 📋 Planned — requires M64 + M65
 
 ---
 
@@ -657,8 +703,9 @@
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 0        | 1       | 5            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
-| 14 Automation & Operations         | M61–M63    | 0        | 0       | 3            |
-| **Total**                          | **63**     | **22**   | **4**   | **37**       |
+| 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
+| 15 KINHANK Variant Management      | M64–M66    | 1        | 1       | 1            |
+| **Total**                          | **66**     | **24**   | **5**   | **37**       |
 
 ### Build Order (Recommended Sequence)
 
@@ -693,6 +740,9 @@ LAYER 8 — ARCADE POLISH (Phase 11, needs M48-M50)
                     ↓
 LAYER 9 — AUTOMATION & OPS (Phase 14, capstone — needs everything above)
   M61 Scheduler & Notifications → M62 Agent Memory & Learning → M63 Self-Healing
+                    ↓
+LAYER 0 — KINHANK VARIANT MANAGEMENT (Phase 15, can run in parallel with all layers)
+  M64 Drive Fingerprint → M65 Game List Extractor → M66 Integrity Checker
 ```
 
 ### What's Needed to Install/Download
@@ -722,12 +772,12 @@ LAYER 9 — AUTOMATION & OPS (Phase 14, capstone — needs everything above)
 
 ### Asset Inventory (Available on HDDs, Not Yet Indexed)
 
-| Asset Source                       | Assets      | Status                |
-| ---------------------------------- | ----------- | --------------------- |
-| D:\Arcade\Media (HyperSpin)        | ~376K files | ❌ Not indexed for GUI |
-| K:\Arcade\menu-art (AttractMode)   | Thousands   | ❌ Not indexed         |
-| L:\CORE - TYPE R (LaunchBox)       | Thousands   | ❌ Not indexed         |
-| N:\themes + decorations (Batocera) | Thousands   | ❌ Not indexed         |
+| Asset Source                               | Assets      | Status                                       |
+| ------------------------------------------ | ----------- | -------------------------------------------- |
+| D:\Arcade\Media (HyperSpin)                | ~376K files | ❌ Not indexed for GUI                        |
+| K:\Arcade\menu-art (AttractMode)           | Thousands   | ❌ Not indexed                                |
+| L:\CORE - TYPE R (45 PC games + 18 arcade) | Hundreds    | ❌ Not indexed — mostly PC games via Playnite |
+| N:\themes + decorations (Batocera)         | Thousands   | ❌ Not indexed                                |
 
 ### New Engines Required (Phases 12–14)
 
@@ -745,6 +795,9 @@ LAYER 9 — AUTOMATION & OPS (Phase 14, capstone — needs everything above)
 | `engines/agent_memory.py`       | M62       | Persistent memory, knowledge base, learning       |
 | `engines/self_healer.py`        | M63       | Issue detection, auto-repair, self-healing hooks  |
 | `scripts/repair_runner.ps1`     | M63       | PowerShell automated repair script                |
+| `engines/drive_fingerprint.py`  | M64       | KINHANK variant detection from drive structure    |
+| `engines/gamelist_extractor.py` | M65       | Cross-variant game list extraction                |
+| `engines/integrity_checker.py`  | M66       | Cross-variant integrity & corruption detection    |
 
 ---
 
