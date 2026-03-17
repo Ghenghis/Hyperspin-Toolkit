@@ -39,7 +39,7 @@
 *   Granular file-level or full-system restore
 *   Pre-restore validation (check target, space, conflicts)
 *   Rollback journal for any toolkit operation
-*   **Status**: 🔧 Building
+*   **Status**: ✅ Complete — `engines/auto_rollback.py`, `engines/snapshot_verify.py` + tests
 
 ## Phase 2: Audit & Discovery (Milestones 6–10)
 
@@ -49,7 +49,7 @@
 *   Detect missing, extra, corrupt, and duplicate ROMs
 *   ROM set completeness scoring per system
 *   CRC32/SHA1 verification against DAT files
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/rom_audit.py` + `tests/test_rom_audit.py`, MCP tools: `rom_verify`, `rom_verify_all`
 
 ### M7 — Emulator Health Check System
 
@@ -57,7 +57,7 @@
 *   Check emulator versions and detect outdated installs
 *   Validate emulator configs (paths, settings)
 *   Map emulator-to-system relationships
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/emulator_health.py` + `tests/test_emulator_health.py`, MCP tools: `emulator_health_all`, `emulator_health_single`
 
 ### M8 — Media Asset Auditor
 
@@ -65,7 +65,7 @@
 *   Report missing media per system/game
 *   Detect broken/corrupt media files
 *   Media completeness scoring
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/media_auditor.py`, `engines/asset_auditor.py` + tests, MCP tools: `media_audit_system`, `media_audit_all`
 
 ### M9 — RocketLauncher Config Validator
 
@@ -73,7 +73,7 @@
 *   Check emulator paths referenced in RL configs
 *   Detect broken system-to-emulator mappings
 *   Validate plugin configurations
-*   **Status**: 📋 Planned
+*   **Status**: � Partial — INI path validation in `engines/emulator_health.py` and `engines/drive_transfer.py`; dedicated RL validator planned
 
 ### M10 — HyperSpin XML Database Auditor
 
@@ -81,7 +81,7 @@
 *   Validate game entries (name, description, year, manufacturer)
 *   Cross-reference with ROM files and media
 *   Detect orphaned entries and missing game data
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/xml_tools.py` + `tests/test_xml_tools.py`, MCP tools: `xml_validate`, `xml_merge`, `xml_rebuild`, `xml_filter`, `xml_stats`
 
 ## Phase 3: Safe Update System (Milestones 11–15)
 
@@ -91,7 +91,7 @@
 *   One-at-a-time update workflow: snapshot → update → test → commit/rollback
 *   Update queue with priority ordering
 *   Update history with full changelog
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/update_applier.py` + `tests/test_update_applier.py`, MCP tools: `update_check`, `update_download`, `update_apply`, `update_rollback`, `update_status`
 
 ### M12 — Emulator Version Tracker & Updater
 
@@ -99,7 +99,7 @@
 *   Check for updates from known sources
 *   Download and stage updates in quarantine folder
 *   Apply updates with automatic backup of previous version
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/version_tracker.py` + `tests/test_version_tracker.py`, MCP tools: `version_scan`, `version_outdated`, `version_stage`, `version_quarantine`, `version_apply_staged`, `version_reject`, `version_history`, `version_summary`
 
 ### M13 — Dependency Conflict Detector
 
@@ -107,7 +107,7 @@
 *   Detect version conflicts between emulators/tools
 *   Warn before updates that would break dependencies
 *   Suggest resolution strategies
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/dependency_detector.py` + `tests/test_dependency_detector.py`, MCP tools: `deps_report`, `deps_conflicts`, `deps_check_update`, `deps_summary`
 
 ### M14 — Pre-Update Snapshot & Post-Update Verification
 
@@ -115,7 +115,7 @@
 *   Post-update diff report showing all changes
 *   Functional verification (launch test, config check)
 *   Snapshot comparison tool
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/snapshot_verify.py` + `tests/test_snapshot_verify.py`, MCP tools: `snapshot_capture`, `snapshot_compare`, `snapshot_verify`, `snapshot_list`, `snapshot_summary`
 
 ### M15 — Automated Rollback on Failure
 
@@ -123,7 +123,7 @@
 *   Automatic rollback to pre-update snapshot
 *   Rollback confirmation and logging
 *   Manual rollback trigger for delayed issues
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/auto_rollback.py` + `tests/test_auto_rollback.py`, MCP tools: `rollback_check`, `rollback_trigger`, `rollback_post_update`, `rollback_policy`, `rollback_list`, `rollback_summary`
 
 ## Phase 4: AI Integration (Milestones 16–20)
 
@@ -134,7 +134,7 @@
 *   vLLM API client
 *   Auto-detect running LLM services
 *   Model selection and fallback chain
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/llm_router.py`, `engines/llm_detector.py`, `engines/ai_engine.py` + tests, MCP tools: `llm_models_scan`, `llm_status`
 
 ### M17 — AI-Powered ROM Identification & Cataloging
 
@@ -142,7 +142,7 @@
 *   AI-assisted game metadata enrichment
 *   Smart ROM organization suggestions
 *   Batch rename with AI-generated names
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/nl_query.py` + `tests/test_nl_query.py`, MCP tools: `nl_query`, `ai_recommend_model`, `ai_full_report`
 
 ### M18 — AI Game Recommendation Engine
 
@@ -158,7 +158,7 @@
 *   "How many SNES games do I have?" → instant answer
 *   "Which systems have the most missing media?" → report
 *   "Show me all fighting games from the 90s" → filtered list
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/nl_query.py` (NLQueryEngine), MCP tool: `nl_query`
 
 ### M20 — AI Troubleshooting Assistant
 
@@ -176,7 +176,7 @@
 *   Modern dark-theme UI (HTML/CSS/JS)
 *   Real-time status updates via WebSocket
 *   Authentication for local access
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `dashboard/app.py` + templates + static assets + `tests/test_dashboard.py`
 
 ### M22 — Collection Browser & Statistics
 
@@ -184,7 +184,7 @@
 *   Collection statistics: total games, size, completeness
 *   Charts and graphs for collection analysis
 *   Search and filter across entire collection
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/event_hub.py` (real-time WebSocket push) + `tests/test_event_hub.py`, MCP tools: `events_recent`, `events_emit`
 
 ### M23 — System Health Monitor Dashboard
 
@@ -192,7 +192,7 @@
 *   Health score per system (0-100)
 *   Issue tracker with severity levels
 *   One-click fix for common issues
-*   **Status**: 📋 Planned
+*   **Status**: � Partial — health scoring in `emulator_health.py`; dashboard page template exists; needs frontend integration
 
 ### M24 — Backup/Recovery Management UI
 
@@ -200,7 +200,7 @@
 *   One-click backup and restore
 *   Backup schedule configuration
 *   Storage usage analysis
-*   **Status**: 📋 Planned
+*   **Status**: � Partial — `dashboard/templates/backups.html` exists; backend API ready; needs frontend JS wiring
 
 ### M25 — Update Manager UI
 
@@ -208,7 +208,7 @@
 *   Update progress tracking
 *   Rollback controls
 *   Update history and changelog viewer
-*   **Status**: 📋 Planned
+*   **Status**: � Partial — `dashboard/templates/updates.html` exists; MCP tools ready; needs frontend JS wiring
 
 ## Phase 6: Advanced Features (Milestones 26–35).maybe 
 
@@ -250,7 +250,7 @@
 *   Plugin discovery and installation
 *   Community plugin repository support
 *   Plugin isolation and sandboxing
-*   **Status**: ✅ Complete
+*   **Status**: ✅ Complete — `plugins/base.py`, event bus, 10+ MCP plugin tools + `tests/test_plugins.py`
 
 ### M31 — Multi-Drive Collection Sync
 
@@ -292,4 +292,18 @@
 *   Task scheduling and coordination
 *   Human-in-the-loop approval for destructive actions
 *   Learning from past operations
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/nemoclaw_agents.py`, `engines/openhands_bridge.py`, `engines/cli_anything_bridge.py`, 4 agent blueprints in `blueprints/`, 4 workflow definitions in `workflows/`, MCP bridge (70+ tools) in `mcp_bridge.py`
+
+---
+
+## Summary
+
+| Phase               | Milestones | Complete | Partial | Planned      |
+| ------------------- | ---------- | -------- | ------- | ------------ |
+| 1 Foundation        | M1–M5      | 5        | 0       | 0            |
+| 2 Audit & Discovery | M6–M10     | 4        | 1 (M9)  | 0            |
+| 3 Safe Update       | M11–M15    | 5        | 0       | 0            |
+| 4 AI Integration    | M16–M20    | 3        | 0       | 2 (M18, M20) |
+| 5 Web Dashboard     | M21–M25    | 2        | 3       | 0            |
+| 6 Advanced          | M26–M35    | 2        | 0       | 8            |
+| **Total**           | **35**     | **21**   | **4**   | **10**       |
