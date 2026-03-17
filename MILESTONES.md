@@ -73,7 +73,7 @@
 *   Check emulator paths referenced in RL configs
 *   Detect broken system-to-emulator mappings
 *   Validate plugin configurations
-*   **Status**: � Partial — INI path validation in `engines/emulator_health.py` and `engines/drive_transfer.py`; dedicated RL validator planned
+*   **Status**: ✅ Complete — `engines/rl_config_validator.py` + `tests/test_rl_config_validator.py` (48 tests), MCP tools: `rl_validate`, `rl_validate_system`, `rl_orphaned`, `rl_summary`
 
 ### M10 — HyperSpin XML Database Auditor
 
@@ -301,9 +301,9 @@
 | Phase               | Milestones | Complete | Partial | Planned      |
 | ------------------- | ---------- | -------- | ------- | ------------ |
 | 1 Foundation        | M1–M5      | 5        | 0       | 0            |
-| 2 Audit & Discovery | M6–M10     | 4        | 1 (M9)  | 0            |
+| 2 Audit & Discovery | M6–M10     | 5        | 0       | 0            |
 | 3 Safe Update       | M11–M15    | 5        | 0       | 0            |
 | 4 AI Integration    | M16–M20    | 3        | 0       | 2 (M18, M20) |
 | 5 Web Dashboard     | M21–M25    | 2        | 3       | 0            |
 | 6 Advanced          | M26–M35    | 2        | 0       | 8            |
-| **Total**           | **35**     | **21**   | **4**   | **10**       |
+| **Total**           | **35**     | **22**   | **3**   | **10**       |

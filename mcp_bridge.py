@@ -796,6 +796,32 @@ def tool_version_summary(**kwargs) -> dict:
     return tracker_summary()
 
 
+# ── M9 — RocketLauncher Config Validator Handlers ──────────────────
+
+def tool_rl_validate(rl_root: str | None = None, **kwargs) -> dict:
+    """M9 — Full RocketLauncher configuration validation."""
+    from engines.rl_config_validator import validate_rl
+    return validate_rl(rl_root).to_dict()
+
+
+def tool_rl_validate_system(system_name: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M9 — Validate RL config for a single system."""
+    from engines.rl_config_validator import validate_single_system
+    return validate_single_system(system_name, rl_root)
+
+
+def tool_rl_orphaned(rl_root: str | None = None, **kwargs) -> dict:
+    """M9 — Find orphaned RL settings and missing system mappings."""
+    from engines.rl_config_validator import find_orphaned_settings
+    return find_orphaned_settings(rl_root)
+
+
+def tool_rl_summary(rl_root: str | None = None, **kwargs) -> dict:
+    """M9 — Quick RL configuration health summary."""
+    from engines.rl_config_validator import rl_summary
+    return rl_summary(rl_root)
+
+
 # ── MCP Tool Definitions ────────────────────────────────────────────
 
 TOOLS = [
@@ -1591,6 +1617,53 @@ TOOLS = [
         "description": "M12 — Get version tracking summary: total tracked emulators, version records, quarantined updates, recent changes.",
         "inputSchema": {"type": "object", "properties": {}},
         "handler": tool_version_summary,
+    },
+    # ── M9 — RocketLauncher Config Validator Tools ──
+    {
+        "name": "rl_validate",
+        "description": "M9 — Full RocketLauncher configuration validation: modules, system mappings, INI paths, plugins. Returns health score and all issues.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "Override RocketLauncher root directory (optional)"},
+            },
+        },
+        "handler": tool_rl_validate,
+    },
+    {
+        "name": "rl_validate_system",
+        "description": "M9 — Validate RocketLauncher config for a single system: INI settings, module mapping, path checks.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system_name"],
+            "properties": {
+                "system_name": {"type": "string", "description": "System name (e.g. 'MAME', 'Nintendo 64')"},
+                "rl_root": {"type": "string", "description": "Override RL root (optional)"},
+            },
+        },
+        "handler": tool_rl_validate_system,
+    },
+    {
+        "name": "rl_orphaned",
+        "description": "M9 — Find orphaned RL settings (no matching HyperSpin DB) and missing settings (DB exists but no RL config).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "Override RL root (optional)"},
+            },
+        },
+        "handler": tool_rl_orphaned,
+    },
+    {
+        "name": "rl_summary",
+        "description": "M9 — Quick RocketLauncher health summary: module count, system count, health score, issue counts.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "Override RL root (optional)"},
+            },
+        },
+        "handler": tool_rl_summary,
     },
     # ── Plugin Management Tools ──
     {
