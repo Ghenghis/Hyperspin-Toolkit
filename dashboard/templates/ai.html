@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}AI Assistant{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+    <div class="card-header">
+        <h2>LLM Providers (M16)</h2>
+        <button class="btn btn-sm" onclick="loadLLMStatus()">&#8635; Refresh</button>
+    </div>
+    <div class="card-body" id="llm-status-panel" style="display:flex;gap:24px;flex-wrap:wrap;padding:12px 20px;">
+        <span class="muted">Detecting providers...</span>
+    </div>
+</div>
+
+<div class="card" style="height: calc(100vh - var(--topbar-height) - 200px);">
+    <div class="card-header">
+        <h2>AI Assistant</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <span class="muted" id="ai-provider-label">Provider: detecting...</span>
+            <button class="btn btn-sm" onclick="checkProviders()">Refresh</button>
+        </div>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;height:calc(100% - 52px);">
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg assistant">
+                Welcome! I'm your HyperSpin AI assistant. I can help you:<br>
+                • Ask questions about your collection<br>
+                • Query the database in plain English<br>
+                • Troubleshoot emulator issues<br>
+                • Identify unknown ROMs<br>
+                • Get collection health recommendations<br><br>
+                Try: "How many systems do I have?" or "Which emulators are unhealthy?"
+            </div>
+        </div>
+        <div class="chat-input-bar">
+            <select id="chat-mode" style="width:140px;">
+                <option value="chat">Chat</option>
+                <option value="query">DB Query</option>
+            </select>
+            <input type="text" class="chat-input" id="chat-input"
+                placeholder="Ask me anything about your HyperSpin collection..."
+                onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn btn-primary" onclick="sendChat()">Send</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadLLMStatus() {
+        const panel = document.getElementById('llm-status-panel');
+        try {
+            const status = await apiGet('/api/ai/llm-status');
+            let html = '';
+            for (const [prov, info] of Object.entries(status)) {
+                if (typeof info !== 'object') continue;
+                const dot = info.online
+                    ? '<span style="color:var(--color-good)">&#9679;</span>'
+                    : '<span style="color:var(--color-bad)">&#9675;</span>';
+                const state = info.online
+                    ? '<span style="color:var(--color-good)">ONLINE</span>'
+                    : '<span class="muted">OFFLINE</span>';
+                html += `<span>${dot} <strong>${prov}</strong> ${state} <span class="muted">${info.url || ''}</span></span>`;
+            }
+            panel.innerHTML = html || '<span class="muted">No providers detected.</span>';
+            const online = Object.entries(status).filter(([, v]) => v && v.online).map(([k]) => k);
+            document.getElementById('ai-provider-label').textContent =
+                online.length ? `Provider: ${online.join(', ')}` : 'Provider: none available';
+        } catch (e) {
+            panel.innerHTML = '<span class="muted">Could not reach LLM status endpoint.</span>';
+        }
+    }
+
+    async function checkProviders() {
+        await loadLLMStatus();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadLLMStatus);
+
+    function addMessage(role, text) {
+        const container = document.getElementById('chat-messages');
+        const msg = document.createElement('div');
+        msg.className = `chat-msg ${role}`;
+        msg.innerHTML = text.replace(/\n/g, '<br>');
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendChat() {
+        const input = document.getElementById('chat-input');
+        const mode = document.getElementById('chat-mode').value;
+        const message = input.value.trim();
+        if (!message) return;
+
+        addMessage('user', message);
+        input.value = '';
+
+        const thinkId = 'think-' + Date.now();
+        const container = document.getElementById('chat-messages');
+        const thinking = document.createElement('div');
+        thinking.className = 'chat-msg assistant';
+        thinking.id = thinkId;
+        thinking.innerHTML = '<span class="spinner"></span> Thinking...';
+        container.appendChild(thinking);
+        container.scrollTop = container.scrollHeight;
+
+        try {
+            let response;
+            if (mode === 'query') {
+                const data = await apiPost('/api/ai/query', { question: message });
+                const r = data.result || {};
+                response = r.explanation || 'No results.';
+                if (r.generated_sql) {
+                    response += `\n\nSQL: ${r.generated_sql}\nRows: ${r.row_count || 0}`;
+                }
+            } else {
+                const data = await apiPost('/api/ai/chat', { message });
+                response = data.response || 'No response.';
+            }
+            thinking.remove();
+            addMessage('assistant', response);
+        } catch (e) {
+            thinking.remove();
+            addMessage('assistant', `Error: ${e.message}. Make sure an AI provider (Ollama, LM Studio, or vLLM) is running.`);
+        }
+    }
+</script>
+{% endblock %}

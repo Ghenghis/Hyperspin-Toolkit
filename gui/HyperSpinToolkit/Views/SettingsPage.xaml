@@ -1,0 +1,92 @@
+<ui:Page
+    x:Class="HyperSpinToolkit.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Settings"
+    d:DesignHeight="800" d:DesignWidth="900">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+        <StackPanel MaxWidth="700" HorizontalAlignment="Left">
+
+            <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,24"/>
+
+            <!-- Python / Bridge -->
+            <TextBlock Text="Python Backend" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="20" Margin="0,0,0,20">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Python Executable:" VerticalAlignment="Center"/>
+                        <ui:TextBox Grid.Column="1"
+                                    Text="{Binding ViewModel.PythonExe, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="python  (or full path)"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Toolkit Root:" VerticalAlignment="Center"/>
+                        <ui:TextBox Grid.Column="1"
+                                    Text="{Binding ViewModel.ToolkitRoot, UpdateSourceTrigger=PropertyChanged}"
+                                    IsReadOnly="True" Opacity="0.7"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Config Path:" VerticalAlignment="Center"/>
+                        <ui:TextBox Grid.Column="1"
+                                    Text="{Binding ViewModel.ConfigPath, UpdateSourceTrigger=PropertyChanged}"
+                                    IsReadOnly="True" Opacity="0.7"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ui:Button Content="Reconnect Bridge"
+                                   Icon="{ui:SymbolIcon ArrowSync24}"
+                                   Command="{Binding ViewModel.ReconnectBridgeCommand}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding ViewModel.BridgeStatus}" FontSize="12" Opacity="0.7"/>
+                    <TextBlock Text="{Binding ViewModel.StatusText}" FontSize="12"
+                               Foreground="{StaticResource SystemAccentColorPrimaryBrush}"/>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Available tools -->
+            <TextBlock Text="MCP Tool Discovery" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="20" Margin="0,0,0,20">
+                <StackPanel Spacing="12">
+                    <ui:Button Content="List Available Tools"
+                               Icon="{ui:SymbolIcon List24}"
+                               Command="{Binding ViewModel.ListToolsCommand}"/>
+                    <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding ViewModel.AvailableTools}"
+                                   FontFamily="Consolas" FontSize="12"
+                                   Opacity="0.8" TextWrapping="Wrap"
+                                   Visibility="{Binding ViewModel.AvailableTools, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </ScrollViewer>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- About -->
+            <TextBlock Text="About" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="20" Margin="0,0,0,20">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="HyperSpin Extreme Toolkit" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="Version 2.0  ·  C# WPF GUI + Python MCP Backend" Opacity="0.65" FontSize="13"/>
+                    <TextBlock Text="Backend: mcp_bridge.py (JSON-RPC over stdio)" Opacity="0.5" FontSize="12"/>
+                    <TextBlock Text="UI: Wpf.Ui 3.x (Fluent Design / Windows 11 style)" Opacity="0.5" FontSize="12"/>
+                    <TextBlock Text="MVVM: CommunityToolkit.Mvvm 8.x" Opacity="0.5" FontSize="12"/>
+                </StackPanel>
+            </ui:Card>
+
+        </StackPanel>
+    </ScrollViewer>
+</ui:Page>

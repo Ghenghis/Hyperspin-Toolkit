@@ -1,0 +1,106 @@
+# Workflow: Collection Sync
+# Differential sync of collections across multiple drives.
+
+name: collection-sync
+version: "1.0"
+description: >
+  Synchronize game collections between drives using differential comparison.
+  Detects changes, resolves conflicts, and transfers only modified files.
+
+trigger:
+  - type: manual
+    command: "goose workflow run collection-sync --source {source} --target {target}"
+
+parameters:
+  source:
+    type: string
+    required: true
+    description: "Source drive letter (e.g., D)"
+  target:
+    type: string
+    required: true
+    description: "Target drive letter (e.g., I)"
+  system:
+    type: string
+    default: ""
+    description: "Specific system to sync (empty = all systems)"
+  dry_run:
+    type: boolean
+    default: true
+    description: "Preview changes without applying"
+
+llm:
+  routing: auto
+  interactive_provider: lmstudio
+
+output:
+  base_dir: "D:\\HyperSpin_Toolkit_Output\\collection-sync"
+  report: "{base_dir}/sync_{source}_to_{target}_{timestamp}.json"
+  log: "{base_dir}/sync_{timestamp}.log"
+
+steps:
+  - id: verify-drives
+    name: "Verify Source & Target Drives"
+    type: cli
+    command: "python -c \"from engines.drive_indexer import find_drive_by_letter; print('Source:', find_drive_by_letter('{source}')); print('Target:', find_drive_by_letter('{target}'))\""
+    timeout_sec: 30
+    on_failure: abort
+
+  - id: pre-snapshot-source
+    name: "Snapshot Source Drive State"
+    type: cli
+    command: "python main.py snapshots capture \"{source}:\\Arcade\" --name \"sync-source-{source}-pre\""
+    depends_on: [verify-drives]
+    timeout_sec: 300
+    on_failure: abort
+
+  - id: pre-snapshot-target
+    name: "Snapshot Target Drive State"
+    type: cli
+    command: "python main.py snapshots capture \"{target}:\\Arcade\" --name \"sync-target-{target}-pre\""
+    depends_on: [verify-drives]
+    timeout_sec: 300
+    on_failure: abort
+
+  - id: diff-analysis
+    name: "Compute Differential"
+    type: cli
+    command: "python main.py snapshots compare \"{source}:\\Arcade\" \"{target}:\\Arcade\" --output {base_dir}/diff.json"
+    depends_on: [pre-snapshot-source, pre-snapshot-target]
+    timeout_sec: 600
+    on_failure: abort
+    outputs:
+      - diff_report: "{base_dir}/diff.json"
+
+  - id: sync-execute
+    name: "Execute Sync (or Dry Run)"
+    type: cli
+    command: "python -m engines.drive_transfer sync --source {source} --target {target} --diff {base_dir}/diff.json --dry-run {dry_run}"
+    depends_on: [diff-analysis]
+    timeout_sec: 3600
+    on_failure: rollback
+
+  - id: post-verify
+    name: "Post-Sync Verification"
+    type: cli
+    command: "python main.py snapshots compare \"{source}:\\Arcade\" \"{target}:\\Arcade\" --output {report}"
+    depends_on: [sync-execute]
+    timeout_sec: 600
+    on_failure: continue
+
+rollback:
+  trigger: on_failure
+  steps:
+    - id: restore-target
+      name: "Restore Target Drive"
+      type: cli
+      command: "python main.py rollback execute --snapshot \"sync-target-{target}-pre\""
+      timeout_sec: 600
+
+notifications:
+  on_complete:
+    type: log
+    message: "Collection sync {source}: → {target}: completed. Report: {report}"
+  on_failure:
+    type: log
+    message: "Collection sync FAILED. Target drive restored from snapshot."

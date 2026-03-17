@@ -1,0 +1,11 @@
+{
+  "source_root": "D:\\HyperSpin",
+  "output_root": "D:\\HyperSpin_Toolkit_Output",
+  "recovery_root": "D:\\HyperSpin_Recovery",
+  "include_hashes": false,
+  "default_report_name": "hyperspin_inventory",
+  "exclude_dirs": [
+    "$RECYCLE.BIN",
+    "System Volume Information"
+  ]
+}

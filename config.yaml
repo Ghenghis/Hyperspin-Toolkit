@@ -1,0 +1,147 @@
+# ============================================================
+# HyperSpin Extreme Toolkit — Master Configuration
+# ============================================================
+
+# --- Smart Drive Index (Fingerprint-Based) ---
+# Drives are identified by fingerprint (volume serial + content hash), NOT letter.
+# When Windows reassigns a letter, the toolkit auto-heals all path references.
+#
+# How it works:
+#   1. On startup, reconcile() scans every drive and builds a fingerprint
+#   2. Known drives are matched by serial (primary) or content hash (fallback)
+#   3. Letter changes are detected and updated transparently
+#   4. New drives with arcade content are auto-discovered and indexed
+#   5. Disconnected drives are remembered and restored when reconnected
+#
+# CLI commands:
+#   python main.py drives scan         — Fingerprint + scan all drives
+#   python main.py drives reconcile    — Full heal (letter changes, new drives)
+#   python main.py drives index        — Show all indexed drives (incl. offline)
+#   python main.py drives status       — Current role assignments + disk usage
+#   python main.py drives set primary E — Assign drive by letter (tracked by fingerprint)
+#   python main.py drives auto         — Auto-assign roles from arcade content
+#   python main.py drives detect-type  — Detect NVMe/SSD/HDD for all drives
+#
+# drives.json (auto-created) stores the fingerprint index and role assignments.
+# Format: v2 — fingerprint-keyed drive records with legacy compat keys.
+drives:
+  # Assign drive letters here. Leave null to use auto-detection.
+  primary:        null       # Main HyperSpin/emulators/ROMs drive
+  secondary:      null       # Overflow ROMs, media, or second system
+  tertiary:       null       # Third drive (extras, backups)
+
+  # Fallback letter used if drives.json is missing and auto-detect finds nothing
+  fallback_letter: "D"
+
+  # Subfolder name on the primary drive root that contains the collection
+  arcade_root:    "Arcade"   # → primary:\Arcade
+  secondary_root: "Arcade"
+  tertiary_root:  "Arcade"
+
+  # Auto-detect on every toolkit start
+  auto_detect:    true
+
+  # Minimum drive size (GB) to be considered a game drive during scan
+  min_game_drive_gb: 500
+
+# --- Paths ---
+# {primary_root}   resolves to primary:\Arcade   (e.g. D:\Arcade)
+# {secondary_root} resolves to secondary:\Arcade (e.g. E:\Arcade)
+# {tertiary_root}  resolves to tertiary:\Arcade  (e.g. F:\Arcade)
+paths:
+  hyperspin_root:      "{primary_root}"
+  rocketlauncher_root: "{primary_root}\\RocketLauncher"
+  emulators_root:      "{primary_root}\\emulators"
+  media_root:          "{primary_root}\\Media"
+  databases_root:      "{primary_root}\\Databases"
+  settings_root:       "{primary_root}\\Settings"
+  roms_root:           "{primary_root}\\ROMs"
+
+  # Secondary drive paths (populated if secondary drive is assigned)
+  secondary_root:      "{secondary_root}"
+  tertiary_root:       "{tertiary_root}"
+
+  # Toolkit paths (fixed — toolkit lives on C: or wherever it was cloned)
+  toolkit_root: "{toolkit_root}"
+  data_dir:     "{toolkit_root}\\data"
+  logs_dir:     "{toolkit_root}\\logs"
+  backup_root:  "{primary}:\\HyperSpin_Backups"
+  recovery_root: "{primary}:\\HyperSpin_Recovery"
+  output_root:  "{primary}:\\HyperSpin_Toolkit_Output"
+
+  # External references
+  backup_archive: "{primary}:\\BACKUP FILES - HYPERSPIN & ROCKETLAUNCHER"
+  setup_guides:   "{primary}:\\SETUP USER GUIDE - FOR HYPERSPIN"
+
+# --- Database ---
+database:
+  path: "{toolkit_root}\\data\\toolkit.db"
+  backup_on_start: true
+
+# --- Backup ---
+backup:
+  compression: "zip"            # zip, 7z, none
+  incremental: true
+  verify_after_create: true
+  max_versions: 10
+  exclude_patterns:
+    - "$RECYCLE.BIN"
+    - "System Volume Information"
+    - "*.tmp"
+    - "Thumbs.db"
+
+# --- Update Manager ---
+updates:
+  quarantine_dir: "{toolkit_root}\\data\\quarantine"
+  auto_snapshot: true
+  auto_rollback_on_failure: true
+  max_rollback_versions: 5
+
+# --- AI ---
+ai:
+  # Ollama (primary)
+  ollama:
+    enabled: true
+    base_url: "http://localhost:11434"
+    default_model: "llama3.1:8b"
+    timeout: 120
+
+  # LM Studio (secondary)
+  lmstudio:
+    enabled: true
+    base_url: "http://localhost:1234/v1"
+    default_model: "auto"
+    timeout: 120
+
+  # vLLM (tertiary)
+  vllm:
+    enabled: false
+    base_url: "http://localhost:8000/v1"
+    default_model: "auto"
+    timeout: 120
+
+  # Fallback order
+  provider_priority:
+    - ollama
+    - lmstudio
+    - vllm
+
+# --- Web Dashboard ---
+dashboard:
+  host: "127.0.0.1"
+  port: 8888
+  debug: false
+  auto_open_browser: true
+
+# --- Audit ---
+audit:
+  hash_algorithm: "sha256"      # sha256, xxhash, crc32
+  parallel_workers: 4
+  scan_hidden_files: false
+
+# --- Logging ---
+logging:
+  level: "INFO"                 # DEBUG, INFO, WARN, ERROR
+  max_file_size_mb: 50
+  max_files: 10
+  json_format: true

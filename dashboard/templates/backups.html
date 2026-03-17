@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Backups — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}Backups & Recovery{% endblock %}
+
+{% block content %}
+<div class="grid-2col">
+    <div class="card">
+        <div class="card-header"><h2>Create Backup</h2></div>
+        <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <label>Source Directory
+                    <input type="text" id="backup-source" value="D:\Arcade" style="width:100%;margin-top:4px;">
+                </label>
+                <label>Label
+                    <input type="text" id="backup-label" value="manual" style="width:100%;margin-top:4px;">
+                </label>
+                <label>Type
+                    <select id="backup-type" style="width:100%;margin-top:4px;">
+                        <option value="full">Full Backup</option>
+                        <option value="incremental">Incremental</option>
+                    </select>
+                </label>
+                <button class="btn btn-primary" onclick="createBackup()" id="create-backup-btn">
+                    💾 Create Backup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h2>Backup Tips</h2></div>
+        <div class="card-body">
+            <ul style="list-style:disc;padding-left:18px;color:var(--text-secondary);font-size:0.85rem;line-height:1.8;">
+                <li><strong>Full backups</strong> copy everything — use for first-time or major milestones.</li>
+                <li><strong>Incremental backups</strong> only copy changed files — faster and smaller.</li>
+                <li>Every backup includes a hash manifest for verification.</li>
+                <li>Backups are stored at the configured backup root directory.</li>
+                <li>Use the Update Manager to auto-snapshot before any program update.</li>
+                <li>Recovery restores from any backup version to any target.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header"><h2>Backup History</h2></div>
+    <div class="card-body" id="backup-history">
+        <p class="muted">Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', loadBackups);
+
+async function loadBackups() {
+    try {
+        const data = await apiGet('/api/backups');
+        const backups = data.backups || [];
+        if (!backups.length) {
+            document.getElementById('backup-history').innerHTML =
+                '<p class="muted">No backups yet.</p>';
+            return;
+        }
+        let html = '<table class="data-table"><thead><tr>' +
+            '<th>Type</th><th>Target</th><th>Files</th><th>Size</th><th>Status</th><th>Created</th>' +
+            '</tr></thead><tbody>';
+        for (const b of backups) {
+            const sizeMB = ((b.size_bytes||0)/(1024*1024)).toFixed(1);
+            html += `<tr>
+                <td>${b.backup_type}</td>
+                <td>${b.target}</td>
+                <td>${(b.file_count||0).toLocaleString()}</td>
+                <td>${sizeMB} MB</td>
+                <td><span class="health-pill ${b.status==='verified'?'good':'warn'}">${b.status}</span></td>
+                <td>${b.created_at}</td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        document.getElementById('backup-history').innerHTML = html;
+    } catch(e) {
+        document.getElementById('backup-history').innerHTML =
+            '<p class="muted">Failed to load backup history.</p>';
+    }
+}
+
+async function createBackup() {
+    const btn = document.getElementById('create-backup-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Creating...';
+    showToast('Creating backup...', 'info');
+
+    try {
+        const body = {
+            source: document.getElementById('backup-source').value,
+            label: document.getElementById('backup-label').value,
+            type: document.getElementById('backup-type').value,
+        };
+        await apiPost('/api/backups/create', body);
+        showToast('Backup created successfully!', 'success');
+        loadBackups();
+    } catch(e) {
+        showToast('Backup failed: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Create Backup';
+    }
+}
+</script>
+{% endblock %}

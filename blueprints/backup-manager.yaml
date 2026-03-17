@@ -1,0 +1,96 @@
+# NemoClaw Agent Blueprint: Backup Manager
+# Manages backup operations and clone verification.
+# Access: READ from source drives, WRITE to H: backup target only.
+
+name: backup-manager
+version: "1.0"
+description: >
+  Autonomous backup management agent that monitors drive health,
+  triggers backup operations, verifies clone integrity, and manages
+  the backup schedule according to the backup strategy.
+
+agent:
+  type: nemoclaw
+  runtime: openshell
+  image: "python:3.12-slim"
+  gpu: false
+
+llm:
+  provider: lmstudio
+  base_url: "http://host.docker.internal:1234/v1"
+  fallback_provider: ollama
+  fallback_url: "http://host.docker.internal:11434/v1"
+  model: ""
+  temperature: 0.1
+  max_tokens: 4096
+
+sandbox:
+  policy: backup-write
+  filesystem:
+    read:
+      - "D:\\Arcade"
+      - "I:\\Arcade"
+      - "K:\\Arcade"
+      - "L:\\CORE - TYPE R"
+      - "N:\\"
+    write:
+      - "H:\\"
+      - "D:\\HyperSpin_Toolkit_Output\\backup-manager"
+    deny:
+      - "C:\\"
+      - "F:\\"
+  network:
+    allow: []
+    deny: ["*"]
+  resources:
+    memory_limit: "2G"
+    cpu_shares: 256
+    timeout_sec: 14400  # 4 hours for large clone verification
+
+workspace:
+  mount: "D:\\hyperspin_toolkit"
+  output_dir: "D:\\HyperSpin_Toolkit_Output\\backup-manager"
+
+tasks:
+  - name: drive-health-check
+    description: "Check SMART health status of all registered drives"
+    command: "python -m engines.drive_indexer health-check"
+    timeout_sec: 300
+
+  - name: verify-clone
+    description: "Verify integrity of a clone by comparing file hashes"
+    command: "python main.py snapshots compare {source_drive} {target_drive} --output {output_dir}/verify_{timestamp}.json"
+    timeout_sec: 7200
+
+  - name: backup-status
+    description: "Report current backup coverage and freshness"
+    command: "python -c \"from engines.drive_indexer import *; print(get_backup_status())\""
+    timeout_sec: 120
+
+  - name: priority-report
+    description: "Identify drives most urgently needing backup"
+    command: "python -c \"from engines.drive_indexer import *; print(get_backup_priorities())\""
+    timeout_sec: 120
+
+skills:
+  - name: backup-status
+    description: "Report which drives have current backups and which are overdue"
+  - name: backup-verify
+    description: "Verify clone integrity between source and backup drives"
+  - name: drive-health
+    description: "Check SMART health status and predict drive failures"
+  - name: backup-priority
+    description: "Rank drives by backup urgency based on health and freshness"
+
+triggers:
+  - type: schedule
+    cron: "0 1 * * *"  # Daily at 1AM
+  - type: event
+    condition: "drive_health_warning"
+  - type: manual
+    command: "nemoclaw run backup-manager"
+
+reporting:
+  format: json
+  output: "{output_dir}/backup_{timestamp}.json"
+  notify: false

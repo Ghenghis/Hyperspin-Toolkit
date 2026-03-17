@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HyperSpin Extreme Toolkit{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo">⚡ HSTK</h1>
+            <span class="version">v2.0</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="nav-link" data-page="dashboard">
+                <span class="icon">📊</span> Dashboard
+            </a></li>
+            <li><a href="/systems" class="nav-link" data-page="systems">
+                <span class="icon">🎮</span> Systems
+            </a></li>
+            <li><a href="/emulators" class="nav-link" data-page="emulators">
+                <span class="icon">🖥️</span> Emulators
+            </a></li>
+            <li><a href="/backups" class="nav-link" data-page="backups">
+                <span class="icon">💾</span> Backups
+            </a></li>
+            <li><a href="/updates" class="nav-link" data-page="updates">
+                <span class="icon">🔄</span> Updates
+            </a></li>
+            <li><a href="/ai" class="nav-link" data-page="ai">
+                <span class="icon">🤖</span> AI Assistant
+            </a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div id="health-badge" class="health-badge">
+                <span class="health-label">Health</span>
+                <span class="health-value" id="health-score">--</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="top-bar">
+            <div class="breadcrumb">{% block breadcrumb %}Dashboard{% endblock %}</div>
+            <div class="top-actions">
+                <button class="btn btn-sm" onclick="runFullAudit()" id="audit-btn">Run Full Audit</button>
+                <span class="status-dot" id="ai-status" title="AI Status"></span>
+            </div>
+        </header>
+        <div class="page-content">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

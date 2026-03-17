@@ -1,0 +1,90 @@
+# NemoClaw Agent Blueprint: Asset Scanner
+# Scans all gaming drives for visual/audio assets and builds searchable index.
+# Access: READ-ONLY to all gaming drives, WRITE to output directory.
+
+name: asset-scanner
+version: "1.0"
+description: >
+  Autonomous asset scanning agent that indexes all game media assets
+  (images, videos, audio, SWF themes) across registered drives,
+  calculates quality scores, and builds the asset catalog for GUI theming.
+
+agent:
+  type: nemoclaw
+  runtime: openshell
+  image: "python:3.12-slim"
+  gpu: false
+
+llm:
+  provider: vllm
+  base_url: "http://host.docker.internal:8000/v1"
+  fallback_provider: lmstudio
+  fallback_url: "http://host.docker.internal:1234/v1"
+  model: ""
+  temperature: 0.1
+  max_tokens: 2048
+
+sandbox:
+  policy: strict-readonly
+  filesystem:
+    read:
+      - "D:\\Arcade\\Media"
+      - "D:\\Arcade\\RocketLauncher\\Media"
+      - "I:\\Arcade\\Media"
+      - "K:\\Arcade\\menu-art"
+      - "L:\\CORE - TYPE R\\collections"
+      - "N:\\themes"
+      - "N:\\decorations"
+    write:
+      - "D:\\HyperSpin_Toolkit_Output\\asset-scanner"
+    deny:
+      - "C:\\"
+      - "F:\\"
+  network:
+    allow: []
+    deny: ["*"]
+  resources:
+    memory_limit: "4G"
+    cpu_shares: 1024
+    timeout_sec: 7200
+
+workspace:
+  mount: "D:\\hyperspin_toolkit"
+  output_dir: "D:\\HyperSpin_Toolkit_Output\\asset-scanner"
+
+tasks:
+  - name: scan-all-assets
+    description: "Scan all media directories across all gaming drives"
+    command: "python -c \"from engines.asset_auditor import AssetAuditor; a=AssetAuditor(); a.scan_all_drives(); a.save_index('{output_dir}/asset_index.json')\""
+    timeout_sec: 3600
+
+  - name: generate-thumbnails
+    description: "Create optimized thumbnail cache for GUI browsing"
+    command: "python -m engines.asset_auditor thumbnails --output {output_dir}/thumbnails"
+    timeout_sec: 1800
+
+  - name: quality-report
+    description: "Generate quality assessment report for all assets"
+    command: "python -c \"from engines.asset_auditor import AssetAuditor; a=AssetAuditor(); a.load_index('{output_dir}/asset_index.json'); import json; json.dump(a.summary(), open('{output_dir}/quality_report.json','w'), indent=2)\""
+    timeout_sec: 300
+
+skills:
+  - name: asset-scan
+    description: "Scan and index all visual/audio/animation assets across gaming drives"
+  - name: asset-quality
+    description: "Score asset quality and recommend best assets per GUI page"
+  - name: asset-duplicates
+    description: "Detect duplicate assets across drives"
+  - name: missing-media
+    description: "Report systems with missing media asset types"
+
+triggers:
+  - type: schedule
+    cron: "0 4 * * 0"  # Weekly Sunday 4AM (after rom-auditor)
+  - type: manual
+    command: "nemoclaw run asset-scanner"
+
+reporting:
+  format: json
+  output: "{output_dir}/scan_{timestamp}.json"
+  notify: false

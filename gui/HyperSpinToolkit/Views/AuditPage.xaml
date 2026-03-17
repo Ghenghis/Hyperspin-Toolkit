@@ -1,0 +1,155 @@
+<ui:Page
+    x:Class="HyperSpinToolkit.Views.AuditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Audit"
+    d:DesignHeight="900" d:DesignWidth="1060">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+        <StackPanel>
+
+            <!-- Header -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Ecosystem Audit" FontSize="28" FontWeight="SemiBold"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                    <ui:Button Content="Full Audit"
+                               Icon="{ui:SymbolIcon ClipboardSearch24}"
+                               Appearance="Primary"
+                               Command="{Binding ViewModel.RunFullAuditCommand}"
+                               IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                    <ui:Button Content="Emulators"
+                               Icon="{ui:SymbolIcon Apps24}"
+                               Command="{Binding ViewModel.AuditEmulatorsCommand}"
+                               IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                </StackPanel>
+            </Grid>
+
+            <ProgressBar Value="{Binding ViewModel.AuditProgress}" Maximum="100" Height="4" Margin="0,0,0,16"
+                         Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <!-- Summary cards -->
+            <UniformGrid Rows="1" Columns="4" Margin="0,0,0,24">
+
+                <ui:Card Margin="0,0,10,0" Padding="18">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ViewModel.Summary.TotalSystems}" FontSize="34" FontWeight="Bold"/>
+                        <TextBlock Text="Total Systems" Opacity="0.55" FontSize="13"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <ui:Card Margin="0,0,10,0" Padding="18">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ViewModel.Summary.TotalRoms, StringFormat='{}{0:N0}'}" FontSize="34" FontWeight="Bold"/>
+                        <TextBlock Text="Total ROMs" Opacity="0.55" FontSize="13"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <ui:Card Margin="0,0,10,0" Padding="18">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ViewModel.Summary.HealthyEmulators, StringFormat='{}{0}/{1}'}" FontSize="34" FontWeight="Bold"/>
+                        <TextBlock Text="Healthy Emulators" Opacity="0.55" FontSize="13"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <ui:Card Margin="0" Padding="18">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ViewModel.Summary.HealthScoreDisplay}" FontSize="34" FontWeight="Bold"
+                                   Foreground="{Binding ViewModel.Summary.HealthColor, Converter={StaticResource HexColorToBrushConverter}}"/>
+                        <TextBlock Text="Health Score" Opacity="0.55" FontSize="13"/>
+                    </StackPanel>
+                </ui:Card>
+
+            </UniformGrid>
+
+            <!-- Single system audit -->
+            <ui:Card Padding="20" Margin="0,0,0,24">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Audit Single System" FontSize="15" FontWeight="SemiBold"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBox PlaceholderText="System name (e.g. MAME, Nintendo 64)"
+                                    Text="{Binding ViewModel.SpecificSystem, UpdateSourceTrigger=PropertyChanged}"/>
+                        <ui:Button Grid.Column="1" Margin="10,0,0,0" Content="Audit System"
+                                   Command="{Binding ViewModel.RunSystemAuditCommand}"
+                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                    </Grid>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Systems results table -->
+            <TextBlock Text="Systems" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="0" Margin="0,0,0,24">
+                <DataGrid ItemsSource="{Binding ViewModel.Systems}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                          RowHeight="38" CanUserResizeRows="False"
+                          Background="Transparent" BorderThickness="0"
+                          MaxHeight="380">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="System"      Binding="{Binding Name}"          Width="*"/>
+                        <DataGridTextColumn Header="ROMs"        Binding="{Binding RomCount}"       Width="70"/>
+                        <DataGridTextColumn Header="XML"         Binding="{Binding XmlGameCount}"   Width="70"/>
+                        <DataGridTextColumn Header="Matched"     Binding="{Binding MatchedGames}"   Width="80"/>
+                        <DataGridTextColumn Header="Missing"     Binding="{Binding MissingRoms}"    Width="75"/>
+                        <DataGridTextColumn Header="Extra"       Binding="{Binding ExtraRoms}"      Width="65"/>
+                        <DataGridTextColumn Header="Issues"      Binding="{Binding IssueCount}"     Width="65"/>
+                        <DataGridTemplateColumn Header="Health"  Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding HealthDisplay}"
+                                               Foreground="{Binding HealthColor, Converter={StaticResource HexColorToBrushConverter}}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontWeight="SemiBold"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </ui:Card>
+
+            <!-- Emulators table -->
+            <TextBlock Text="Emulators" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"
+                       Visibility="{Binding ViewModel.Emulators.Count, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <ui:Card Padding="0" Margin="0,0,0,24"
+                     Visibility="{Binding ViewModel.Emulators.Count, Converter={StaticResource BoolToVisibilityConverter}}">
+                <DataGrid ItemsSource="{Binding ViewModel.Emulators}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                          RowHeight="38" CanUserResizeRows="False"
+                          Background="Transparent" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Emulator"   Binding="{Binding Name}"           Width="*"/>
+                        <DataGridTextColumn Header="Exes"       Binding="{Binding ExeCount}"        Width="60"/>
+                        <DataGridTextColumn Header="Files"      Binding="{Binding FileCount}"       Width="70"/>
+                        <DataGridTextColumn Header="Size (MB)"  Binding="{Binding TotalSizeMb, StringFormat='{}{0:N0}'}" Width="90"/>
+                        <DataGridTemplateColumn Header="Healthy" Width="75">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding HealthDisplay}"
+                                               Foreground="{Binding HealthColor, Converter={StaticResource HexColorToBrushConverter}}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontWeight="Bold" FontSize="15"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </ui:Card>
+
+            <TextBlock Text="{Binding ViewModel.StatusText}" Opacity="0.55" FontSize="12"
+                       Margin="0,0,0,8" HorizontalAlignment="Right"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</ui:Page>

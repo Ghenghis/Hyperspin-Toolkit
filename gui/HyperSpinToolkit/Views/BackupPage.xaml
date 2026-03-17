@@ -1,0 +1,122 @@
+<ui:Page
+    x:Class="HyperSpinToolkit.Views.BackupPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Backup"
+    d:DesignHeight="900" d:DesignWidth="1060">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+        <StackPanel>
+
+            <!-- Header -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Backup &amp; Restore" FontSize="28" FontWeight="SemiBold"/>
+                <ui:Button Grid.Column="1" Content="Refresh List" VerticalAlignment="Top"
+                           Icon="{ui:SymbolIcon ArrowSync24}"
+                           Command="{Binding ViewModel.LoadBackupsCommand}"
+                           IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+            </Grid>
+
+            <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,16"
+                         Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <!-- Create backup -->
+            <TextBlock Text="Create Backup" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="20" Margin="0,0,0,24">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Source:" VerticalAlignment="Center"/>
+                        <ui:TextBox Grid.Column="1"
+                                    Text="{Binding ViewModel.BackupSource, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="Path to back up (e.g. D:\Arcade\MAME)"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Label:" VerticalAlignment="Center"/>
+                        <ui:TextBox Grid.Column="1"
+                                    Text="{Binding ViewModel.BackupLabel, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="Label (e.g. pre-update)"/>
+                        <TextBlock Grid.Column="2"/>
+                        <TextBlock Grid.Column="3" Text="Type:" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="4"
+                                  ItemsSource="{Binding ViewModel.BackupTypes}"
+                                  SelectedItem="{Binding ViewModel.BackupType}"
+                                  Width="160" HorizontalAlignment="Left"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ui:Button Content="Create Backup"
+                                   Appearance="Primary"
+                                   Icon="{ui:SymbolIcon ArrowDownload24}"
+                                   Command="{Binding ViewModel.CreateBackupCommand}"
+                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding ViewModel.CreateResult}" TextWrapping="Wrap"
+                               Opacity="0.75" FontSize="12"
+                               Visibility="{Binding ViewModel.CreateResult, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Backup list -->
+            <TextBlock Text="Backup History" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="0" Margin="0,0,0,24">
+                <DataGrid ItemsSource="{Binding ViewModel.Backups}"
+                          SelectedItem="{Binding ViewModel.SelectedBackup}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                          RowHeight="38" CanUserResizeRows="False"
+                          Background="Transparent" BorderThickness="0"
+                          MaxHeight="320">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID"     Binding="{Binding Id}"         Width="45"/>
+                        <DataGridTextColumn Header="Type"   Binding="{Binding BackupType}" Width="90"/>
+                        <DataGridTextColumn Header="Target" Binding="{Binding Target}"     Width="*"/>
+                        <DataGridTextColumn Header="Files"  Binding="{Binding FileCount, StringFormat='{}{0:N0}'}" Width="75"/>
+                        <DataGridTextColumn Header="Size"   Binding="{Binding SizeMb}"     Width="85"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}"     Width="80"/>
+                        <DataGridTextColumn Header="Created" Binding="{Binding CreatedAt}" Width="130"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </ui:Card>
+
+            <!-- Restore -->
+            <TextBlock Text="Restore Selected Backup" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ui:Card Padding="20" Margin="0,0,0,16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{Binding ViewModel.SelectedBackup.Target, StringFormat='Selected: {0}'}"
+                               Opacity="0.7" FontSize="13"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ui:Button Content="Restore Backup"
+                                   Appearance="Danger"
+                                   Icon="{ui:SymbolIcon ArrowUndo24}"
+                                   Command="{Binding ViewModel.RestoreBackupCommand}"
+                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding ViewModel.RestoreResult}" TextWrapping="Wrap"
+                               Opacity="0.75" FontSize="12"/>
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Text="{Binding ViewModel.StatusText}" Opacity="0.55" FontSize="12"
+                       Margin="0,0,0,8" HorizontalAlignment="Right"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</ui:Page>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Systems — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>All Systems</h2>
+        <div>
+            <input type="text" id="sys-search" placeholder="Filter systems..." oninput="filterSystems()">
+            <button class="btn btn-sm btn-primary" onclick="runFullAudit()">Refresh Audit</button>
+        </div>
+    </div>
+    <div class="card-body" id="systems-list">
+        <p class="muted">Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allSystems = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const data = await apiGet('/api/systems');
+        allSystems = data.systems || [];
+        renderSystems(allSystems);
+    } catch(e) {
+        document.getElementById('systems-list').innerHTML =
+            '<p class="muted">Failed to load. Run a full audit first.</p>';
+    }
+});
+
+function renderSystems(systems) {
+    if (!systems.length) {
+        document.getElementById('systems-list').innerHTML =
+            '<p class="muted">No systems found. Run a full audit to discover systems.</p>';
+        return;
+    }
+    let html = '<table class="data-table"><thead><tr>' +
+        '<th>System</th><th>ROMs</th><th>Media</th><th>Health</th><th>XML DB</th><th>Last Audit</th><th>Actions</th>' +
+        '</tr></thead><tbody>';
+    for (const s of systems) {
+        const hc = s.health_score >= 75 ? 'good' : s.health_score >= 50 ? 'warn' : 'bad';
+        const hasXml = s.xml_path ? '✅' : '❌';
+        html += `<tr>
+            <td><strong>${s.name}</strong></td>
+            <td>${(s.rom_count||0).toLocaleString()}</td>
+            <td>${(s.media_count||0).toLocaleString()}</td>
+            <td><span class="health-pill ${hc}">${s.health_score||0}%</span></td>
+            <td>${hasXml}</td>
+            <td>${s.last_audit||'Never'}</td>
+            <td><button class="btn btn-sm" onclick="auditSystem('${s.name}')">Audit</button></td>
+        </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('systems-list').innerHTML = html;
+}
+
+function filterSystems() {
+    const q = document.getElementById('sys-search').value.toLowerCase();
+    const filtered = allSystems.filter(s => s.name.toLowerCase().includes(q));
+    renderSystems(filtered);
+}
+
+async function auditSystem(name) {
+    showToast(`Auditing ${name}...`, 'info');
+    try {
+        await apiPost(`/api/audit/system/${encodeURIComponent(name)}`);
+        showToast(`${name} audit complete`, 'success');
+        const data = await apiGet('/api/systems');
+        allSystems = data.systems || [];
+        filterSystems();
+    } catch(e) {
+        showToast(`Audit failed: ${e.message}`, 'error');
+    }
+}
+</script>
+{% endblock %}

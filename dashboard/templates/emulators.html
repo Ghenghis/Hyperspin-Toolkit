@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Emulators — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}Emulators{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+    <div class="card-header">
+        <h2>Emulator Health (M7)</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="emu-search" placeholder="Filter emulators..." oninput="filterEmus()"
+                style="width:220px;">
+            <button class="btn btn-sm" onclick="loadHealth()">&#8635; Refresh</button>
+        </div>
+    </div>
+    <div id="health-summary"
+        style="padding:12px 20px;display:flex;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border-color);">
+    </div>
+    <div class="card-body" id="emu-list">
+        <p class="muted">Loading emulator health...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allEmus = [];
+
+    async function loadHealth() {
+        document.getElementById('emu-list').innerHTML = '<p class="muted">Scanning emulators...</p>';
+        try {
+            const data = await apiGet('/api/emulators/health');
+            allEmus = data.emulators || [];
+            // Summary bar
+            const sumEl = document.getElementById('health-summary');
+            const scoreColor = data.avg_health_score >= 70 ? 'var(--color-good)' : data.avg_health_score >= 40 ? 'var(--color-warn)' : 'var(--color-bad)';
+            sumEl.innerHTML = `
+            <span><strong>${data.total}</strong> <span class="muted">total</span></span>
+            <span style="color:var(--color-good)"><strong>${data.healthy}</strong> <span class="muted">healthy</span></span>
+            <span style="color:var(--color-bad)"><strong>${data.unhealthy}</strong> <span class="muted">need attention</span></span>
+            <span style="color:${scoreColor}"><strong>${data.avg_health_score}</strong> <span class="muted">avg score</span></span>
+        `;
+            renderEmus(allEmus);
+        } catch (e) {
+            document.getElementById('emu-list').innerHTML =
+                `<p class="muted">Could not load health data: ${e.message}. Configure paths.emulators_root in config.yaml.</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Try M7 health first; fall back to legacy /api/emulators
+        loadHealth().catch(() => {
+            apiGet('/api/emulators').then(data => {
+                allEmus = data.emulators || [];
+                renderEmus(allEmus);
+            });
+        });
+    });
+
+    function renderEmus(emus) {
+        if (!emus.length) {
+            document.getElementById('emu-list').innerHTML =
+                '<p class="muted">No emulators found. Check paths.emulators_root in config.yaml.</p>';
+            return;
+        }
+        let html = '<table class="data-table"><thead><tr>' +
+            '<th>Emulator</th><th>Score</th><th>EXE</th><th>Version</th><th>RL Module</th><th>Cfg Issues</th><th>Healthy</th>' +
+            '</tr></thead><tbody>';
+        for (const e of emus) {
+            const scoreColor = e.health_score >= 70 ? 'var(--color-good)' : e.health_score >= 40 ? 'var(--color-warn)' : 'var(--color-bad)';
+            const healthy = e.is_healthy
+                ? '<span class="health-pill good">YES</span>'
+                : '<span class="health-pill bad">NO</span>';
+            const exe = e.exe_exists ? '&#10003;' : '<span style="color:var(--color-bad)">&#10007;</span>';
+            const rl = e.rl_module_exists ? '&#10003;' : '<span class="muted">—</span>';
+            const cfg = e.config_issues && e.config_issues.length
+                ? `<span style="color:var(--color-warn)">${e.config_issues.length}</span>`
+                : '<span style="color:var(--color-good)">0</span>';
+            html += `<tr>
+            <td><strong>${e.name}</strong></td>
+            <td style="color:${scoreColor};font-weight:600;">${e.health_score}</td>
+            <td>${exe}</td>
+            <td>${e.version || '?'}</td>
+            <td>${rl}</td>
+            <td>${cfg}</td>
+            <td>${healthy}</td>
+        </tr>`;
+        }
+        html += '</tbody></table>';
+        document.getElementById('emu-list').innerHTML = html;
+    }
+
+    function filterEmus() {
+        const q = document.getElementById('emu-search').value.toLowerCase();
+        renderEmus(allEmus.filter(e => e.name.toLowerCase().includes(q)));
+    }
+</script>
+{% endblock %}

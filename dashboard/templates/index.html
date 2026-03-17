@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-systems">--</div>
+            <div class="stat-label">Systems</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📀</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-roms">--</div>
+            <div class="stat-label">Total ROMs</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-emulators">--</div>
+            <div class="stat-label">Emulators</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-healthy">--</div>
+            <div class="stat-label">Healthy Emulators</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💾</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-backups">--</div>
+            <div class="stat-label">Backups</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-updates">--</div>
+            <div class="stat-label">Updates Applied</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2col">
+    <div class="card">
+        <div class="card-header">
+            <h2>Recent Activity</h2>
+        </div>
+        <div class="card-body" id="recent-activity">
+            <p class="muted">Run an audit to populate activity data.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Quick Actions</h2>
+        </div>
+        <div class="card-body">
+            <div class="action-grid">
+                <button class="btn btn-primary" onclick="runFullAudit()">🔍 Full Audit</button>
+                <button class="btn btn-secondary" onclick="location.href='/backups'">💾 Create Backup</button>
+                <button class="btn btn-secondary" onclick="location.href='/updates'">🔄 Update Manager</button>
+                <button class="btn btn-secondary" onclick="location.href='/ai'">🤖 AI Assistant</button>
+                <button class="btn btn-secondary" onclick="checkAI()">📡 Check AI Status</button>
+                <button class="btn btn-secondary" onclick="location.href='/systems'">🎮 Browse Systems</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>System Health Overview</h2>
+    </div>
+    <div class="card-body">
+        <div id="systems-table-container">
+            <p class="muted">Loading systems...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    loadSystems();
+});
+
+async function loadStats() {
+    try {
+        const resp = await fetch('/api/stats');
+        const data = await resp.json();
+        document.getElementById('stat-systems').textContent = (data.total_systems || 0).toLocaleString();
+        document.getElementById('stat-roms').textContent = (data.total_roms || 0).toLocaleString();
+        document.getElementById('stat-emulators').textContent = (data.total_emulators || 0).toLocaleString();
+        document.getElementById('stat-healthy').textContent = (data.healthy_emulators || 0).toLocaleString();
+        document.getElementById('stat-backups').textContent = (data.total_backups || 0).toLocaleString();
+        document.getElementById('stat-updates').textContent = (data.total_updates || 0).toLocaleString();
+        document.getElementById('health-score').textContent = (data.avg_health_score || 0) + '%';
+    } catch(e) {
+        console.error('Failed to load stats:', e);
+    }
+}
+
+async function loadSystems() {
+    try {
+        const resp = await fetch('/api/systems');
+        const data = await resp.json();
+        const systems = data.systems || [];
+        if (systems.length === 0) {
+            document.getElementById('systems-table-container').innerHTML =
+                '<p class="muted">No systems in database. Run a full audit to discover systems.</p>';
+            return;
+        }
+        let html = '<table class="data-table"><thead><tr>' +
+            '<th>System</th><th>ROMs</th><th>Media</th><th>Health</th><th>Last Audit</th>' +
+            '</tr></thead><tbody>';
+        for (const s of systems.slice(0, 50)) {
+            const healthClass = s.health_score >= 75 ? 'good' : s.health_score >= 50 ? 'warn' : 'bad';
+            html += `<tr>
+                <td>${s.name}</td>
+                <td>${(s.rom_count || 0).toLocaleString()}</td>
+                <td>${(s.media_count || 0).toLocaleString()}</td>
+                <td><span class="health-pill ${healthClass}">${s.health_score || 0}%</span></td>
+                <td>${s.last_audit || 'Never'}</td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        if (systems.length > 50) html += `<p class="muted">Showing 50 of ${systems.length} systems</p>`;
+        document.getElementById('systems-table-container').innerHTML = html;
+    } catch(e) {
+        console.error('Failed to load systems:', e);
+    }
+}
+</script>
+{% endblock %}

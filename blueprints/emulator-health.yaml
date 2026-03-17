@@ -1,0 +1,99 @@
+# NemoClaw Agent Blueprint: Emulator Health Monitor
+# Monitors emulator installations, checks versions, detects dependency conflicts.
+# Access: READ-ONLY to gaming drives, WRITE to D: test drive for testing.
+
+name: emulator-health
+version: "1.0"
+description: >
+  Autonomous emulator health monitoring agent. Scans emulator installations
+  for version freshness, dependency conflicts, missing DLLs, and configuration
+  issues. Can run automated health checks on the test drive.
+
+agent:
+  type: nemoclaw
+  runtime: openshell
+  image: "python:3.12-slim"
+  gpu: false
+
+llm:
+  provider: lmstudio
+  base_url: "http://host.docker.internal:1234/v1"
+  fallback_provider: ollama
+  fallback_url: "http://host.docker.internal:11434/v1"
+  model: ""
+  temperature: 0.2
+  max_tokens: 4096
+
+sandbox:
+  policy: test-drive-write
+  filesystem:
+    read:
+      - "D:\\Arcade"
+      - "I:\\Arcade"
+      - "K:\\Arcade"
+      - "L:\\CORE - TYPE R"
+    write:
+      - "D:\\Arcade"
+      - "D:\\HyperSpin_Toolkit_Output\\emulator-health"
+    deny:
+      - "C:\\"
+      - "F:\\"
+      - "I:\\"
+      - "J:\\"
+      - "K:\\"
+      - "L:\\"
+      - "N:\\"
+  network:
+    allow:
+      - "api.github.com"  # For version checking
+    deny: ["*"]
+  resources:
+    memory_limit: "2G"
+    cpu_shares: 512
+    timeout_sec: 1800
+
+workspace:
+  mount: "D:\\hyperspin_toolkit"
+  output_dir: "D:\\HyperSpin_Toolkit_Output\\emulator-health"
+
+tasks:
+  - name: version-scan
+    description: "Scan all emulator installations for current versions"
+    command: "python main.py releases scan-versions --emu-root D:\\Arcade"
+    timeout_sec: 600
+
+  - name: dependency-check
+    description: "Check for dependency conflicts across emulators"
+    command: "python main.py deps scan --emu-root D:\\Arcade"
+    timeout_sec: 300
+
+  - name: health-report
+    description: "Generate comprehensive emulator health report"
+    command: "python main.py releases health-report --output {output_dir}/health_{timestamp}.json"
+    timeout_sec: 300
+
+  - name: update-check
+    description: "Check for available emulator updates"
+    command: "python main.py releases check-updates --emu-root D:\\Arcade"
+    timeout_sec: 600
+
+skills:
+  - name: emu-versions
+    description: "List all emulator versions installed across drives"
+  - name: emu-health
+    description: "Run comprehensive health check on emulator installations"
+  - name: emu-conflicts
+    description: "Detect dependency conflicts between emulators"
+  - name: emu-updates
+    description: "Check for available emulator updates from GitHub"
+
+triggers:
+  - type: schedule
+    cron: "0 2 * * 1"  # Weekly Monday 2AM
+  - type: manual
+    command: "nemoclaw run emulator-health"
+
+reporting:
+  format: json
+  output: "{output_dir}/health_{timestamp}.json"
+  notify: false

@@ -1,0 +1,120 @@
+# Workflow: Safe Emulator Update Pipeline
+# Snapshot → Update → Verify → Auto-Rollback on failure.
+# Targets the test drive (D:) exclusively.
+
+name: safe-update
+version: "1.0"
+description: >
+  Safe emulator update pipeline with pre-update snapshots, controlled
+  update application, post-update verification, and automatic rollback
+  on any detected failure. Only operates on the test drive (D:).
+
+trigger:
+  - type: manual
+    command: "goose workflow run safe-update --emulator {emulator_name}"
+
+parameters:
+  emulator_name:
+    type: string
+    required: true
+    description: "Name of the emulator to update (e.g., MAME, RetroArch)"
+  emu_root:
+    type: string
+    default: "D:\\Arcade"
+    description: "Root directory of emulator installations"
+  auto_rollback:
+    type: boolean
+    default: true
+    description: "Automatically rollback on failure"
+
+llm:
+  routing: auto
+  interactive_provider: lmstudio
+  fallback_provider: ollama
+
+output:
+  base_dir: "D:\\HyperSpin_Toolkit_Output\\safe-update"
+  log: "{base_dir}/update_{emulator_name}_{timestamp}.log"
+
+steps:
+  - id: pre-check
+    name: "Pre-Update Health Check"
+    type: cli
+    command: "python main.py releases scan-versions --emu-root {emu_root} --emulator {emulator_name}"
+    timeout_sec: 120
+    on_failure: abort
+
+  - id: dep-check
+    name: "Dependency Conflict Check"
+    type: cli
+    command: "python main.py deps scan --emu-root {emu_root} --emulator {emulator_name}"
+    depends_on: [pre-check]
+    timeout_sec: 120
+    on_failure: abort
+
+  - id: snapshot
+    name: "Capture Pre-Update Snapshot"
+    type: cli
+    command: "python main.py snapshots capture \"{emu_root}\\{emulator_name}\" --name \"{emulator_name}-pre-update\""
+    depends_on: [dep-check]
+    timeout_sec: 300
+    on_failure: abort
+    outputs:
+      - snapshot_id: "{emulator_name}-pre-update"
+
+  - id: update
+    name: "Apply Update"
+    type: cli
+    command: "python main.py releases update {emulator_name} --emu-root {emu_root}"
+    depends_on: [snapshot]
+    timeout_sec: 600
+    on_failure: rollback
+
+  - id: post-verify
+    name: "Post-Update Verification"
+    type: cli
+    command: "python main.py snapshots verify \"{emu_root}\\{emulator_name}\" --snapshot \"{emulator_name}-pre-update\""
+    depends_on: [update]
+    timeout_sec: 300
+    on_failure: rollback
+
+  - id: health-check
+    name: "Post-Update Health Check"
+    type: cli
+    command: "python main.py rollback post-update {emulator_name} --emu-root {emu_root}"
+    depends_on: [post-verify]
+    timeout_sec: 300
+    on_failure: rollback
+
+  - id: cleanup
+    name: "Cleanup Old Snapshots"
+    type: cli
+    command: "python main.py snapshots cleanup --keep 5"
+    depends_on: [health-check]
+    timeout_sec: 60
+    on_failure: continue
+
+rollback:
+  trigger: on_failure
+  enabled: "{auto_rollback}"
+  steps:
+    - id: auto-rollback
+      name: "Automatic Rollback"
+      type: cli
+      command: "python main.py rollback execute {emulator_name} --snapshot \"{emulator_name}-pre-update\" --emu-root {emu_root}"
+      timeout_sec: 300
+
+    - id: verify-rollback
+      name: "Verify Rollback Success"
+      type: cli
+      command: "python main.py snapshots verify \"{emu_root}\\{emulator_name}\" --snapshot \"{emulator_name}-pre-update\""
+      depends_on: [auto-rollback]
+      timeout_sec: 300
+
+notifications:
+  on_complete:
+    type: log
+    message: "Update pipeline completed successfully for {emulator_name}"
+  on_rollback:
+    type: log
+    message: "Update FAILED for {emulator_name} — rolled back to pre-update snapshot"

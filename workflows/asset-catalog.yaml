@@ -1,0 +1,142 @@
+# Workflow: Asset Catalog
+# Scan, classify, score, and catalog all game assets for GUI theming.
+
+name: asset-catalog
+version: "1.0"
+description: >
+  Complete asset cataloging pipeline: scan all gaming drives for
+  visual/audio/animation assets, classify by type, score quality,
+  detect duplicates, generate recommendations for GUI pages, and
+  build the searchable asset index.
+
+trigger:
+  - type: manual
+    command: "goose workflow run asset-catalog"
+  - type: schedule
+    cron: "0 5 * * 0"  # Weekly Sunday 5AM
+
+parameters:
+  drives:
+    type: string
+    default: "D,I,K,L,N"
+    description: "Comma-separated drive letters to scan"
+  max_files_per_dir:
+    type: integer
+    default: 0
+    description: "Max files per directory (0 = unlimited)"
+
+llm:
+  routing: auto
+  batch_provider: vllm      # Use VLLM for batch image classification
+  interactive_provider: lmstudio
+  fallback_provider: ollama
+
+output:
+  base_dir: "D:\\HyperSpin_Toolkit_Output\\asset-catalog"
+  index: "{base_dir}/asset_index.json"
+  report: "{base_dir}/catalog_{timestamp}.json"
+  thumbnails: "{base_dir}/thumbnails"
+
+steps:
+  - id: scan-assets
+    name: "Scan All Asset Directories"
+    agent: asset-scanner
+    task: scan-all-assets
+    timeout_sec: 3600
+    on_failure: abort
+    outputs:
+      - asset_index: "{index}"
+
+  - id: quality-scoring
+    name: "Quality Scoring & Classification"
+    agent: asset-scanner
+    task: quality-report
+    depends_on: [scan-assets]
+    timeout_sec: 300
+    on_failure: continue
+    outputs:
+      - quality_report: "{base_dir}/quality_scores.json"
+
+  - id: duplicate-detection
+    name: "Cross-Drive Duplicate Detection"
+    type: script
+    depends_on: [scan-assets]
+    command: >
+      python -c "
+      from engines.asset_auditor import AssetAuditor;
+      import json;
+      a = AssetAuditor();
+      a.load_index('{index}');
+      dupes = a.duplicate_assets();
+      json.dump(
+          [{'key': k, 'count': len(v), 'paths': v} for k, v in dupes],
+          open('{base_dir}/duplicates.json', 'w'), indent=2
+      );
+      print(f'Found {len(dupes)} duplicate asset groups')
+      "
+    timeout_sec: 300
+    on_failure: continue
+
+  - id: missing-media
+    name: "Missing Media Report"
+    type: script
+    depends_on: [scan-assets]
+    command: >
+      python -c "
+      from engines.asset_auditor import AssetAuditor;
+      import json;
+      a = AssetAuditor();
+      a.load_index('{index}');
+      report = a.missing_media_report();
+      json.dump(report, open('{base_dir}/missing_media.json', 'w'), indent=2);
+      print(f'{len(report)} systems with missing media')
+      "
+    timeout_sec: 300
+    on_failure: continue
+
+  - id: gui-recommendations
+    name: "GUI Page Asset Recommendations"
+    type: script
+    depends_on: [quality-scoring]
+    command: >
+      python -c "
+      from engines.asset_auditor import AssetAuditor, PAGE_ASSET_MAP;
+      import json;
+      a = AssetAuditor();
+      a.load_index('{index}');
+      recs = {};
+      for page in PAGE_ASSET_MAP:
+          best = a.best_assets_for_page(page, limit=20);
+          recs[page] = [r.to_dict() for r in best];
+      json.dump(recs, open('{base_dir}/gui_recommendations.json', 'w'), indent=2);
+      print(f'Generated recommendations for {len(recs)} GUI pages')
+      "
+    timeout_sec: 300
+    on_failure: continue
+
+  - id: aggregate-report
+    name: "Final Catalog Summary"
+    type: script
+    depends_on: [duplicate-detection, missing-media, gui-recommendations]
+    command: >
+      python -c "
+      from engines.asset_auditor import AssetAuditor;
+      import json, time;
+      a = AssetAuditor();
+      a.load_index('{index}');
+      summary = a.summary();
+      summary['workflow'] = 'asset-catalog';
+      summary['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S');
+      json.dump(summary, open('{report}', 'w'), indent=2);
+      print('Asset catalog complete:', json.dumps(summary, indent=2))
+      "
+    timeout_sec: 60
+    on_failure: continue
+
+notifications:
+  on_complete:
+    type: log
+    message: "Asset catalog completed. Index: {index}, Report: {report}"
+  on_failure:
+    type: log
+    message: "Asset catalog workflow failed at step: {failed_step}"

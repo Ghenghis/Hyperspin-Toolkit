@@ -1,0 +1,133 @@
+# Workflow: Full Ecosystem Audit
+# Comprehensive audit of all ROMs, assets, emulators, and drive health.
+# Orchestrated by Goose → delegates to NemoClaw agents.
+
+name: full-audit
+version: "1.0"
+description: >
+  End-to-end ecosystem audit combining ROM auditing, asset scanning,
+  emulator health checks, and drive health monitoring. Runs all agents
+  in sequence with dependency resolution.
+
+trigger:
+  - type: manual
+    command: "goose workflow run full-audit"
+  - type: schedule
+    cron: "0 1 * * 0"  # Weekly Sunday 1AM
+
+llm:
+  routing: auto  # Use LLM router to select backend per step
+  interactive_provider: lmstudio
+  batch_provider: vllm
+  fallback_provider: ollama
+
+output:
+  base_dir: "D:\\HyperSpin_Toolkit_Output\\full-audit"
+  report: "{base_dir}/audit_{timestamp}.json"
+  log: "{base_dir}/audit_{timestamp}.log"
+
+steps:
+  - id: drive-health
+    name: "Drive Health Check"
+    agent: backup-manager
+    task: drive-health-check
+    timeout_sec: 300
+    on_failure: continue  # Non-blocking — log and continue
+    outputs:
+      - health_report: "{output_dir}/health.json"
+
+  - id: rom-scan
+    name: "ROM Inventory Scan"
+    agent: rom-auditor
+    task: scan-roms
+    depends_on: []
+    timeout_sec: 1800
+    on_failure: abort
+    outputs:
+      - rom_inventory: "{output_dir}/rom_inventory.json"
+
+  - id: rom-validate
+    name: "ROM Format Validation"
+    agent: rom-auditor
+    task: validate-formats
+    depends_on: [rom-scan]
+    timeout_sec: 600
+    on_failure: continue
+    outputs:
+      - validation_report: "{output_dir}/rom_validation.json"
+
+  - id: rom-completion
+    name: "ROM Completion Report"
+    agent: rom-auditor
+    task: completion-report
+    depends_on: [rom-scan]
+    timeout_sec: 300
+    on_failure: continue
+    outputs:
+      - completion_report: "{output_dir}/rom_completion.json"
+
+  - id: asset-scan
+    name: "Asset Index Scan"
+    agent: asset-scanner
+    task: scan-all-assets
+    depends_on: []
+    timeout_sec: 3600
+    on_failure: continue
+    outputs:
+      - asset_index: "{output_dir}/asset_index.json"
+
+  - id: asset-quality
+    name: "Asset Quality Report"
+    agent: asset-scanner
+    task: quality-report
+    depends_on: [asset-scan]
+    timeout_sec: 300
+    on_failure: continue
+    outputs:
+      - quality_report: "{output_dir}/quality_report.json"
+
+  - id: emu-version
+    name: "Emulator Version Scan"
+    agent: emulator-health
+    task: version-scan
+    depends_on: []
+    timeout_sec: 600
+    on_failure: continue
+    outputs:
+      - version_report: "{output_dir}/emu_versions.json"
+
+  - id: emu-deps
+    name: "Dependency Conflict Check"
+    agent: emulator-health
+    task: dependency-check
+    depends_on: [emu-version]
+    timeout_sec: 300
+    on_failure: continue
+    outputs:
+      - deps_report: "{output_dir}/emu_deps.json"
+
+  - id: aggregate
+    name: "Aggregate Audit Report"
+    type: script
+    depends_on: [drive-health, rom-completion, asset-quality, emu-deps]
+    command: >
+      python -c "
+      import json, glob, time;
+      reports = {};
+      for f in glob.glob('{base_dir}/*.json'):
+          k = f.rsplit('/', 1)[-1].replace('.json','');
+          reports[k] = json.load(open(f));
+      reports['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S');
+      reports['workflow'] = 'full-audit';
+      json.dump(reports, open('{report}', 'w'), indent=2)
+      "
+    timeout_sec: 60
+    on_failure: continue
+
+notifications:
+  on_complete:
+    type: log
+    message: "Full ecosystem audit completed. Report: {report}"
+  on_failure:
+    type: log
+    message: "Audit workflow failed at step: {failed_step}"

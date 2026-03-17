@@ -1,0 +1,87 @@
+# NemoClaw Agent Blueprint: ROM Auditor
+# Scans all gaming drives for ROM files, validates formats, and generates audit reports.
+# Access: READ-ONLY to all gaming drives.
+
+name: rom-auditor
+version: "1.0"
+description: >
+  Autonomous ROM auditing agent that scans registered gaming drives,
+  validates ROM file integrity, identifies format mismatches, and
+  generates per-system completion reports.
+
+agent:
+  type: nemoclaw
+  runtime: openshell
+  image: "python:3.12-slim"
+  gpu: false
+
+llm:
+  provider: lmstudio
+  base_url: "http://host.docker.internal:1234/v1"
+  fallback_provider: ollama
+  fallback_url: "http://host.docker.internal:11434/v1"
+  model: ""  # Use whatever is loaded
+  temperature: 0.1
+  max_tokens: 4096
+
+sandbox:
+  policy: strict-readonly
+  filesystem:
+    read:
+      - "D:\\Arcade"
+      - "I:\\Arcade"
+      - "K:\\Arcade"
+      - "L:\\CORE - TYPE R"
+      - "N:\\"
+      - "J:\\"
+    write:
+      - "D:\\HyperSpin_Toolkit_Output\\rom-auditor"
+    deny:
+      - "C:\\"
+      - "F:\\"
+  network:
+    allow: []
+    deny: ["*"]
+  resources:
+    memory_limit: "2G"
+    cpu_shares: 512
+    timeout_sec: 3600
+
+workspace:
+  mount: "D:\\hyperspin_toolkit"
+  output_dir: "D:\\HyperSpin_Toolkit_Output\\rom-auditor"
+
+tasks:
+  - name: scan-roms
+    description: "Scan all drives for ROM files and build inventory"
+    command: "python -m engines.rom_audit scan --all-drives"
+    timeout_sec: 1800
+
+  - name: validate-formats
+    description: "Validate ROM file formats against emulator requirements"
+    command: "python -m engines.rom_audit validate --emu-root D:\\Arcade"
+    timeout_sec: 600
+
+  - name: completion-report
+    description: "Generate per-system ROM completion report"
+    command: "python -m engines.rom_audit report --output {output_dir}/report.json"
+    timeout_sec: 300
+
+skills:
+  - name: rom-inventory
+    description: "List all ROMs across all registered gaming drives"
+  - name: rom-validate
+    description: "Validate ROM format compatibility with configured emulators"
+  - name: rom-completion
+    description: "Calculate ROM set completion percentage per system"
+
+triggers:
+  - type: schedule
+    cron: "0 3 * * 0"  # Weekly Sunday 3AM
+  - type: manual
+    command: "nemoclaw run rom-auditor"
+
+reporting:
+  format: json
+  output: "{output_dir}/audit_{timestamp}.json"
+  notify: false

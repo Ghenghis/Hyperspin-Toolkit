@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Updates — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}Update Manager{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Safe Update Pipeline</h2>
+        <span class="muted">Snapshot → Update → Test → Commit or Rollback</span>
+    </div>
+    <div class="card-body">
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">
+            Every update follows the safe pipeline: a pre-update snapshot is taken automatically,
+            the update is applied, verified, and only then committed. If anything fails, an
+            automatic rollback restores the previous state.
+        </p>
+        <div class="action-grid" style="max-width:500px;">
+            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update register','info')">
+                📝 Register Update
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update apply','info')">
+                ⬆️ Apply Update
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update test','info')">
+                🧪 Test Update
+            </button>
+            <button class="btn btn-danger" onclick="showToast('Use CLI: python main.py update rollback','info')">
+                ↩️ Rollback
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header"><h2>Update History</h2></div>
+    <div class="card-body" id="update-history">
+        <p class="muted">Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const data = await apiGet('/api/updates');
+        const updates = data.updates || [];
+        if (!updates.length) {
+            document.getElementById('update-history').innerHTML =
+                '<p class="muted">No updates recorded yet.</p>';
+            return;
+        }
+        let html = '<table class="data-table"><thead><tr>' +
+            '<th>Program</th><th>Old Ver</th><th>New Ver</th><th>Status</th><th>Applied</th><th>Notes</th>' +
+            '</tr></thead><tbody>';
+        for (const u of updates) {
+            const sc = {'committed':'good','tested':'good','applied':'warn','rolled_back':'bad','failed':'bad','pending':'warn'};
+            const cls = sc[u.status] || 'warn';
+            html += `<tr>
+                <td><strong>${u.program_name}</strong></td>
+                <td>${u.old_version||'-'}</td>
+                <td>${u.new_version||'-'}</td>
+                <td><span class="health-pill ${cls}">${u.status}</span></td>
+                <td>${u.applied_at||'-'}</td>
+                <td>${u.notes||''}</td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        document.getElementById('update-history').innerHTML = html;
+    } catch(e) {
+        document.getElementById('update-history').innerHTML =
+            '<p class="muted">Failed to load update history.</p>';
+    }
+});
+</script>
+{% endblock %}
