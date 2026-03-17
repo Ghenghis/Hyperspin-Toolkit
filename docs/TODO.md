@@ -481,6 +481,226 @@
 
 ---
 
+## Phase 11: Data Pipeline & Cross-Platform ⏳ (NEW — from Roadmap Audit)
+
+> **Milestones:** M53–M58 in `MILESTONES.md`  
+> **Goal:** Fill critical gaps: metadata scraping, BIOS verification, DAT-based ROM validation, HyperSpin settings management, and cross-frontend interoperability
+
+### 11.1 Drive Indexer & Manifest Engine (M53)
+> *Formalize the existing drive_indexer.py into a full milestone with cross-HDD scanning*
+
+- [ ] **Extend `engines/drive_indexer.py`:**
+  - [ ] Cross-HDD scanning (D:, I:, K:, L:, N:, J: all drives from `drive_registry.json`)
+  - [ ] File hashing (CRC32 + MD5) for duplicate detection and verification
+  - [ ] Store index in SQLite `drive_index` table with full-text search
+  - [ ] Generate per-drive JSON manifests saved to each drive root
+  - [ ] Auto-detect collection type (HyperSpin, AttractMode, Batocera, LaunchBox)
+- [ ] **Write tests:** `tests/test_drive_indexer_extended.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 11.2 Metadata Scraping Engine (M54)
+> *Integrate with game databases to enrich ROM metadata and download missing media*
+
+- [ ] **Build `engines/metadata_scraper.py`:**
+  - [ ] ScreenScraper API client (most complete: 30+ media types, free tier w/ rate limits)
+  - [ ] TheGamesDB API client (good for modern games, free tier)
+  - [ ] IGDB API client (comprehensive, requires Twitch OAuth token)
+  - [ ] ArcadeDB API client (specialized for arcade platforms)
+  - [ ] Optional Skyscraper CLI wrapper for batch scraping with local cache
+- [ ] **Scrape metadata fields:**
+  - [ ] title, description, year, developer, publisher, genre, players, rating
+- [ ] **Scrape media assets:**
+  - [ ] box art, wheel art, fanart, marquee, snap, video, manual
+  - [ ] Auto-place into HyperSpin `Media/{System}/` directory structure
+- [ ] **Store in SQLite `game_metadata` table** — searchable by system, name, genre
+- [ ] **Rate limiting, retry logic, credential management** for all APIs
+- [ ] **Write tests:** `tests/test_metadata_scraper.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 11.3 BIOS Management & Verification (M55)
+> *Scan, verify, and report on BIOS files required by emulators*
+
+- [ ] **Build `engines/bios_manager.py`:**
+  - [ ] Scan emulator directories for BIOS files (PS1, PS2, Saturn, Dreamcast, Neo Geo, GBA, etc.)
+  - [ ] Load known-good checksums from libretro System.dat + Batocera es_bios.xml
+  - [ ] Verify BIOS file checksums (MD5/SHA1) against known-good hashes
+  - [ ] Detect missing required BIOS files per emulator/core
+  - [ ] Map BIOS → emulator relationships (which BIOS needed for which emulator)
+  - [ ] RetroArch `system/` directory scanning and validation
+  - [ ] BIOS path configuration management per emulator
+- [ ] **Generate BIOS health report:**
+  - [ ] Per-system status: ✅ present + valid, ⚠️ wrong checksum, ❌ missing
+  - [ ] Summary: total BIOS files found, verified, missing
+- [ ] **Write tests:** `tests/test_bios_manager.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 11.4 DAT File ROM Set Verification (M56)
+> *Validate ROM collections against No-Intro, Redump, and TOSEC DAT files*
+
+- [ ] **Build `engines/dat_verifier.py`:**
+  - [ ] Parse No-Intro DAT/XML files (cartridge-based systems)
+  - [ ] Parse Redump DAT files (disc-based: PS1, PS2, Saturn, Dreamcast, etc.)
+  - [ ] Parse TOSEC DAT files (comprehensive multi-system)
+  - [ ] ROM set completeness: compare local ROMs vs DAT entries
+  - [ ] CRC32/MD5/SHA1 hash verification against DAT checksums
+  - [ ] 1G1R (1 Game 1 ROM) set curation with region priority config
+  - [ ] Region variant detection and filtering (USA > Europe > Japan)
+- [ ] **Generate reports:**
+  - [ ] Missing ROM list with game names and expected hashes
+  - [ ] Extra/unverified ROM list (files not in any DAT)
+  - [ ] Per-system completion percentage
+- [ ] **Integration with M6 (ROM Audit) and M27 (Completion Tracker)**
+- [ ] **Write tests:** `tests/test_dat_verifier.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 11.5 HyperSpin Settings Manager (M57)
+> *Read, write, and validate HyperSpin configuration files*
+
+- [ ] **Build `engines/hyperspin_settings.py`:**
+  - [ ] Parse HyperSpin.ini (main configuration)
+  - [ ] Parse per-system Settings INI files (`Settings/{System}.ini`)
+  - [ ] Read/write wheel behavior (speed, style, letter grouping)
+  - [ ] Read/write navigation settings (key bindings, joystick config)
+  - [ ] Read/write theme settings (default theme, source paths)
+  - [ ] Read/write startup/exit settings (intro video, exit confirmation)
+  - [ ] Read/write attract mode / screen saver settings (idle timeout, attract sequence)
+- [ ] **Validation engine:**
+  - [ ] Check for common misconfiguration patterns
+  - [ ] Validate paths referenced in settings exist on disk
+  - [ ] Recommended settings presets (performance, quality, cabinet mode)
+- [ ] **Write tests:** `tests/test_hyperspin_settings.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 11.6 Cross-Frontend Import/Export (M58)
+> *Convert between frontend database formats for collection portability*
+
+- [ ] **Build `engines/frontend_converter.py`:**
+  - [ ] HyperSpin XML ↔ EmulationStation gamelist.xml
+  - [ ] HyperSpin XML ↔ LaunchBox XML database
+  - [ ] HyperSpin XML ↔ AttractMode romlist.txt
+  - [ ] HyperSpin XML ↔ Pegasus metadata.txt
+  - [ ] Media path remapping between frontend directory structures
+  - [ ] Batch conversion with progress tracking
+- [ ] **Cross-frontend comparison:**
+  - [ ] Diff tool: what systems/games exist in frontend A but not B
+  - [ ] Theme format mapping (different frontends use different media layouts)
+- [ ] **Write tests:** `tests/test_frontend_converter.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+---
+
+## Phase 12: RocketLauncher Deep Integration ⏳ (NEW — from Roadmap Audit)
+
+> **Milestones:** M59–M60 in `MILESTONES.md`  
+> **Goal:** Manage RL's advanced features beyond basic config validation (M9)
+
+### 12.1 Fade, Bezel & Pause Manager (M59)
+- [ ] **Fade Screen Manager:**
+  - [ ] Scan `RocketLauncher\Media\Fade\{System}\` directories
+  - [ ] Validate fade image dimensions and format (PNG required)
+  - [ ] Detect missing fade assets, generate per-system coverage report
+  - [ ] Support global, per-system, and per-ROM fade configurations
+  - [ ] Manage multi-layer fade images (Layer 1-4)
+- [ ] **Bezel Manager:**
+  - [ ] Scan `RocketLauncher\Media\Bezels\{System}\` directories
+  - [ ] Support per-game bezels with background images
+  - [ ] Validate bezel dimensions match emulator output resolution
+  - [ ] Orientation detection (horizontal/vertical games)
+- [ ] **Pause Menu Manager:**
+  - [ ] Game guides inventory (PDF, TXT, PNG, compressed archives)
+  - [ ] Controller/input display images per system
+  - [ ] Pause screen configuration per emulator
+- [ ] **Build `engines/rl_media_manager.py`**
+- [ ] **Write tests:** `tests/test_rl_media_manager.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 12.2 Keymapper, Statistics & MultiGame (M60)
+- [ ] **Keymapper Manager:**
+  - [ ] AutoHotKey script inventory per emulator/system
+  - [ ] Xpadder/JoyToKey profile management
+  - [ ] Controller mapping validation (detect unmapped buttons)
+  - [ ] Import/export keymapper profiles
+- [ ] **Statistics Tracker:**
+  - [ ] Parse RL statistics: play count, total time, last played per game
+  - [ ] Most played games reports, recently played history
+  - [ ] Play time trends and analytics
+  - [ ] Integration with M34 (Ecosystem Health Score)
+- [ ] **MultiGame Manager:**
+  - [ ] Validate MultiGame settings in RocketLauncher INI
+  - [ ] Multi-disc game configuration (PS1, Saturn, etc.)
+- [ ] **7z Extraction Settings:**
+  - [ ] Validate extraction paths and temp directory settings
+  - [ ] Monitor extraction cache size and cleanup policies
+- [ ] **Build `engines/rl_keymapper.py`**
+- [ ] **Write tests:** `tests/test_rl_keymapper.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+---
+
+## Phase 13: Automation & Operations ⏳ (NEW — from Roadmap Audit)
+
+> **Milestones:** M61–M63 in `MILESTONES.md`  
+> **Goal:** Scheduling, agent intelligence, and self-healing — the capstone of a fully agentic toolkit
+
+### 13.1 Scheduler & Notification System (M61)
+- [ ] **Task Scheduler (`engines/scheduler.py`):**
+  - [ ] Periodic collection audits (daily/weekly ROM + media scan)
+  - [ ] Scheduled backup operations (nightly incremental, weekly full)
+  - [ ] Automated update checks for emulators and tools
+  - [ ] Drive health monitoring on schedule
+  - [ ] Windows Task Scheduler integration for persistence
+- [ ] **Notification System (`engines/notifier.py`):**
+  - [ ] Windows toast notifications for critical events
+  - [ ] In-app notification center (Arcade GUI HUD bar)
+  - [ ] Log-based alerting for issues
+  - [ ] Configurable preferences per event type
+- [ ] **Maintenance Cycles:**
+  - [ ] "Night mode" — full audit + cleanup + backup while idle
+  - [ ] Post-update verification cycle
+  - [ ] Pre-session health check (quick validation before gaming)
+- [ ] **Write tests:** `tests/test_scheduler.py`, `tests/test_notifier.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 13.2 Agent Memory, Learning & Knowledge Base (M62)
+- [ ] **Persistent Agent Memory (`engines/agent_memory.py`):**
+  - [ ] SQLite `agent_memory` table: observations, user corrections, resolved issues
+  - [ ] Memory recall during agent operations (avoid repeating known issues)
+  - [ ] Session history with searchable context
+- [ ] **Knowledge Base Accumulation:**
+  - [ ] Emulator-specific quirks database (learned from troubleshooting)
+  - [ ] ROM compatibility notes (which versions work best with which emulators)
+  - [ ] User preference learning (favorite systems, common operations)
+- [ ] **Adaptive Recommendations:**
+  - [ ] Learn from user acceptance/rejection of suggestions
+  - [ ] Prioritize actions based on historical effectiveness
+  - [ ] Personalized health scoring weights based on collection focus
+- [ ] **Write tests:** `tests/test_agent_memory.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+### 13.3 Automated Repair & Self-Healing Framework (M63)
+- [ ] **Issue Detection Pipeline (`engines/self_healer.py`):**
+  - [ ] Broken symlinks and orphaned files
+  - [ ] Corrupted config files (malformed INI/XML)
+  - [ ] Missing dependencies and broken paths
+  - [ ] Stale cache entries and temp files
+- [ ] **Automated Repair Scripts:**
+  - [ ] Path fixer: update absolute paths after drive letter changes
+  - [ ] Config repair: regenerate corrupted INI/XML from templates
+  - [ ] Missing media stub generator: create placeholder assets
+  - [ ] Dead reference cleaner: remove entries pointing to nonexistent files
+- [ ] **Self-Healing Hooks:**
+  - [ ] Pre-operation validation with auto-fix attempt
+  - [ ] Post-operation verification with rollback on failure
+  - [ ] Continuous integrity monitoring in background
+- [ ] **Repair Reporting (`scripts/repair_runner.ps1`):**
+  - [ ] What was found, what was fixed, what needs manual attention
+  - [ ] Repair history with before/after snapshots
+  - [ ] Suggested manual fixes for issues that can't be auto-repaired
+- [ ] **Write tests:** `tests/test_self_healer.py`
+- [ ] **Wire into CLI/MCP/Dashboard**
+
+---
+
 ## Switch Game Integration (From J: 20TB Backup)
 
 > User noted Switch games on J: could be added to a drive with room + proper emulator.
@@ -550,7 +770,7 @@ All toolkit testing should target D: exclusively:
 
 ### Automated Test Suite
 - Current: **364+ tests passing** (including 22 drive_indexer tests)
-- Target: 600+ tests after Phase 4-10 milestones
+- Target: 800+ tests after Phase 4-13 milestones (M18-M63)
 - Agent integration tests: end-to-end Goose → NemoClaw → result validation
 - GUI tests: WPF control rendering, theme engine, asset loading
 
