@@ -1,4 +1,4 @@
-## HyperSpin Extreme Toolkit — 35 Milestone Roadmap
+## HyperSpin Extreme Toolkit — 63 Milestone Roadmap
 
 ## Phase 1: Foundation (Milestones 1–5)
 
@@ -294,16 +294,480 @@
 *   Learning from past operations
 *   **Status**: ✅ Complete — `engines/nemoclaw_agents.py`, `engines/openhands_bridge.py`, `engines/cli_anything_bridge.py`, 4 agent blueprints in `blueprints/`, 4 workflow definitions in `workflows/`, MCP bridge (70+ tools) in `mcp_bridge.py`
 
+## Phase 7: Agentic AI Stack (Milestones 36–40)
+
+### M36 — Goose Orchestrator Integration
+
+*   Install Goose v1.27.2+ and configure LM Studio as default provider
+*   Register HyperSpin Toolkit as MCP server (`goose mcp add`)
+*   Create custom Goose extensions for drive management, ROM audit, asset scan
+*   End-to-end test: user request → Goose → MCP Bridge → result
+*   **Status**: 📋 Planned — `setup/install_goose.ps1` exists but integration not tested
+
+### M37 — OpenHands Coding Agent Integration
+
+*   Docker image setup with LM Studio backend (`host.docker.internal:1234`)
+*   Mount `D:\hyperspin_toolkit` as workspace volume
+*   Test autonomous coding tasks (run tests, generate engines, debug)
+*   Goose delegates coding tasks to OpenHands
+*   **Status**: 📋 Planned — `engines/openhands_bridge.py` exists but Docker integration not wired
+
+### M38 — NemoClaw Agent Sandbox Orchestration
+
+*   Clone NemoClaw, override inference to local LM Studio
+*   Create agent blueprints: rom-auditor, asset-scanner, emulator-health, backup-manager
+*   Define OpenShell sandbox policies per blueprint using `drive_registry.json`
+*   Test sandbox lifecycle: onboard, status, destroy
+*   **Status**: 📋 Planned — `engines/nemoclaw_agents.py` + 4 blueprints in `blueprints/` exist but not connected
+
+### M39 — CLI-Anything Software Bridge
+
+*   Generate project-specific CLIs: cli-anything-hyperspin, -rocketlauncher, -mame, -retroarch, -lmstudio, -ollama
+*   Verify SKILL.md generation for each CLI (agent-discoverable)
+*   Register Skills with Goose: `goose skill load cli-anything-*`
+*   Test agent-driven software control through Skills
+*   **Status**: 📋 Planned — `engines/cli_anything_bridge.py` exists but CLIs not generated
+
+### M40 — Agentic Security Policies & Workflow Orchestration
+
+*   Drive access policies mapped from `drive_registry.json` (I:,K:,L:,J: read-only; D: read-write test; H: backup write; C:,F: denied)
+*   All inference stays local — no cloud API calls
+*   Serial-based drive verification before any disk write
+*   Implement Goose ↔ NemoClaw ↔ OpenHands communication pipeline
+*   YAML workflow orchestration: full-audit, safe-update, collection-sync, asset-catalog
+*   **Status**: 📋 Planned — 4 workflow definitions in `workflows/` exist but orchestrator not built
+
+## Phase 8: Asset Pipeline & Theme Engine (Milestones 41–43)
+
+### M41 — Cross-HDD Asset Index & Quality Scoring
+
+*   Scan all gaming HDDs: D:\Arcade\Media (301K PNGs, 47K videos, 20K audio, 8K SWF), K:\Arcade\menu-art, L:\CORE - TYPE R, N:\themes
+*   Index every asset: path, type, format, dimensions, file size, drive tag, system, game
+*   Calculate quality score per asset (resolution, aspect ratio, file size, animation)
+*   Tag assets by GUI page relevance (dashboard, collection browser, etc.)
+*   Store in SQLite `asset_index` table with full-text search
+*   **Status**: 📋 Planned — `engines/asset_auditor.py` has basic structure, needs cross-HDD scanning + quality scoring
+
+### M42 — SWF Theme Conversion Pipeline
+
+*   JPEXS CLI → Lottie JSON conversion for top 100+ most-used animated themes
+*   FFmpeg batch → MP4 video loops for remaining 8K SWF themes
+*   Static PNG snapshot generation for thumbnails/previews
+*   CefSharp fallback rendering for complex interactive SWF themes
+*   Conversion status tracking and error reporting
+*   **Status**: 📋 Planned — 0% built, requires JPEXS Free Flash Decompiler + FFmpeg
+
+### M43 — Thumbnail Cache & Dynamic Theme Loader
+
+*   Generate optimized thumbnail cache (resized PNGs) for fast GUI browsing
+*   Build `ArcadeThemeEngine` service: dynamically loads assets from all registered HDDs
+*   Theme source priority chain: HyperSpin → AttractMode → LaunchBox → Batocera
+*   Per-page theme mapping: best assets for each GUI page
+*   Dynamic theme rotation with user favorites/pinning
+*   **Status**: 📋 Planned — design spec in `docs/ARCADE_GUI_PLAN.md`, 0% implemented
+
+## Phase 9: Arcade GUI Foundation (Milestones 44–47)
+
+### M44 — Arcade Theme System & Neon Color Palette
+
+*   Create `ArcadeTheme.xaml` global resource dictionary with neon color palette
+*   Colors: NeonBlue (#00D4FF), NeonPink (#FF0088), NeonGreen (#39FF14), NeonYellow (#FFF000), NeonOrange (#FF6E00), NeonPurple (#BF00FF)
+*   Dark cabinet backgrounds (#0A0A14, #12121E)
+*   Install arcade fonts: Press Start 2P (pixel), Orbitron (futuristic), JetBrains Mono (console)
+*   Create `ArcadeFonts.xaml` and `NeonColors.xaml` resource dictionaries
+*   Restyle MainWindow shell: layered architecture (animated background → content → HUD overlay → nav bar)
+*   **Status**: 📋 Planned — current GUI uses Fluent/corporate style, needs complete retheme
+
+### M45 — Custom Arcade Controls Suite
+
+*   **ArcadeButton** — neon glow on hover, pulse animation on click, sound effect trigger
+*   **NeonGauge** — arcade-style circular/bar meter for health %, drive usage, completion
+*   **LedIndicator** — multi-color LED with glow states (green/yellow/red/off)
+*   **ScoreCounter** — animated number roller with digit-by-digit cascade animation
+*   **CrtTerminal** — retro scanline text terminal control for agent console output
+*   All controls support both mouse and gamepad interaction
+*   **Status**: 📋 Planned — 0 of 5+ controls built, `gui/HyperSpinToolkit/Controls/` directory needed
+
+### M46 — HLSL Shader Effects & Particle System
+
+*   **CRT Scanline Effect** — HLSL pixel shader for retro CRT monitor look
+*   **Neon Glow Effect** — bloom/glow shader for buttons, text, active elements
+*   **Pixel Dissolve Effect** — page transition shader with configurable direction/speed
+*   **Particle System** — custom WPF particle engine with spark, glow, and pixel sprites
+*   Particle presets: ambient stars, neon rain, arcade sparks, fire pixels
+*   Create `Effects/` directory with .cs + .fx shader files
+*   **Status**: 📋 Planned — 0% built, requires SharpDX or custom HLSL compilation
+
+### M47 — Video Background & Audio Engine
+
+*   Install LibVLCSharp.WPF NuGet for hardware-accelerated video playback
+*   **VideoBackground** control — seamless loop of game preview videos from 47K library
+*   Random background selection per page from asset index (M41)
+*   **Sound Effects Engine** — load arcade sounds from `Media/{System}/Sound/` (20K files)
+*   UI sound map: click, hover, navigate, transition, success, error, ambient
+*   Sound presets per page theme (MAME sounds for audit page, etc.)
+*   Volume control + mute toggle in settings
+*   **Status**: 📋 Planned — 0% built, LibVLCSharp NuGet not installed
+
+## Phase 10: Arcade GUI Pages (Milestones 48–50)
+
+### M48 — Arcade Dashboard & Collection Browser
+
+*   **Dashboard restyle** — replace Fluent cards with neon stat counters, animated background, drive health gauges (NeonGauge), agent LED indicators, video background from random game theme
+*   **Collection Browser** (NEW page) — HyperSpin-style spinning wheel navigation:
+    *   `WheelCarousel` 3D control with wheel art from `Media/{System}/Images/Wheel/` (45K+ PNGs)
+    *   Video preview panel (MP4 from `Media/{System}/Video/`)
+    *   Box art display panels (Artwork1-4 layers)
+    *   Sound effects on navigation from `Media/{System}/Sound/`
+    *   Genre icons, letter art, special art overlays
+*   **Status**: 📋 Planned — Dashboard exists in Fluent style; Collection Browser is 0%
+
+### M49 — Agent Console, Asset Gallery & AI Chat
+
+*   **Agent Console** (NEW page) — CRT scanline terminal for Goose/NemoClaw/OpenHands output, real-time agent status LEDs, command input with autocomplete
+*   **Asset Gallery** (NEW page) — grid browse/search all 301K+ game assets, filter by type/system/quality, lightbox preview with metadata, drag-to-set as page theme
+*   **AI Chat** (NEW page) — arcade-style chat bubbles with scanline text effect, natural language input to Goose, results displayed as formatted arcade cards
+*   **Status**: 📋 Planned — 0% built, 3 entirely new pages
+
+### M50 — Audit, Backup, Update & Settings Arcade Restyle
+
+*   **ROM Audit page** — Pac-Man-style completion meters per system, neon health pills
+*   **Backup Control page** — pixel-art animated transfer progress, visual backup timeline
+*   **Update Center page** — arcade loading screen progress bars, rollback controls
+*   **Drive Manager page** — LED indicators per drive, arcade gauge bars, serial-based identification
+*   **Settings page** — retro options menu with joystick-style navigation, sound/theme config
+*   All pages use arcade controls (M45), shaders (M46), sounds (M47)
+*   **Status**: 📋 Planned — existing 5 pages need complete restyle from Fluent → Arcade
+
+## Phase 11: Arcade Polish & Integration (Milestones 51–52)
+
+### M51 — Gamepad/Joystick Support & Page Transitions
+
+*   Install XInputDotNet NuGet for gamepad input
+*   `ArcadeInputHandler` — full D-pad, ABXY, triggers, bumpers, analog sticks mapping
+*   Left stick = wheel/list navigation, Right stick = camera/zoom in gallery
+*   Start = Settings, Select = toggle AI chat overlay
+*   LB/RB = previous/next page with pixel dissolve transition
+*   Button mapping configuration page in Settings
+*   Animated page transitions using Pixel Dissolve shader (M46)
+*   Marquee-scroll notifications in bottom HUD bar
+*   **Status**: 📋 Planned — XInputDotNet not installed, 0% built
+
+### M52 — Full Arcade Polish, Performance & E2E Testing
+
+*   Performance optimization: asset preloading, thumbnail caching, lazy video load
+*   Memory management: dispose video/audio resources on page leave
+*   Startup experience: animated splash screen with arcade boot sequence
+*   HUD overlay: persistent top bar with agent status, drive health, system clock
+*   Theme persistence: remember user's favorite theme per page
+*   Accessibility: keyboard navigation fallback for all arcade controls
+*   E2E testing: all 10 pages rendered, all agents connected, gamepad navigation, video/audio playback
+*   WPF GUI unit tests for custom controls, theme engine, asset loading
+*   **Status**: 📋 Planned — capstone milestone, requires all M44–M51 complete
+
+## Phase 12: Data Pipeline & Cross-Platform (Milestones 53–58)
+
+### M53 — Drive Indexer & Manifest Engine
+
+*   Scan all gaming HDDs and generate file manifests (path, size, hash, type)
+*   Record file counts, total sizes, folder trees per drive
+*   Store index in SQLite `drive_index` table with full-text search
+*   Auto-detect collection type using `drive_registry.json` identifiers
+*   Generate per-drive JSON manifests saved to each drive root
+*   Cross-drive duplicate file detection (feeds into M26)
+*   **Status**: 🔶 Partial — `engines/drive_indexer.py` + `engines/drive_index.py` exist; needs cross-HDD scanning, hashing, and manifest export
+
+### M54 — Metadata Scraping Engine
+
+*   Integrate with ScreenScraper API (most complete: backcover, cover, fanart, manual, marquee, screenshot, texture, video, wheel)
+*   Integrate with TheGamesDB API (good for modern games, free tier)
+*   Integrate with IGDB API (comprehensive, requires Twitch OAuth)
+*   Integrate with ArcadeDB API (specialized for arcade platforms)
+*   Optional Skyscraper CLI integration for batch scraping with local cache
+*   Scrape metadata: title, description, year, developer, publisher, genre, players, rating
+*   Scrape media: box art, wheel art, fanart, marquee, snap, video, manual
+*   Store scraped data in SQLite `game_metadata` table
+*   Rate limiting, retry logic, and credential management for all APIs
+*   **Status**: 📋 Planned — M28 (Online Research Agent) covers AI research; this milestone covers structured scraping from game databases
+
+### M55 — BIOS Management & Verification System
+
+*   Scan all emulator directories for BIOS files (PS1, PS2, Saturn, Dreamcast, Neo Geo, GBA, etc.)
+*   Verify BIOS checksums against known-good hashes (libretro System.dat, Batocera es_bios.xml)
+*   Detect missing required BIOS files per emulator/core
+*   Map BIOS files to emulators (which BIOS is needed for which emulator)
+*   Report BIOS health status per system (present/missing/wrong checksum)
+*   RetroArch system directory scanning and validation
+*   BIOS path configuration management per emulator
+*   **Status**: 📋 Planned — 0% built, requires `engines/bios_manager.py`
+
+### M56 — DAT File ROM Set Verification (No-Intro, TOSEC, Redump)
+
+*   Parse No-Intro DAT/XML files for cartridge-based systems
+*   Parse Redump DAT files for disc-based systems (PS1, PS2, Saturn, etc.)
+*   Parse TOSEC DAT files for comprehensive verification
+*   ROM set completeness comparison: local ROMs vs DAT entries
+*   CRC32/MD5/SHA1 hash verification against DAT checksums
+*   1G1R (1 Game 1 ROM) set curation with region priority configuration
+*   Missing ROM reports with game names and expected hashes
+*   Region variant detection and filtering (USA, Europe, Japan priority)
+*   Integration with M6 (ROM Audit) and M27 (Completion Tracker) for unified reporting
+*   **Status**: 📋 Planned — M6 has basic CRC verification; this adds full DAT format support and set management
+
+### M57 — HyperSpin Settings Manager & HyperHQ Bridge
+
+*   Parse and read/write HyperSpin.ini (main configuration)
+*   Parse per-system Settings INI files (`Settings/{System}.ini`)
+*   Manage wheel behavior settings (speed, style, letter grouping)
+*   Manage navigation settings (key bindings, joystick config)
+*   Manage theme settings (default theme, theme source paths)
+*   Manage startup/exit settings (intro video, exit confirmation)
+*   Manage attract mode / screen saver settings (idle timeout, attract sequence)
+*   Validate HyperSpin settings for consistency and common errors
+*   Provide recommended settings presets (performance, visual quality, cabinet mode)
+*   **Status**: 📋 Planned — 0% built, requires `engines/hyperspin_settings.py`
+
+### M58 — Cross-Frontend Import/Export Engine
+
+*   HyperSpin XML database ↔ EmulationStation gamelist.xml converter
+*   HyperSpin XML ↔ LaunchBox XML database converter
+*   HyperSpin XML ↔ AttractMode romlist.txt converter
+*   HyperSpin XML ↔ Pegasus metadata.txt converter
+*   Media path remapping between frontend directory structures
+*   Batch conversion with progress tracking and error reporting
+*   Cross-frontend collection comparison (what systems/games exist where)
+*   Theme format awareness (different frontends use different media layouts)
+*   **Status**: 📋 Planned — 0% built, requires `engines/frontend_converter.py`
+
+## Phase 13: RocketLauncher Deep Integration (Milestones 59–60)
+
+### M59 — RocketLauncher Fade, Bezel & Pause Manager
+
+*   **Fade Screen Manager** — manage multi-layer fade images (Layer 1-4) per system and per game
+    *   Scan `RocketLauncher\Media\Fade\{System}\` directories
+    *   Validate fade image dimensions and format (PNG required)
+    *   Detect missing fade assets, generate per-system coverage report
+    *   Support global, per-system, and per-ROM fade configurations
+*   **Bezel Manager** — manage bezel overlays for all emulators
+    *   Scan `RocketLauncher\Media\Bezels\{System}\` directories
+    *   Support per-game bezels with background images
+    *   Validate bezel dimensions match emulator output resolution
+    *   Orientation detection (horizontal/vertical games)
+*   **Pause Menu Manager** — manage pause overlay assets
+    *   Game guides (PDF, TXT, PNG, compressed archives)
+    *   Controller/input display images per system
+    *   Pause screen configuration per emulator
+*   **Status**: 📋 Planned — M9 covers basic RL config validation; this adds deep media/overlay management
+
+### M60 — RocketLauncher Keymapper, Statistics & MultiGame
+
+*   **Keymapper Manager** — manage per-emulator input configurations
+    *   AutoHotKey script management per emulator/system
+    *   Xpadder/JoyToKey profile management
+    *   Controller mapping validation (detect unmapped buttons)
+    *   Import/export keymapper profiles
+*   **Statistics Tracker** — game play statistics from RocketLauncher logs
+    *   Parse RL statistics: play count, total time, last played per game
+    *   Most played games reports, recently played history
+    *   Play time trends and analytics
+    *   Integration with M34 (Ecosystem Health Score) for engagement metrics
+*   **MultiGame Manager** — multi-game ROM launching configuration
+    *   Validate MultiGame settings in RocketLauncher INI
+    *   Multi-disc game configuration (PS1, Saturn, etc.)
+*   **7z Extraction Settings** — compressed ROM handling configuration
+    *   Validate 7z extraction paths and temp directory settings
+    *   Monitor extraction cache size and cleanup policies
+*   **Status**: 📋 Planned — 0% built, extends RL integration beyond config validation
+
+## Phase 14: Automation & Operations (Milestones 61–63)
+
+### M61 — Scheduler & Notification System
+
+*   **Task Scheduler** — cron-like scheduling for automated operations
+    *   Periodic collection audits (daily/weekly ROM + media scan)
+    *   Scheduled backup operations (nightly incremental, weekly full)
+    *   Automated update checks for emulators and tools
+    *   Drive health monitoring on schedule
+*   **Notification System** — alerts for important events
+    *   System tray notifications (Windows toast)
+    *   In-app notification center (Arcade GUI HUD bar)
+    *   Log-based alerting for critical issues
+    *   Configurable notification preferences per event type
+*   **Maintenance Cycles** — automated multi-step maintenance
+    *   "Night mode" — run full audit + cleanup + backup while idle
+    *   Post-update verification cycle
+    *   Pre-session health check (quick validation before gaming)
+*   **Status**: 📋 Planned — 0% built, requires `engines/scheduler.py` + `engines/notifier.py`
+
+### M62 — Agent Memory, Learning & Knowledge Base
+
+*   **Persistent Agent Memory** — store findings across sessions
+    *   SQLite `agent_memory` table: key observations from audits, user corrections, resolved issues
+    *   Memory recall during agent operations (avoid repeating known issues)
+    *   Session history with searchable context
+*   **Knowledge Base Accumulation** — build intelligence from operations
+    *   Emulator-specific quirks database (learned from troubleshooting)
+    *   ROM compatibility notes (which ROM versions work best with which emulators)
+    *   User preference learning (favorite systems, common operations)
+    *   Community knowledge integration (curated tips from forums)
+*   **Adaptive Recommendations** — improve suggestions over time
+    *   Learn from user acceptance/rejection of recommendations
+    *   Prioritize actions based on historical effectiveness
+    *   Personalized health scoring weights based on user's collection focus
+*   **Status**: 📋 Planned — M35 mentions learning; this provides the concrete implementation
+
+### M63 — Automated Repair & Self-Healing Framework
+
+*   **Issue Detection Pipeline** — proactive scanning for problems
+    *   Broken symlinks and orphaned files
+    *   Corrupted config files (malformed INI/XML)
+    *   Missing dependencies and broken paths
+    *   Stale cache entries and temp files
+*   **Automated Repair Scripts** — fix common issues without user intervention
+    *   Path fixer: update absolute paths after drive letter changes
+    *   Config repair: regenerate corrupted INI/XML from templates
+    *   Missing media stub generator: create placeholder assets
+    *   Dead reference cleaner: remove entries pointing to nonexistent files
+*   **Self-Healing Hooks** — automatic repair during normal operations
+    *   Pre-operation validation with auto-fix attempt
+    *   Post-operation verification with rollback on failure
+    *   Continuous integrity monitoring in background
+*   **Repair Reporting** — detailed logs of all automated fixes
+    *   What was found, what was fixed, what needs manual attention
+    *   Repair history with before/after snapshots
+    *   Suggested manual fixes for issues that can't be auto-repaired
+*   **Status**: 📋 Planned — 0% built, requires `engines/self_healer.py` + `scripts/repair_runner.ps1`
+
 ---
 
 ## Summary
 
-| Phase               | Milestones | Complete | Partial | Planned      |
-| ------------------- | ---------- | -------- | ------- | ------------ |
-| 1 Foundation        | M1–M5      | 5        | 0       | 0            |
-| 2 Audit & Discovery | M6–M10     | 5        | 0       | 0            |
-| 3 Safe Update       | M11–M15    | 5        | 0       | 0            |
-| 4 AI Integration    | M16–M20    | 3        | 0       | 2 (M18, M20) |
-| 5 Web Dashboard     | M21–M25    | 2        | 3       | 0            |
-| 6 Advanced          | M26–M35    | 2        | 0       | 8            |
-| **Total**           | **35**     | **22**   | **3**   | **10**       |
+| Phase                              | Milestones | Complete | Partial | Planned      |
+| ---------------------------------- | ---------- | -------- | ------- | ------------ |
+| 1 Foundation                       | M1–M5      | 5        | 0       | 0            |
+| 2 Audit & Discovery                | M6–M10     | 5        | 0       | 0            |
+| 3 Safe Update                      | M11–M15    | 5        | 0       | 0            |
+| 4 AI Integration                   | M16–M20    | 3        | 0       | 2 (M18, M20) |
+| 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0            |
+| 6 Advanced Features                | M26–M35    | 2        | 0       | 8            |
+| 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5            |
+| 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3            |
+| 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
+| 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
+| 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 0        | 1       | 5            |
+| 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
+| 14 Automation & Operations         | M61–M63    | 0        | 0       | 3            |
+| **Total**                          | **63**     | **22**   | **4**   | **37**       |
+
+### Build Order (Recommended Sequence)
+
+```
+LAYER 1 — BACKEND REMAINING (can start now, no dependencies)
+  M18 Game Recommender → M20 Troubleshooter → M26-M29 Collection Mgmt → M31-M34 Advanced
+                    ↓
+LAYER 2 — DATA PIPELINE (Phase 12, parallel with Layer 1)
+  M53 Drive Indexer ──→ M56 DAT Verification ──→ M55 BIOS Manager
+  M54 Metadata Scraper (ScreenScraper/IGDB/TheGamesDB/ArcadeDB)
+  M57 HyperSpin Settings Manager
+  M58 Cross-Frontend Import/Export (AttractMode/LaunchBox/Batocera/Pegasus)
+                    ↓
+LAYER 3 — RL DEEP INTEGRATION (Phase 13, after M9 + M53)
+  M59 Fade/Bezel/Pause Manager → M60 Keymapper/Statistics/MultiGame
+                    ↓
+LAYER 4 — AGENTIC STACK (Phase 7, after Layer 1-3 engines exist)
+  M36 Goose → M37 OpenHands → M38 NemoClaw → M39 CLI-Anything → M40 Orchestration
+                    ↓
+LAYER 5 — ASSET PIPELINE (Phase 8, needs M53 + M54)
+  M41 Cross-HDD Asset Index → M42 SWF Conversion → M43 Theme Loader
+                    ↓
+LAYER 6 — ARCADE GUI FOUNDATION (Phase 9, needs M41-M43)
+  M44 Neon Theme System → M45 Custom Controls → M46 HLSL Shaders → M47 Video/Audio
+                    ↓
+LAYER 7 — ARCADE GUI PAGES (Phase 10, needs M44-M47)
+  M48 Dashboard + Collection Browser → M49 Agent Console + Gallery + AI Chat
+  M50 Audit/Backup/Update/Settings Restyle
+                    ↓
+LAYER 8 — ARCADE POLISH (Phase 11, needs M48-M50)
+  M51 Gamepad + Transitions → M52 E2E Testing & Performance
+                    ↓
+LAYER 9 — AUTOMATION & OPS (Phase 14, capstone — needs everything above)
+  M61 Scheduler & Notifications → M62 Agent Memory & Learning → M63 Self-Healing
+```
+
+### What's Needed to Install/Download
+
+| Dependency                   | Purpose                           | Phase | Status           |
+| ---------------------------- | --------------------------------- | ----- | ---------------- |
+| LibVLCSharp.WPF (NuGet)      | Video backgrounds                 | 9     | ❌ Not installed  |
+| LottieSharp (NuGet)          | SWF→Lottie animation              | 8     | ❌ Not installed  |
+| CefSharp.Wpf (NuGet)         | Fallback SWF rendering            | 8     | ❌ Not installed  |
+| XInputDotNet (NuGet)         | Gamepad/joystick support          | 11    | ❌ Not installed  |
+| SharpDX (NuGet)              | HLSL shader compilation           | 9     | ❌ Not installed  |
+| Press Start 2P font (.ttf)   | Arcade pixel font                 | 9     | ❌ Not downloaded |
+| Orbitron font (.ttf)         | Futuristic UI font                | 9     | ❌ Not downloaded |
+| JetBrains Mono font (.ttf)   | Console/code font                 | 9     | ❌ Not downloaded |
+| JPEXS Free Flash Decompiler  | SWF→Lottie conversion             | 8     | ❌ Not installed  |
+| FFmpeg                       | SWF→MP4 batch conversion          | 8     | ❌ Not installed  |
+| Goose v1.27.2+               | AI orchestrator                   | 7     | ❌ Not installed  |
+| OpenHands Docker image       | Coding agent                      | 7     | ❌ Not pulled     |
+| NemoClaw                     | Agent sandbox                     | 7     | ❌ Not cloned     |
+| ScreenScraper API key        | Metadata scraping (free tier)     | 12    | ❌ Not registered |
+| IGDB API credentials         | Game metadata (Twitch OAuth)      | 12    | ❌ Not registered |
+| Skyscraper CLI               | Batch metadata scraping           | 12    | ❌ Not installed  |
+| No-Intro DAT files           | ROM set verification (cartridge)  | 12    | ❌ Not downloaded |
+| Redump DAT files             | ROM set verification (disc-based) | 12    | ❌ Not downloaded |
+| libretro System.dat          | BIOS checksum verification        | 12    | ❌ Not downloaded |
+| Windows Task Scheduler hooks | Scheduled automation              | 14    | ❌ Not configured |
+
+### Asset Inventory (Available on HDDs, Not Yet Indexed)
+
+| Asset Source                       | Assets      | Status                |
+| ---------------------------------- | ----------- | --------------------- |
+| D:\Arcade\Media (HyperSpin)        | ~376K files | ❌ Not indexed for GUI |
+| K:\Arcade\menu-art (AttractMode)   | Thousands   | ❌ Not indexed         |
+| L:\CORE - TYPE R (LaunchBox)       | Thousands   | ❌ Not indexed         |
+| N:\themes + decorations (Batocera) | Thousands   | ❌ Not indexed         |
+
+### New Engines Required (Phases 12–14)
+
+| Engine File                     | Milestone | Purpose                                           |
+| ------------------------------- | --------- | ------------------------------------------------- |
+| `engines/metadata_scraper.py`   | M54       | ScreenScraper, IGDB, TheGamesDB, ArcadeDB clients |
+| `engines/bios_manager.py`       | M55       | BIOS scanning, checksum verification, health      |
+| `engines/dat_verifier.py`       | M56       | No-Intro/Redump/TOSEC DAT parser + ROM matching   |
+| `engines/hyperspin_settings.py` | M57       | HyperSpin INI read/write/validate                 |
+| `engines/frontend_converter.py` | M58       | Cross-frontend database import/export             |
+| `engines/rl_media_manager.py`   | M59       | Fade screens, bezels, pause overlays              |
+| `engines/rl_keymapper.py`       | M60       | Keymapper profiles, statistics, MultiGame         |
+| `engines/scheduler.py`          | M61       | Task scheduling, maintenance cycles               |
+| `engines/notifier.py`           | M61       | Windows toast, in-app alerts                      |
+| `engines/agent_memory.py`       | M62       | Persistent memory, knowledge base, learning       |
+| `engines/self_healer.py`        | M63       | Issue detection, auto-repair, self-healing hooks  |
+| `scripts/repair_runner.ps1`     | M63       | PowerShell automated repair script                |
+
+---
+
+### Research Gap Analysis (What Was Missing Before This Audit)
+
+The following 9 major gaps were identified by auditing the M1-M52 roadmap against:
+- **HyperSpin/RocketLauncher ecosystem** (wiki, forums, media structure)
+- **Modern arcade frontends** (LaunchBox, Pegasus, AttractMode, Batocera)
+- **Agentic AI frameworks** (Goose, OpenHands, NemoClaw, CLI-Anything)
+- **Metadata scraping tools** (ScreenScraper, Skyscraper, IGDB, ArcadeDB)
+- **ROM management standards** (No-Intro, Redump, TOSEC, 1G1R)
+- **BIOS verification databases** (libretro System.dat, Batocera es_bios.xml)
+
+| Gap # | Category                    | What Was Missing                                                      | Now Covered By |
+| ----- | --------------------------- | --------------------------------------------------------------------- | -------------- |
+| 1     | Metadata Scraping           | No integration with game databases (ScreenScraper, IGDB, etc.)        | **M54**        |
+| 2     | BIOS Management             | No BIOS scanning, verification, or missing-BIOS detection             | **M55**        |
+| 3     | DAT File Verification       | No No-Intro/Redump/TOSEC DAT parsing or 1G1R set curation             | **M56**        |
+| 4     | HyperSpin Settings          | No engine to read/write HyperSpin.ini or per-system settings          | **M57**        |
+| 5     | Cross-Frontend Support      | No import/export between frontend database formats                    | **M58**        |
+| 6     | RL Fade/Bezel/Pause         | M9 only validates config; RL's fade layers, bezels, pause not managed | **M59**        |
+| 7     | RL Keymapper/Statistics     | No keymapper profile management or play statistics tracking           | **M60**        |
+| 8     | Scheduling & Notifications  | No automated task scheduling or alert system                          | **M61**        |
+| 9     | Agent Memory & Self-Healing | No persistent memory, learning, or automated repair framework         | **M62, M63**   |
+
+**Additionally**, M53 (Drive Indexer) was already partially built (`engines/drive_indexer.py`) but not tracked as a milestone — now formalized.
