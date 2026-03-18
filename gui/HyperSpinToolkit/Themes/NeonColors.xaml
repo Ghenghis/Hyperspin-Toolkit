@@ -1,0 +1,97 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         M44 — Neon Color Palette
+         Arcade-inspired neon colors for the HyperSpin Extreme Toolkit GUI
+         ══════════════════════════════════════════════════════════════ -->
+
+    <!-- Primary Neon Colors -->
+    <Color x:Key="NeonBlueColor">#00D4FF</Color>
+    <Color x:Key="NeonPinkColor">#FF0088</Color>
+    <Color x:Key="NeonGreenColor">#39FF14</Color>
+    <Color x:Key="NeonYellowColor">#FFF000</Color>
+    <Color x:Key="NeonOrangeColor">#FF6E00</Color>
+    <Color x:Key="NeonPurpleColor">#BF00FF</Color>
+
+    <!-- Secondary / Muted Neons -->
+    <Color x:Key="NeonCyanColor">#00FFCC</Color>
+    <Color x:Key="NeonRedColor">#FF1744</Color>
+    <Color x:Key="NeonWhiteColor">#E0E0FF</Color>
+
+    <!-- Dark Cabinet Backgrounds -->
+    <Color x:Key="CabinetDarkColor">#0A0A14</Color>
+    <Color x:Key="CabinetMidColor">#12121E</Color>
+    <Color x:Key="CabinetLightColor">#1A1A2E</Color>
+    <Color x:Key="CabinetSurfaceColor">#222240</Color>
+
+    <!-- Overlay / Glass -->
+    <Color x:Key="GlassOverlayColor">#2000D4FF</Color>
+    <Color x:Key="DimOverlayColor">#80000000</Color>
+
+    <!-- ── Solid Brushes ── -->
+    <SolidColorBrush x:Key="NeonBlueBrush" Color="{StaticResource NeonBlueColor}" />
+    <SolidColorBrush x:Key="NeonPinkBrush" Color="{StaticResource NeonPinkColor}" />
+    <SolidColorBrush x:Key="NeonGreenBrush" Color="{StaticResource NeonGreenColor}" />
+    <SolidColorBrush x:Key="NeonYellowBrush" Color="{StaticResource NeonYellowColor}" />
+    <SolidColorBrush x:Key="NeonOrangeBrush" Color="{StaticResource NeonOrangeColor}" />
+    <SolidColorBrush x:Key="NeonPurpleBrush" Color="{StaticResource NeonPurpleColor}" />
+    <SolidColorBrush x:Key="NeonCyanBrush" Color="{StaticResource NeonCyanColor}" />
+    <SolidColorBrush x:Key="NeonRedBrush" Color="{StaticResource NeonRedColor}" />
+    <SolidColorBrush x:Key="NeonWhiteBrush" Color="{StaticResource NeonWhiteColor}" />
+
+    <SolidColorBrush x:Key="CabinetDarkBrush" Color="{StaticResource CabinetDarkColor}" />
+    <SolidColorBrush x:Key="CabinetMidBrush" Color="{StaticResource CabinetMidColor}" />
+    <SolidColorBrush x:Key="CabinetLightBrush" Color="{StaticResource CabinetLightColor}" />
+    <SolidColorBrush x:Key="CabinetSurfaceBrush" Color="{StaticResource CabinetSurfaceColor}" />
+
+    <SolidColorBrush x:Key="GlassOverlayBrush" Color="{StaticResource GlassOverlayColor}" />
+    <SolidColorBrush x:Key="DimOverlayBrush" Color="{StaticResource DimOverlayColor}" />
+
+    <!-- ── Gradient Brushes ── -->
+    <LinearGradientBrush x:Key="NeonBlueGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#00D4FF" Offset="0" />
+        <GradientStop Color="#0088FF" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="NeonPinkGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FF0088" Offset="0" />
+        <GradientStop Color="#BF00FF" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="NeonGreenGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#39FF14" Offset="0" />
+        <GradientStop Color="#00FFCC" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CabinetGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#12121E" Offset="0" />
+        <GradientStop Color="#0A0A14" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="NeonRainbowGradient" StartPoint="0,0.5" EndPoint="1,0.5">
+        <GradientStop Color="#FF0088" Offset="0.0" />
+        <GradientStop Color="#BF00FF" Offset="0.2" />
+        <GradientStop Color="#00D4FF" Offset="0.4" />
+        <GradientStop Color="#39FF14" Offset="0.6" />
+        <GradientStop Color="#FFF000" Offset="0.8" />
+        <GradientStop Color="#FF6E00" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- ── Radial Glow Brushes ── -->
+    <RadialGradientBrush x:Key="NeonBlueGlow" GradientOrigin="0.5,0.5" Center="0.5,0.5">
+        <GradientStop Color="#4000D4FF" Offset="0" />
+        <GradientStop Color="#0000D4FF" Offset="1" />
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="NeonPinkGlow" GradientOrigin="0.5,0.5" Center="0.5,0.5">
+        <GradientStop Color="#40FF0088" Offset="0" />
+        <GradientStop Color="#00FF0088" Offset="1" />
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="NeonGreenGlow" GradientOrigin="0.5,0.5" Center="0.5,0.5">
+        <GradientStop Color="#4039FF14" Offset="0" />
+        <GradientStop Color="#0039FF14" Offset="1" />
+    </RadialGradientBrush>
+
+</ResourceDictionary>

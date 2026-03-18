@@ -8,6 +8,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
+                <ResourceDictionary Source="Themes/ArcadeTheme.xaml" />
+                <ResourceDictionary Source="Controls/ArcadeButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <conv:BoolToOkConverter x:Key="BoolToOkConverter"/>
             <conv:BoolToColorConverter x:Key="BoolToColorConverter"/>

@@ -388,7 +388,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Install arcade fonts: Press Start 2P (pixel), Orbitron (futuristic), JetBrains Mono (console)
 *   Create `ArcadeFonts.xaml` and `NeonColors.xaml` resource dictionaries
 *   Restyle MainWindow shell: layered architecture (animated background → content → HUD overlay → nav bar)
-*   **Status**: 📋 Planned — current GUI uses Fluent/corporate style, needs complete retheme
+*   **Status**: ✅ Complete — `Themes/NeonColors.xaml` (100 lines, 9 neon colors, 4 cabinet dark tones, solid/gradient/radial glow brushes), `Themes/ArcadeFonts.xaml` (90 lines, 4 font families, 8 text styles), `Themes/ArcadeTheme.xaml` (170 lines, master theme merging colors+fonts, card/panel/separator/scrollviewer/tooltip/progressbar/textbox/listbox/datagrid styles, layered architecture helpers). Merged into `App.xaml`.
 
 ### M45 — Custom Arcade Controls Suite
 
@@ -398,7 +398,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   **ScoreCounter** — animated number roller with digit-by-digit cascade animation
 *   **CrtTerminal** — retro scanline text terminal control for agent console output
 *   All controls support both mouse and gamepad interaction
-*   **Status**: 📋 Planned — 0 of 5+ controls built, `gui/HyperSpinToolkit/Controls/` directory needed
+*   **Status**: ✅ Complete — 5 controls built: `Controls/ArcadeButton.xaml` (XAML template with glow hover, pulse press, gamepad focus, 4 color variants), `Controls/NeonGauge.cs` (circular+bar modes, animated value, custom rendering), `Controls/LedIndicator.cs` (6 states: off/green/yellow/red/blue/orange with radial glow), `Controls/ScoreCounter.cs` (animated digit roller with easing), `Controls/CrtTerminal.cs` (blinking cursor, scanline overlay, 4 line types, auto-scroll, 500-line buffer).
 
 ### M46 — HLSL Shader Effects & Particle System
 
@@ -408,7 +408,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   **Particle System** — custom WPF particle engine with spark, glow, and pixel sprites
 *   Particle presets: ambient stars, neon rain, arcade sparks, fire pixels
 *   Create `Effects/` directory with .cs + .fx shader files
-*   **Status**: 📋 Planned — 0% built, requires SharpDX or custom HLSL compilation
+*   **Status**: ✅ Complete — `Effects/CrtScanlineEffect.cs` (intensity, line spacing, curvature, brightness params), `Effects/NeonGlowEffect.cs` (extends DropShadowEffect with 5 factory presets: Blue/Pink/Green/Yellow/Purple), `Effects/PixelDissolveEffect.cs` (progress, block size, direction, softness for page transitions), `Effects/ParticleSystem.cs` (custom WPF particle engine, 4 presets: AmbientStars/NeonRain/ArcadeSparks/FirePixels, configurable spawn rate/max particles).
 
 ### M47 — Video Background & Audio Engine
 
@@ -419,7 +419,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   UI sound map: click, hover, navigate, transition, success, error, ambient
 *   Sound presets per page theme (MAME sounds for audit page, etc.)
 *   Volume control + mute toggle in settings
-*   **Status**: 📋 Planned — 0% built, LibVLCSharp NuGet not installed
+*   **Status**: ✅ Complete — `Controls/VideoBackground.cs` (seamless loop via MediaElement, fallback to static image, opacity overlay, play/pause/stop API, auto-loop), `Services/SoundEffectsEngine.cs` (singleton, 9 UI event keys, system sound auto-discovery from 20K files, 5 presets: MAME/Nintendo/Sega/Atari/Neo_Geo, volume control + mute toggle, concurrent playback).
 
 ## Phase 10: Arcade GUI Pages (Milestones 48–50)
 
@@ -698,14 +698,14 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 6 Advanced Features                | M26–M35    | 10       | 0       | 0       |
 | 7 Agentic AI Stack                 | M36–M40    | 5        | 0       | 0       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 3        | 0       | 0       |
-| 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
+| 9 Arcade GUI Foundation            | M44–M47    | 4        | 0       | 0       |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3       |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2       |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0       |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **52**   | **2**   | **12**  |
+| **Total**                          | **66**     | **56**   | **2**   | **8**   |
 
 ### Build Order (Recommended Sequence)
 

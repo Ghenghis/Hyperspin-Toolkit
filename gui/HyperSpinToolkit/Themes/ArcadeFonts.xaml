@@ -1,0 +1,82 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         M44 — Arcade Font Definitions
+         Press Start 2P (pixel), Orbitron (futuristic), JetBrains Mono (console)
+         Fonts loaded from system or bundled in Assets/Fonts/
+         ══════════════════════════════════════════════════════════════ -->
+
+    <!-- Font Family Definitions -->
+    <FontFamily x:Key="PixelFont">Press Start 2P, Consolas</FontFamily>
+    <FontFamily x:Key="FuturisticFont">Orbitron, Segoe UI</FontFamily>
+    <FontFamily x:Key="ConsoleFont">JetBrains Mono, Cascadia Code, Consolas</FontFamily>
+    <FontFamily x:Key="DefaultArcadeFont">Segoe UI, Arial</FontFamily>
+
+    <!-- ── Title Styles ── -->
+    <Style x:Key="ArcadeTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FuturisticFont}" />
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonBlueBrush}" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="ArcadeSubtitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FuturisticFont}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonWhiteBrush}" />
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+
+    <!-- ── Pixel Text (retro/score) ── -->
+    <Style x:Key="PixelTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PixelFont}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonGreenBrush}" />
+    </Style>
+
+    <Style x:Key="PixelScoreStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PixelFont}" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonYellowBrush}" />
+    </Style>
+
+    <!-- ── Console / Terminal Text ── -->
+    <Style x:Key="ConsoleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonGreenBrush}" />
+        <Setter Property="Opacity" Value="0.9" />
+        <Setter Property="LineHeight" Value="20" />
+    </Style>
+
+    <!-- ── Body / Label Text ── -->
+    <Style x:Key="ArcadeBodyStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultArcadeFont}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonWhiteBrush}" />
+        <Setter Property="Opacity" Value="0.8" />
+    </Style>
+
+    <Style x:Key="ArcadeLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FuturisticFont}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource NeonBlueBrush}" />
+        <Setter Property="Opacity" Value="0.7" />
+        <Setter Property="CharacterSpacing" Value="100" />
+    </Style>
+
+    <!-- ── Neon Badge / Tag ── -->
+    <Style x:Key="NeonBadgeStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PixelFont}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{DynamicResource CabinetDarkBrush}" />
+        <Setter Property="Padding" Value="6,2" />
+    </Style>
+
+</ResourceDictionary>

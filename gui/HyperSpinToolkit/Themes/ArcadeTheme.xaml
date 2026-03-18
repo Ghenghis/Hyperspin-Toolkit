@@ -1,0 +1,171 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         M44 — Master Arcade Theme
+         Merges NeonColors + ArcadeFonts and adds global control styles
+         Layered architecture: animated background → content → HUD → nav bar
+         ══════════════════════════════════════════════════════════════ -->
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="NeonColors.xaml" />
+        <ResourceDictionary Source="ArcadeFonts.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- ── Global Window / Panel Styles ── -->
+
+    <Style x:Key="ArcadeWindowStyle" TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource CabinetDarkBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonWhiteBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource DefaultArcadeFont}" />
+    </Style>
+
+    <Style x:Key="ArcadePageStyle" TargetType="Page">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource NeonWhiteBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource DefaultArcadeFont}" />
+    </Style>
+
+    <!-- ── Card / Panel ── -->
+
+    <Style x:Key="ArcadeCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CabinetLightBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource NeonBlueBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="6" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="{StaticResource NeonBlueColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ArcadeCardPinkStyle" TargetType="Border" BasedOn="{StaticResource ArcadeCardStyle}">
+        <Setter Property="BorderBrush" Value="{StaticResource NeonPinkBrush}" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="{StaticResource NeonPinkColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ArcadeCardGreenStyle" TargetType="Border" BasedOn="{StaticResource ArcadeCardStyle}">
+        <Setter Property="BorderBrush" Value="{StaticResource NeonGreenBrush}" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="{StaticResource NeonGreenColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Separator ── -->
+
+    <Style x:Key="NeonSeparatorStyle" TargetType="Separator">
+        <Setter Property="Background" Value="{StaticResource NeonBlueBrush}" />
+        <Setter Property="Opacity" Value="0.3" />
+        <Setter Property="Margin" Value="0,8" />
+        <Setter Property="Height" Value="1" />
+    </Style>
+
+    <!-- ── ScrollViewer ── -->
+
+    <Style x:Key="ArcadeScrollViewerStyle" TargetType="ScrollViewer">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+    <!-- ── ToolTip ── -->
+
+    <Style x:Key="NeonToolTipStyle" TargetType="ToolTip">
+        <Setter Property="Background" Value="{StaticResource CabinetMidBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonWhiteBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource NeonBlueBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleFont}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- ── ProgressBar ── -->
+
+    <Style x:Key="NeonProgressBarStyle" TargetType="ProgressBar">
+        <Setter Property="Background" Value="{StaticResource CabinetSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonBlueBrush}" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="Minimum" Value="0" />
+        <Setter Property="Maximum" Value="100" />
+    </Style>
+
+    <Style x:Key="NeonProgressBarGreenStyle" TargetType="ProgressBar" BasedOn="{StaticResource NeonProgressBarStyle}">
+        <Setter Property="Foreground" Value="{StaticResource NeonGreenBrush}" />
+    </Style>
+
+    <Style x:Key="NeonProgressBarPinkStyle" TargetType="ProgressBar" BasedOn="{StaticResource NeonProgressBarStyle}">
+        <Setter Property="Foreground" Value="{StaticResource NeonPinkBrush}" />
+    </Style>
+
+    <!-- ── TextBox ── -->
+
+    <Style x:Key="ArcadeTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource CabinetDarkBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonGreenBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource NeonBlueBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="CaretBrush" Value="{StaticResource NeonGreenBrush}" />
+    </Style>
+
+    <!-- ── ListBox ── -->
+
+    <Style x:Key="ArcadeListBoxStyle" TargetType="ListBox">
+        <Setter Property="Background" Value="{StaticResource CabinetDarkBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonWhiteBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CabinetSurfaceBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontFamily" Value="{StaticResource DefaultArcadeFont}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- ── DataGrid ── -->
+
+    <Style x:Key="ArcadeDataGridStyle" TargetType="DataGrid">
+        <Setter Property="Background" Value="{StaticResource CabinetDarkBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource NeonWhiteBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CabinetSurfaceBrush}" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource CabinetSurfaceBrush}" />
+        <Setter Property="RowBackground" Value="Transparent" />
+        <Setter Property="AlternatingRowBackground" Value="{StaticResource CabinetLightBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleFont}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- ── Layered Architecture Helpers ── -->
+
+    <!-- Background layer (z=0): video or animated gradient behind all content -->
+    <Style x:Key="BackgroundLayerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CabinetGradient}" />
+        <Setter Property="Panel.ZIndex" Value="0" />
+    </Style>
+
+    <!-- Content layer (z=1): main scrollable page content -->
+    <Style x:Key="ContentLayerStyle" TargetType="Grid">
+        <Setter Property="Panel.ZIndex" Value="1" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- HUD overlay layer (z=2): always-visible status indicators -->
+    <Style x:Key="HudLayerStyle" TargetType="StackPanel">
+        <Setter Property="Panel.ZIndex" Value="2" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Margin" Value="0,8,16,0" />
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+
+</ResourceDictionary>
