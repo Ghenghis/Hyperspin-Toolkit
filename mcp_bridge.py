@@ -1041,6 +1041,130 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M31 — Multi-Drive Collection Sync Handlers ──────────────────────
+
+def tool_create_sync_pair(name: str, source_dir: str, dest_dir: str,
+                           pattern: str = "*", recursive: bool = True,
+                           conflict_strategy: str = "newer",
+                           delete_orphans: bool = False, **kwargs) -> dict:
+    """M31 — Create a sync pair configuration."""
+    from engines.drive_sync import create_sync_pair
+    pair = create_sync_pair(name, source_dir, dest_dir, pattern, recursive,
+                            conflict_strategy, delete_orphans)
+    return pair.to_dict()
+
+
+def tool_list_sync_pairs(enabled_only: bool = False, **kwargs) -> dict:
+    """M31 — List all configured sync pairs."""
+    from engines.drive_sync import list_sync_pairs
+    pairs = list_sync_pairs(enabled_only)
+    return {"pairs": [p.to_dict() for p in pairs], "count": len(pairs)}
+
+
+def tool_analyze_sync_diff(source_dir: str, dest_dir: str,
+                            pattern: str = "*", **kwargs) -> dict:
+    """M31 — Analyze differences between source and destination."""
+    from engines.drive_sync import analyze_diff
+    return analyze_diff(source_dir, dest_dir, pattern)
+
+
+def tool_execute_sync(source_dir: str = "", dest_dir: str = "",
+                       pair_name: str = "", dry_run: bool = False,
+                       **kwargs) -> dict:
+    """M31 — Execute a sync operation."""
+    from engines.drive_sync import execute_sync, sync_pair_by_name
+    if pair_name:
+        return sync_pair_by_name(pair_name, dry_run)
+    return execute_sync(source_dir, dest_dir, dry_run=dry_run, pair_name="manual")
+
+
+def tool_sync_status(**kwargs) -> dict:
+    """M31 — Get overall sync status and history."""
+    from engines.drive_sync import sync_status
+    return sync_status()
+
+
+# ── M32 — Performance Benchmarking Handlers ─────────────────────────
+
+def tool_record_benchmark(emulator: str, system: str = "", game: str = "",
+                           launch_time_ms: float = 0, cpu_usage_pct: float = 0,
+                           memory_mb: float = 0, fps_avg: float = 0,
+                           notes: str = "", **kwargs) -> dict:
+    """M32 — Record an emulator benchmark result."""
+    from engines.perf_benchmark import record_benchmark
+    return record_benchmark(emulator, system, game, launch_time_ms,
+                            cpu_usage_pct, memory_mb, fps_avg, notes)
+
+
+def tool_rank_emulators(system: str, **kwargs) -> dict:
+    """M32 — Rank emulators for a system by performance."""
+    from engines.perf_benchmark import rank_emulators
+    return rank_emulators(system)
+
+
+def tool_benchmark_summary(**kwargs) -> dict:
+    """M32 — Get overall benchmark summary."""
+    from engines.perf_benchmark import benchmark_summary
+    return benchmark_summary()
+
+
+def tool_performance_history(emulator: str, system: str = "",
+                              limit: int = 30, **kwargs) -> dict:
+    """M32 — Get performance history for an emulator."""
+    from engines.perf_benchmark import performance_history
+    return performance_history(emulator, system, limit)
+
+
+# ── M33 — Theme/Media Downloader Handlers ───────────────────────────
+
+def tool_scan_missing_media(system: str, hyperspin_root: str,
+                             media_types: list = None, **kwargs) -> dict:
+    """M33 — Scan for missing theme/media files."""
+    from engines.theme_downloader import scan_missing_media
+    return scan_missing_media(system, hyperspin_root, media_types)
+
+
+def tool_queue_media_downloads(system: str, media_type: str,
+                                games: list = None,
+                                source_url_template: str = "",
+                                **kwargs) -> dict:
+    """M33 — Queue media downloads for missing items."""
+    from engines.theme_downloader import queue_downloads
+    return queue_downloads(system, media_type, games, source_url_template)
+
+
+def tool_download_stats(**kwargs) -> dict:
+    """M33 — Get download statistics."""
+    from engines.theme_downloader import download_stats
+    return download_stats()
+
+
+def tool_list_media_sources(**kwargs) -> dict:
+    """M33 — List known media download sources and types."""
+    from engines.theme_downloader import list_sources
+    return list_sources()
+
+
+# ── M34 — Full Ecosystem Health Score Handlers ──────────────────────
+
+def tool_calculate_health_score(**kwargs) -> dict:
+    """M34 — Calculate the full ecosystem health score (0-100)."""
+    from engines.health_score import calculate_health_score
+    return calculate_health_score()
+
+
+def tool_health_history(limit: int = 20, **kwargs) -> dict:
+    """M34 — Get health score history over time."""
+    from engines.health_score import get_health_history
+    return get_health_history(limit)
+
+
+def tool_health_breakdown(**kwargs) -> dict:
+    """M34 — Get latest subsystem score breakdown."""
+    from engines.health_score import get_subsystem_breakdown
+    return get_subsystem_breakdown()
+
+
 # ── M26 — Duplicate ROM Detection & Cleanup Handlers ────────────────
 
 def tool_detect_duplicates(rom_dirs: list, systems: list = None,
@@ -2688,6 +2812,188 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M31 — Multi-Drive Collection Sync ──
+    {
+        "name": "create_sync_pair",
+        "description": "M31 — Create a named sync pair (source → dest) with conflict strategy.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["name", "source_dir", "dest_dir"],
+            "properties": {
+                "name": {"type": "string", "description": "Unique name for the sync pair"},
+                "source_dir": {"type": "string"},
+                "dest_dir": {"type": "string"},
+                "pattern": {"type": "string", "default": "*"},
+                "recursive": {"type": "boolean", "default": True},
+                "conflict_strategy": {"type": "string", "enum": ["newer", "larger", "source", "dest", "skip"], "default": "newer"},
+                "delete_orphans": {"type": "boolean", "default": False},
+            },
+        },
+        "handler": tool_create_sync_pair,
+    },
+    {
+        "name": "list_sync_pairs",
+        "description": "M31 — List all configured sync pairs.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "enabled_only": {"type": "boolean", "default": False},
+            },
+        },
+        "handler": tool_list_sync_pairs,
+    },
+    {
+        "name": "analyze_sync_diff",
+        "description": "M31 — Analyze differences between source and destination directories.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["source_dir", "dest_dir"],
+            "properties": {
+                "source_dir": {"type": "string"},
+                "dest_dir": {"type": "string"},
+                "pattern": {"type": "string", "default": "*"},
+            },
+        },
+        "handler": tool_analyze_sync_diff,
+    },
+    {
+        "name": "execute_sync",
+        "description": "M31 — Execute a sync operation (by pair name or source/dest).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "pair_name": {"type": "string", "description": "Named sync pair to run"},
+                "source_dir": {"type": "string"},
+                "dest_dir": {"type": "string"},
+                "dry_run": {"type": "boolean", "default": False, "description": "Preview only"},
+            },
+        },
+        "handler": tool_execute_sync,
+    },
+    {
+        "name": "sync_status",
+        "description": "M31 — Get overall sync status, pairs, and history.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_sync_status,
+    },
+    # ── M32 — Performance Benchmarking ──
+    {
+        "name": "record_benchmark",
+        "description": "M32 — Record an emulator benchmark result (launch time, FPS, CPU, memory).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["emulator"],
+            "properties": {
+                "emulator": {"type": "string"},
+                "system": {"type": "string"},
+                "game": {"type": "string"},
+                "launch_time_ms": {"type": "number"},
+                "cpu_usage_pct": {"type": "number"},
+                "memory_mb": {"type": "number"},
+                "fps_avg": {"type": "number"},
+                "notes": {"type": "string"},
+            },
+        },
+        "handler": tool_record_benchmark,
+    },
+    {
+        "name": "rank_emulators",
+        "description": "M32 — Rank emulators for a system by average benchmark score.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_rank_emulators,
+    },
+    {
+        "name": "benchmark_summary",
+        "description": "M32 — Get overall benchmark summary across all systems and emulators.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_benchmark_summary,
+    },
+    {
+        "name": "performance_history",
+        "description": "M32 — Get performance history for an emulator over time.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["emulator"],
+            "properties": {
+                "emulator": {"type": "string"},
+                "system": {"type": "string"},
+                "limit": {"type": "integer", "default": 30},
+            },
+        },
+        "handler": tool_performance_history,
+    },
+    # ── M33 — Theme/Media Downloader ──
+    {
+        "name": "scan_missing_media",
+        "description": "M33 — Scan for missing themes, wheels, videos, and artwork for a system.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "hyperspin_root"],
+            "properties": {
+                "system": {"type": "string"},
+                "hyperspin_root": {"type": "string", "description": "Root HyperSpin directory"},
+                "media_types": {"type": "array", "items": {"type": "string"}, "description": "Filter to specific types (themes, wheels, videos, artwork1-4, etc.)"},
+            },
+        },
+        "handler": tool_scan_missing_media,
+    },
+    {
+        "name": "queue_media_downloads",
+        "description": "M33 — Queue media downloads for missing items.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "media_type"],
+            "properties": {
+                "system": {"type": "string"},
+                "media_type": {"type": "string", "enum": ["themes", "wheels", "artwork1", "artwork2", "artwork3", "artwork4", "videos", "backgrounds", "pointers", "sounds"]},
+                "games": {"type": "array", "items": {"type": "string"}},
+                "source_url_template": {"type": "string", "description": "URL template with {game} placeholder"},
+            },
+        },
+        "handler": tool_queue_media_downloads,
+    },
+    {
+        "name": "download_stats",
+        "description": "M33 — Get download statistics (queued, completed, failed).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_download_stats,
+    },
+    {
+        "name": "list_media_sources",
+        "description": "M33 — List known media download sources and supported media types.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_list_media_sources,
+    },
+    # ── M34 — Full Ecosystem Health Score ──
+    {
+        "name": "calculate_health_score",
+        "description": "M34 — Calculate the full ecosystem health score (0-100, A+ to F grade) across all subsystems.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_calculate_health_score,
+    },
+    {
+        "name": "health_score_history",
+        "description": "M34 — Get health score history over time with trend analysis.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "default": 20},
+            },
+        },
+        "handler": tool_health_history,
+    },
+    {
+        "name": "health_score_breakdown",
+        "description": "M34 — Get latest subsystem score breakdown (BIOS, ROMs, media, emulators, config, integrity, completion, scheduler).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_health_breakdown,
     },
     # ── M26 — Duplicate ROM Detection & Cleanup ──
     {

@@ -270,7 +270,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Conflict resolution for diverged copies
 *   Bandwidth-efficient delta sync
 *   Sync scheduling and monitoring
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/drive_sync.py` (480 lines). SQLite pair storage, delta diff analysis, conflict strategies (newer/larger/source/dest/skip), orphan cleanup, dry-run mode, sync history tracking. MCP tools: `create_sync_pair`, `list_sync_pairs`, `analyze_sync_diff`, `execute_sync`, `sync_status`
 
 ### M32 — Performance Benchmarking for Emulators
 
@@ -278,7 +278,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Track performance per game/emulator combo
 *   Recommend optimal emulator per system
 *   Performance history over time
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/perf_benchmark.py` (460 lines). Launch time measurement, composite scoring (launch+FPS+CPU+memory), emulator rankings per system, performance history, SQLite persistent storage. MCP tools: `record_benchmark`, `rank_emulators`, `benchmark_summary`, `performance_history`
 
 ### M33 — Automated HyperSpin Theme/Media Downloader
 
@@ -286,7 +286,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Source from HyperSpin community repositories
 *   Batch download with progress tracking
 *   Quality verification after download
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/theme_downloader.py` (480 lines). 10 media types (themes/wheels/artwork1-4/videos/backgrounds/pointers/sounds), 6 known sources, download queue with SQLite, quality verification (size/format), gap analysis from game DB XML. MCP tools: `scan_missing_media`, `queue_media_downloads`, `download_stats`, `list_media_sources`
 
 ### M34 — Full Ecosystem Health Score
 
@@ -295,7 +295,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Trend tracking over time
 *   Actionable improvement suggestions
 *   AI-generated health report narrative
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/health_score.py` (500 lines). 8 weighted subsystems (BIOS 15%, ROMs 20%, media 15%, emulators 15%, config 10%, integrity 10%, completion 10%, scheduler 5%), A+ to F grading, trend analysis, AI narrative generation, actionable suggestions. MCP tools: `calculate_health_score`, `health_score_history`, `health_score_breakdown`
 
 ### M35 — Agentic Workflow Orchestrator
 
@@ -695,7 +695,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 3 Safe Update                      | M11–M15    | 5        | 0       | 0       |
 | 4 AI Integration                   | M16–M20    | 5        | 0       | 0       |
 | 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
-| 6 Advanced Features                | M26–M35    | 6        | 0       | 4       |
+| 6 Advanced Features                | M26–M35    | 10       | 0       | 0       |
 | 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3       |
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
@@ -705,7 +705,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **40**   | **2**   | **24**  |
+| **Total**                          | **66**     | **44**   | **2**   | **20**  |
 
 ### Build Order (Recommended Sequence)
 
