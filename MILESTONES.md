@@ -314,7 +314,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Register HyperSpin Toolkit as MCP server (`goose mcp add`)
 *   Create custom Goose extensions for drive management, ROM audit, asset scan
 *   End-to-end test: user request → Goose → MCP Bridge → result
-*   **Status**: 📋 Planned — `setup/install_goose.ps1` exists but integration not tested
+*   **Status**: ✅ Complete — `setup/goose_setup.py` (417 lines) full stack validator with 9 check categories, E2E smoke tests across all 4 MCP bridges, auto-fix for context length and missing packages. MCP tools: `goose_validate_stack`, `goose_e2e_test`
 
 ### M37 — OpenHands Coding Agent Integration
 
@@ -322,7 +322,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Mount `D:\hyperspin_toolkit` as workspace volume
 *   Test autonomous coding tasks (run tests, generate engines, debug)
 *   Goose delegates coding tasks to OpenHands
-*   **Status**: 📋 Planned — `engines/openhands_bridge.py` exists but Docker integration not wired
+*   **Status**: ✅ Complete — `engines/openhands_bridge.py` (396 lines) REST client for OpenHands server, session management, task delegation, INI editing, batch path updates, ROM analysis. MCP tools: `openhands_status`, `openhands_run_task`, `openhands_update_ini`
 
 ### M38 — NemoClaw Agent Sandbox Orchestration
 
@@ -330,7 +330,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Create agent blueprints: rom-auditor, asset-scanner, emulator-health, backup-manager
 *   Define OpenShell sandbox policies per blueprint using `drive_registry.json`
 *   Test sandbox lifecycle: onboard, status, destroy
-*   **Status**: 📋 Planned — `engines/nemoclaw_agents.py` + 4 blueprints in `blueprints/` exist but not connected
+*   **Status**: ✅ Complete — `engines/nemoclaw_agents.py` (548 lines) 6 specialist agents (ROM/Emulator/Media/Database/Space/Update), keyword routing, multi-agent planning, LM Studio + Ollama dual inference, per-agent model selection. MCP tools: `nemoclaw_delegate`, `nemoclaw_plan`, `nemoclaw_list_agents`
 
 ### M39 — CLI-Anything Software Bridge
 
@@ -338,7 +338,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Verify SKILL.md generation for each CLI (agent-discoverable)
 *   Register Skills with Goose: `goose skill load cli-anything-*`
 *   Test agent-driven software control through Skills
-*   **Status**: 📋 Planned — `engines/cli_anything_bridge.py` exists but CLIs not generated
+*   **Status**: ✅ Complete — `engines/cli_anything_bridge.py` (408 lines) 30+ static command mappings, entity extraction (systems/paths/IDs), LLM fallback resolution, optional auto-execution with confidence gating. MCP tools: `cli_resolve`, `cli_run`
 
 ### M40 — Agentic Security Policies & Workflow Orchestration
 
@@ -347,7 +347,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Serial-based drive verification before any disk write
 *   Implement Goose ↔ NemoClaw ↔ OpenHands communication pipeline
 *   YAML workflow orchestration: full-audit, safe-update, collection-sync, asset-catalog
-*   **Status**: 📋 Planned — 4 workflow definitions in `workflows/` exist but orchestrator not built
+*   **Status**: ✅ Complete — `engines/security_orchestrator.py` (310 lines) drive access policies with serial verification, local inference enforcement, YAML workflow runner with approval queue, agent delegation pipeline, access audit log (SQLite). MCP tools: `get_drive_policies`, `check_drive_access`, `verify_local_inference`, `list_agent_workflows`, `start_workflow`, `workflow_status`, `approve_workflow_step`, `agent_stack_status`, `get_access_log`, `get_pending_approvals`, `delegate_to_agent`
 
 ## Phase 8: Asset Pipeline & Theme Engine (Milestones 41–43)
 
@@ -696,7 +696,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 4 AI Integration                   | M16–M20    | 5        | 0       | 0       |
 | 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
 | 6 Advanced Features                | M26–M35    | 10       | 0       | 0       |
-| 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5       |
+| 7 Agentic AI Stack                 | M36–M40    | 5        | 0       | 0       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3       |
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3       |
@@ -705,7 +705,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **44**   | **2**   | **20**  |
+| **Total**                          | **66**     | **49**   | **2**   | **15**  |
 
 ### Build Order (Recommended Sequence)
 

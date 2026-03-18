@@ -1041,6 +1041,169 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M36 — Goose Orchestrator Integration Handlers ───────────────────
+
+def tool_goose_validate_stack(**kwargs) -> dict:
+    """M36 — Run full Goose agentic stack validation."""
+    from setup.goose_setup import run_setup
+    r = run_setup(validate_only=True)
+    return {"passed": r.passed, "warnings": r.warnings, "failures": r.failures, "ok": r.ok}
+
+
+def tool_goose_e2e_test(**kwargs) -> dict:
+    """M36 — Run E2E smoke tests on all MCP bridges."""
+    import subprocess, json as _json
+    from pathlib import Path
+    bridges = {
+        "mcp_bridge": str(Path(r"D:\hyperspin_toolkit\mcp_bridge.py")),
+        "nemoclaw_agents": str(Path(r"D:\hyperspin_toolkit\engines\nemoclaw_agents.py")),
+        "openhands_bridge": str(Path(r"D:\hyperspin_toolkit\engines\openhands_bridge.py")),
+        "cli_anything_bridge": str(Path(r"D:\hyperspin_toolkit\engines\cli_anything_bridge.py")),
+    }
+    results = {}
+    for name, path in bridges.items():
+        try:
+            proc = subprocess.run(
+                ["python", path], input='{"method":"tools/list","id":1,"jsonrpc":"2.0"}\n',
+                capture_output=True, text=True, timeout=15, cwd=r"D:\hyperspin_toolkit")
+            if proc.returncode == 0 and proc.stdout:
+                resp = _json.loads(proc.stdout.strip().split("\n")[0])
+                tools = resp.get("result", {}).get("tools", [])
+                results[name] = {"ok": True, "tools": len(tools)}
+            else:
+                results[name] = {"ok": False, "error": proc.stderr[:200]}
+        except Exception as e:
+            results[name] = {"ok": False, "error": str(e)[:200]}
+    return {"bridges": results, "all_ok": all(r.get("ok") for r in results.values())}
+
+
+# ── M37 — OpenHands Coding Agent Handlers ───────────────────────────
+
+def tool_openhands_status(**kwargs) -> dict:
+    """M37 — Check OpenHands server status."""
+    from engines.openhands_bridge import CLIENT
+    return {"running": CLIENT.is_running(), "version": CLIENT.get_version(), "url": "http://localhost:3000"}
+
+
+def tool_openhands_run_task(task: str, timeout: int = 300, **kwargs) -> dict:
+    """M37 — Delegate a complex task to OpenHands autonomous agent."""
+    from engines.openhands_bridge import CLIENT
+    return CLIENT.run_task(task, timeout=timeout)
+
+
+def tool_openhands_update_ini(system: str, key: str, value: str, **kwargs) -> dict:
+    """M37 — Update a RocketLauncher INI setting via OpenHands."""
+    from engines.openhands_bridge import edit_rocketlauncher_ini
+    return edit_rocketlauncher_ini(system, key, value)
+
+
+# ── M38 — NemoClaw Agent Sandbox Handlers ───────────────────────────
+
+def tool_nemoclaw_delegate(task: str, context: str = "", agent_name: str = "", **kwargs) -> dict:
+    """M38 — Delegate a task to the best NemoClaw specialist agent."""
+    from engines.nemoclaw_agents import delegate
+    from dataclasses import asdict
+    result = delegate(task, context, agent_name or None)
+    return asdict(result)
+
+
+def tool_nemoclaw_plan(goal: str, context: str = "", **kwargs) -> dict:
+    """M38 — Run multi-agent planning across NemoClaw specialists."""
+    from engines.nemoclaw_agents import multi_agent_plan
+    from dataclasses import asdict
+    results = multi_agent_plan(goal, context)
+    return {"agents_consulted": len(results), "results": [asdict(r) for r in results]}
+
+
+def tool_nemoclaw_list_agents(**kwargs) -> dict:
+    """M38 — List all NemoClaw specialist agents."""
+    from engines.nemoclaw_agents import AGENTS
+    return {"agents": {n: a.to_dict() for n, a in AGENTS.items()}, "count": len(AGENTS)}
+
+
+# ── M39 — CLI-Anything Software Bridge Handlers ─────────────────────
+
+def tool_cli_resolve(task: str, **kwargs) -> dict:
+    """M39 — Resolve natural language to a toolkit CLI command."""
+    from engines.cli_anything_bridge import resolve_command
+    return resolve_command(task)
+
+
+def tool_cli_run(task: str, auto_execute: bool = False, **kwargs) -> dict:
+    """M39 — Resolve AND optionally execute a natural language command."""
+    from engines.cli_anything_bridge import ask_and_run
+    return ask_and_run(task, auto_execute)
+
+
+# ── M40 — Security & Workflow Orchestration Handlers ────────────────
+
+def tool_get_drive_policies(**kwargs) -> dict:
+    """M40 — Get all drive access policies."""
+    from engines.security_orchestrator import get_drive_policies
+    return get_drive_policies()
+
+
+def tool_check_drive_access(drive_letter: str, operation: str = "read",
+                             path: str = "", agent: str = "", **kwargs) -> dict:
+    """M40 — Check if an operation is allowed on a drive."""
+    from engines.security_orchestrator import check_access
+    return check_access(drive_letter, operation, path, agent)
+
+
+def tool_verify_local_inference(**kwargs) -> dict:
+    """M40 — Verify all inference stays local (no cloud calls)."""
+    from engines.security_orchestrator import verify_local_inference
+    return verify_local_inference()
+
+
+def tool_list_agent_workflows(**kwargs) -> dict:
+    """M40 — List available YAML workflow definitions."""
+    from engines.security_orchestrator import list_workflows
+    return list_workflows()
+
+
+def tool_start_workflow(name: str, params: dict = None, **kwargs) -> dict:
+    """M40 — Start a workflow execution."""
+    from engines.security_orchestrator import start_workflow
+    return start_workflow(name, params)
+
+
+def tool_workflow_status(run_id: str, **kwargs) -> dict:
+    """M40 — Get status of a workflow run."""
+    from engines.security_orchestrator import get_workflow_status
+    return get_workflow_status(run_id)
+
+
+def tool_approve_workflow_step(run_id: str, step_index: int, **kwargs) -> dict:
+    """M40 — Approve a workflow step (human-in-the-loop)."""
+    from engines.security_orchestrator import approve_step
+    return approve_step(run_id, step_index)
+
+
+def tool_agent_stack_status(**kwargs) -> dict:
+    """M40 — Check status of all agents (Goose, NemoClaw, OpenHands, CLI-Anything)."""
+    from engines.security_orchestrator import agent_stack_status
+    return agent_stack_status()
+
+
+def tool_get_access_log(drive: str = "", limit: int = 50, **kwargs) -> dict:
+    """M40 — Get drive access audit log."""
+    from engines.security_orchestrator import get_access_log
+    return get_access_log(drive, limit)
+
+
+def tool_get_pending_approvals(**kwargs) -> dict:
+    """M40 — Get pending human-in-the-loop approval requests."""
+    from engines.security_orchestrator import get_pending_approvals
+    return get_pending_approvals()
+
+
+def tool_delegate_to_agent(agent: str, task: str, context: str = "", **kwargs) -> dict:
+    """M40 — Route a task to a specific agent in the stack."""
+    from engines.security_orchestrator import delegate_to_agent
+    return delegate_to_agent(agent, task, context)
+
+
 # ── M31 — Multi-Drive Collection Sync Handlers ──────────────────────
 
 def tool_create_sync_pair(name: str, source_dir: str, dest_dir: str,
@@ -2812,6 +2975,223 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M36 — Goose Orchestrator Integration ──
+    {
+        "name": "goose_validate_stack",
+        "description": "M36 — Validate the full Goose agentic stack (toolkit files, skills, config, LM Studio, Ollama, dependencies).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_goose_validate_stack,
+    },
+    {
+        "name": "goose_e2e_test",
+        "description": "M36 — Run E2E smoke tests on all MCP bridges (mcp_bridge, nemoclaw, openhands, cli-anything).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_goose_e2e_test,
+    },
+    # ── M37 — OpenHands Coding Agent ──
+    {
+        "name": "openhands_status",
+        "description": "M37 — Check if OpenHands autonomous agent server is running and get its version.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_openhands_status,
+    },
+    {
+        "name": "openhands_run_task",
+        "description": "M37 — Delegate a complex multi-file or code-heavy task to the OpenHands autonomous agent.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Detailed task description for OpenHands"},
+                "timeout": {"type": "integer", "default": 300, "description": "Max seconds to wait"},
+            },
+        },
+        "handler": tool_openhands_run_task,
+    },
+    {
+        "name": "openhands_update_ini",
+        "description": "M37 — Update a RocketLauncher INI setting for a system via OpenHands.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "key", "value"],
+            "properties": {
+                "system": {"type": "string"},
+                "key": {"type": "string"},
+                "value": {"type": "string"},
+            },
+        },
+        "handler": tool_openhands_update_ini,
+    },
+    # ── M38 — NemoClaw Agent Sandbox ──
+    {
+        "name": "nemoclaw_delegate",
+        "description": "M38 — Delegate a HyperSpin task to the best NemoClaw specialist agent (ROM, Emulator, Media, Database, Space, Update).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Task description in plain English"},
+                "context": {"type": "string", "description": "Optional context data (audit JSON, etc.)"},
+                "agent_name": {"type": "string", "description": "Force agent: RomSpecialist, EmulatorSpecialist, MediaSpecialist, DatabaseSpecialist, SpaceOptimizer, UpdateOrchestrator"},
+            },
+        },
+        "handler": tool_nemoclaw_delegate,
+    },
+    {
+        "name": "nemoclaw_plan",
+        "description": "M38 — Run a complex goal through multiple NemoClaw specialist agents and return a consolidated action plan.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["goal"],
+            "properties": {
+                "goal": {"type": "string", "description": "High-level goal description"},
+                "context": {"type": "string"},
+            },
+        },
+        "handler": tool_nemoclaw_plan,
+    },
+    {
+        "name": "nemoclaw_list_agents",
+        "description": "M38 — List all available NemoClaw specialist agents, their roles, and capabilities.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_nemoclaw_list_agents,
+    },
+    # ── M39 — CLI-Anything Software Bridge ──
+    {
+        "name": "cli_resolve",
+        "description": "M39 — Translate a natural language task description into the correct HyperSpin Toolkit CLI command.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Plain English description of what to do"},
+            },
+        },
+        "handler": tool_cli_resolve,
+    },
+    {
+        "name": "cli_run",
+        "description": "M39 — Resolve AND optionally execute a natural language command. Confidence >= 0.8 required for auto-execution.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Plain English description"},
+                "auto_execute": {"type": "boolean", "default": False},
+            },
+        },
+        "handler": tool_cli_run,
+    },
+    # ── M40 — Security Policies & Workflow Orchestration ──
+    {
+        "name": "get_drive_policies",
+        "description": "M40 — Get all drive access policies (read-only, read-write, denied, etc.) from drive_registry.json.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_get_drive_policies,
+    },
+    {
+        "name": "check_drive_access",
+        "description": "M40 — Check if a read/write/delete operation is allowed on a specific drive with serial verification.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter (e.g. 'D')"},
+                "operation": {"type": "string", "enum": ["read", "write", "delete"], "default": "read"},
+                "path": {"type": "string"},
+                "agent": {"type": "string", "description": "Which agent is requesting access"},
+            },
+        },
+        "handler": tool_check_drive_access,
+    },
+    {
+        "name": "verify_local_inference",
+        "description": "M40 — Verify all LLM inference stays local (LM Studio/Ollama) with no cloud API calls.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_verify_local_inference,
+    },
+    {
+        "name": "list_agent_workflows",
+        "description": "M40 — List available YAML workflow definitions (full-audit, safe-update, collection-sync, asset-catalog).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_list_agent_workflows,
+    },
+    {
+        "name": "start_workflow",
+        "description": "M40 — Start a named workflow execution with optional parameters.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+                "name": {"type": "string", "description": "Workflow name (e.g. 'full-audit', 'safe-update')"},
+                "params": {"type": "object", "description": "Optional parameters for workflow steps"},
+            },
+        },
+        "handler": tool_start_workflow,
+    },
+    {
+        "name": "workflow_status",
+        "description": "M40 — Get status of a workflow run by run_id.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["run_id"],
+            "properties": {
+                "run_id": {"type": "string"},
+            },
+        },
+        "handler": tool_workflow_status,
+    },
+    {
+        "name": "approve_workflow_step",
+        "description": "M40 — Approve a workflow step that requires human-in-the-loop confirmation.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["run_id", "step_index"],
+            "properties": {
+                "run_id": {"type": "string"},
+                "step_index": {"type": "integer"},
+            },
+        },
+        "handler": tool_approve_workflow_step,
+    },
+    {
+        "name": "agent_stack_status",
+        "description": "M40 — Check status of all agents in the stack (Goose, NemoClaw, OpenHands, CLI-Anything).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_agent_stack_status,
+    },
+    {
+        "name": "get_access_log",
+        "description": "M40 — Get drive access audit log entries.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "drive": {"type": "string", "description": "Filter by drive letter (optional)"},
+                "limit": {"type": "integer", "default": 50},
+            },
+        },
+        "handler": tool_get_access_log,
+    },
+    {
+        "name": "get_pending_approvals",
+        "description": "M40 — Get all pending human-in-the-loop approval requests.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_get_pending_approvals,
+    },
+    {
+        "name": "delegate_to_agent",
+        "description": "M40 — Route a task to a specific agent (nemoclaw, openhands, cli-anything) in the stack.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["agent", "task"],
+            "properties": {
+                "agent": {"type": "string", "description": "Agent name: nemoclaw, openhands, cli-anything"},
+                "task": {"type": "string"},
+                "context": {"type": "string"},
+            },
+        },
+        "handler": tool_delegate_to_agent,
     },
     # ── M31 — Multi-Drive Collection Sync ──
     {
