@@ -1,4 +1,4 @@
-<ui:Page x:Class="HyperSpinToolkit.Views.BackupPage"
+<Page x:Class="HyperSpinToolkit.Views.BackupPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -31,7 +31,7 @@
                 <!-- Create backup -->
                 <TextBlock Text="CREATE BACKUP" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardGreenStyle}" Margin="0,0,0,24">
-                    <StackPanel Spacing="12">
+                    <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="100"/>
@@ -80,7 +80,7 @@
                 <!-- Restore -->
                 <TextBlock Text="RESTORE SELECTED" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardPinkStyle}" Margin="0,0,0,16">
-                    <StackPanel Spacing="12">
+                    <StackPanel>
                         <TextBlock Text="{Binding ViewModel.SelectedBackup.Target, StringFormat='Selected: {0}'}" Opacity="0.7" FontSize="13"/>
                         <StackPanel Orientation="Horizontal">
                             <Button Content="RESTORE BACKUP" Style="{DynamicResource ArcadeButtonPinkStyle}" Padding="16,8" FontSize="12" Command="{Binding ViewModel.RestoreBackupCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
@@ -94,4 +94,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</ui:Page>
+</Page>

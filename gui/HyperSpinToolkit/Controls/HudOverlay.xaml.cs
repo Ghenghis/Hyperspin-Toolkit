@@ -47,7 +47,7 @@ namespace HyperSpinToolkit.Controls
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        LedGamepad.LedState = args.Connected ? "Green" : "Off";
+                        LedGamepad.LedState = args.Connected ? LedState.Green : LedState.Off;
                         if (args.Connected)
                             PushNotification($"PLAYER {args.PlayerIndex + 1} GAMEPAD CONNECTED");
                     });
@@ -70,13 +70,16 @@ namespace HyperSpinToolkit.Controls
         /// </summary>
         public void SetAgentLed(string agent, string state)
         {
+            if (!Enum.TryParse<LedState>(state, true, out var parsed))
+                parsed = LedState.Off;
+
             Dispatcher.Invoke(() =>
             {
                 switch (agent.ToUpperInvariant())
                 {
-                    case "BRIDGE": case "BRG": LedBridge.LedState = state; break;
-                    case "GOOSE": case "GSE": LedGoose.LedState = state; break;
-                    case "NEMO": case "NMC": case "NEMOCLAW": LedNemo.LedState = state; break;
+                    case "BRIDGE": case "BRG": LedBridge.LedState = parsed; break;
+                    case "GOOSE": case "GSE": LedGoose.LedState = parsed; break;
+                    case "NEMO": case "NMC": case "NEMOCLAW": LedNemo.LedState = parsed; break;
                 }
             });
         }

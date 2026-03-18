@@ -1,4 +1,4 @@
-<ui:Page x:Class="HyperSpinToolkit.Views.SettingsPage"
+<Page x:Class="HyperSpinToolkit.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -18,7 +18,7 @@
                 <!-- Python / Bridge -->
                 <TextBlock Text="PYTHON BACKEND" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,20">
-                    <StackPanel Spacing="12">
+                    <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="150"/>
@@ -54,7 +54,7 @@
                 <!-- Available tools -->
                 <TextBlock Text="MCP TOOL DISCOVERY" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardGreenStyle}" Margin="0,0,0,20">
-                    <StackPanel Spacing="12">
+                    <StackPanel>
                         <Button Content="LIST AVAILABLE TOOLS" Style="{DynamicResource ArcadeButtonStyle}" Padding="14,6" Command="{Binding ViewModel.ListToolsCommand}"/>
                         <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding ViewModel.AvailableTools}" FontFamily="Consolas" FontSize="12" Opacity="0.8" TextWrapping="Wrap" Visibility="{Binding ViewModel.AvailableTools, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -65,7 +65,7 @@
                 <!-- Gamepad / Input -->
                 <TextBlock Text="GAMEPAD &amp; TRANSITIONS" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,20">
-                    <StackPanel Spacing="12">
+                    <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <controls:LedIndicator x:Name="GamepadLed" LedState="Off" LabelText="GAMEPAD" LedSize="12" Margin="0,0,16,0" />
                             <TextBlock x:Name="GamepadStatusText" Text="No gamepad detected" Style="{DynamicResource ConsoleTextStyle}" FontSize="11" VerticalAlignment="Center" />
@@ -104,7 +104,7 @@
                 <!-- About -->
                 <TextBlock Text="ABOUT" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
                 <Border Style="{DynamicResource ArcadeCardPinkStyle}" Margin="0,0,0,20">
-                    <StackPanel Spacing="6">
+                    <StackPanel>
                         <TextBlock Text="HYPERSPIN EXTREME TOOLKIT" Style="{DynamicResource PixelTextStyle}" FontSize="14"/>
                         <TextBlock Text="Version 2.0  ·  C# WPF GUI + Python MCP Backend" Style="{DynamicResource ArcadeBodyStyle}" Opacity="0.65"/>
                         <TextBlock Text="Backend: mcp_bridge.py (JSON-RPC over stdio)" Style="{DynamicResource ConsoleTextStyle}" FontSize="11"/>
@@ -117,4 +117,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</ui:Page>
+</Page>

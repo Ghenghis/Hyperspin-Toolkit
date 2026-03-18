@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using HyperSpinToolkit.Controls;
 using HyperSpinToolkit.Services;
 using HyperSpinToolkit.ViewModels;
 
@@ -25,7 +26,7 @@ public partial class SettingsPage
 
         // Reflect current gamepad connection state
         var input = ArcadeInputHandler.Instance;
-        GamepadLed.LedState = input.AnyConnected ? "Green" : "Off";
+        GamepadLed.LedState = input.AnyConnected ? LedState.Green : LedState.Off;
         GamepadStatusText.Text = input.AnyConnected ? "Gamepad connected" : "No gamepad detected";
 
         // Load current transition settings

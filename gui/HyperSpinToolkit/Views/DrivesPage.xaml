@@ -1,4 +1,4 @@
-<ui:Page x:Class="HyperSpinToolkit.Views.DrivesPage"
+<Page x:Class="HyperSpinToolkit.Views.DrivesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -82,7 +82,7 @@
 
                     <!-- Assign role -->
                     <Border Grid.Column="0" Style="{DynamicResource ArcadeCardStyle}">
-                        <StackPanel Spacing="10">
+                        <StackPanel>
                             <TextBlock Text="ASSIGN DRIVE ROLE" Style="{DynamicResource ArcadeSubtitleStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -107,7 +107,7 @@
 
                     <!-- Health check -->
                     <Border Grid.Column="2" Style="{DynamicResource ArcadeCardPinkStyle}">
-                        <StackPanel Spacing="10">
+                        <StackPanel>
                             <TextBlock Text="DRIVE HEALTH CHECK" Style="{DynamicResource ArcadeSubtitleStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -131,7 +131,7 @@
 
                 <!-- Compare -->
                 <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,16">
-                    <StackPanel Spacing="10">
+                    <StackPanel>
                         <TextBlock Text="COMPARE DIRECTORIES" Style="{DynamicResource ArcadeSubtitleStyle}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -150,7 +150,7 @@
 
                 <!-- Migrate -->
                 <Border Style="{DynamicResource ArcadeCardPinkStyle}" Margin="0,0,0,16">
-                    <StackPanel Spacing="10">
+                    <StackPanel>
                         <TextBlock Text="MIGRATE / COPY DRIVE" Style="{DynamicResource ArcadeSubtitleStyle}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -161,10 +161,10 @@
                             <ui:TextBox PlaceholderText="Source root (e.g. D:\Arcade)" Text="{Binding ViewModel.MigrateSource, UpdateSourceTrigger=PropertyChanged}"/>
                             <ui:TextBox Grid.Column="2" PlaceholderText="Destination root (e.g. E:\Arcade)" Text="{Binding ViewModel.MigrateDest, UpdateSourceTrigger=PropertyChanged}"/>
                         </Grid>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
+                        <StackPanel Orientation="Horizontal">
                             <CheckBox Content="Verify checksums after copy" IsChecked="{Binding ViewModel.MigrateVerify}"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                        <StackPanel Orientation="Horizontal">
                             <Button Content="DRY RUN" Style="{DynamicResource ArcadeButtonStyle}" Padding="14,6" Command="{Binding ViewModel.MigrateDryRunCommand}" IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
                             <Button Content="START MIGRATION" Style="{DynamicResource ArcadeButtonOrangeStyle}" Padding="14,6" Margin="8,0,0,0" Command="{Binding ViewModel.MigrateCommand}" IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
                         </StackPanel>
@@ -178,4 +178,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</ui:Page>
+</Page>
