@@ -162,7 +162,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   "If you like X, try Y" recommendations
 *   Hidden gem discovery from your collection
 *   Genre/era/style clustering
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/game_recommender.py` (520 lines). Genre taxonomy (18 categories), era classification (6 eras), system generation mapping, similarity scoring (genre+era+developer+series), preference-based recommendations, hidden gem discovery, genre/era cluster reports. MCP tools: `recommend_similar_games`, `recommend_by_preference`, `discover_hidden_gems`, `analyze_game_collection`, `genre_cluster_report`
 
 ### M19 — Natural Language Query System
 
@@ -178,7 +178,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Parse error logs and suggest fixes
 *   Common issue knowledge base
 *   Learn from your specific setup over time
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/troubleshooter.py` (580 lines). 10-category common issue KB (emulator/rom/bios/config/media/performance/path/audio), regex pattern matching, error log parser, system-wide diagnostics (BIOS+emulator+RL), agent_memory integration for learning. MCP tools: `diagnose_problem`, `diagnose_system`, `parse_error_log`, `known_issues_kb`
 
 ## Phase 5: Web Dashboard (Milestones 21–25)
 
@@ -688,24 +688,24 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 
 ## Summary
 
-| Phase                              | Milestones | Complete | Partial | Planned      |
-| ---------------------------------- | ---------- | -------- | ------- | ------------ |
-| 1 Foundation                       | M1–M5      | 5        | 0       | 0            |
-| 2 Audit & Discovery                | M6–M10     | 5        | 0       | 0            |
-| 3 Safe Update                      | M11–M15    | 5        | 0       | 0            |
-| 4 AI Integration                   | M16–M20    | 3        | 0       | 2 (M18, M20) |
-| 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0            |
-| 6 Advanced Features                | M26–M35    | 2        | 0       | 8            |
-| 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5            |
-| 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3            |
-| 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
-| 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
-| 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0            |
-| 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
-| 14 Automation & Operations         | M61–M63    | 3        | 0       | 0            |
-| 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **34**   | **2**   | **30**       |
+| Phase                              | Milestones | Complete | Partial | Planned |
+| ---------------------------------- | ---------- | -------- | ------- | ------- |
+| 1 Foundation                       | M1–M5      | 5        | 0       | 0       |
+| 2 Audit & Discovery                | M6–M10     | 5        | 0       | 0       |
+| 3 Safe Update                      | M11–M15    | 5        | 0       | 0       |
+| 4 AI Integration                   | M16–M20    | 5        | 0       | 0       |
+| 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
+| 6 Advanced Features                | M26–M35    | 2        | 0       | 8       |
+| 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5       |
+| 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3       |
+| 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
+| 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3       |
+| 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2       |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0       |
+| 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
+| 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
+| 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
+| **Total**                          | **66**     | **36**   | **2**   | **28**  |
 
 ### Build Order (Recommended Sequence)
 

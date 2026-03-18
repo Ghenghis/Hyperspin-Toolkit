@@ -1041,6 +1041,69 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M18 — AI Game Recommendation Engine Handlers ────────────────────
+
+def tool_recommend_similar(game_name: str, system: str = "",
+                           limit: int = 10, cross_system: bool = True,
+                           **kwargs) -> dict:
+    """M18 — Get games similar to a given game."""
+    from engines.game_recommender import recommend_similar
+    return recommend_similar(game_name, system, limit, cross_system)
+
+
+def tool_recommend_by_preference(system: str = "", genres: list = None,
+                                  era: str = "", developer: str = "",
+                                  limit: int = 15, **kwargs) -> dict:
+    """M18 — Get recommendations based on preference criteria."""
+    from engines.game_recommender import recommend_by_preference
+    return recommend_by_preference(system, genres, era, developer, limit)
+
+
+def tool_discover_hidden_gems(system: str = "", min_rating: float = 70,
+                               limit: int = 15, **kwargs) -> dict:
+    """M18 — Discover hidden gems in your collection."""
+    from engines.game_recommender import discover_hidden_gems
+    return discover_hidden_gems(system, min_rating, limit=limit)
+
+
+def tool_analyze_collection(system: str = "", **kwargs) -> dict:
+    """M18 — Analyze collection for genre/era/developer patterns."""
+    from engines.game_recommender import analyze_collection
+    return analyze_collection(system)
+
+
+def tool_genre_clusters(system: str = "", **kwargs) -> dict:
+    """M18 — Genre and era cluster report for the collection."""
+    from engines.game_recommender import genre_cluster_report
+    return genre_cluster_report(system)
+
+
+# ── M20 — AI Troubleshooting Assistant Handlers ─────────────────────
+
+def tool_diagnose_problem(description: str, **kwargs) -> dict:
+    """M20 — Diagnose a problem from a text description."""
+    from engines.troubleshooter import diagnose_problem
+    return diagnose_problem(description)
+
+
+def tool_diagnose_system(system: str, **kwargs) -> dict:
+    """M20 — Run comprehensive diagnostics on a system."""
+    from engines.troubleshooter import diagnose_system
+    return diagnose_system(system)
+
+
+def tool_parse_error_log(log_text: str, **kwargs) -> dict:
+    """M20 — Parse an error log and identify issues."""
+    from engines.troubleshooter import parse_error_log
+    return parse_error_log(log_text)
+
+
+def tool_known_issues(**kwargs) -> dict:
+    """M20 — Get the full common issues knowledge base."""
+    from engines.troubleshooter import get_known_issues
+    return get_known_issues()
+
+
 # ── M61 — Scheduler & Task Automation Handlers ──────────────────────
 
 def tool_list_scheduled_tasks(category: str = "", enabled_only: bool = False,
@@ -2509,6 +2572,115 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M18 — AI Game Recommendation Engine ──
+    {
+        "name": "recommend_similar_games",
+        "description": "M18 — Get games similar to a given game based on genre, era, developer, and series.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game_name"],
+            "properties": {
+                "game_name": {"type": "string", "description": "Source game name"},
+                "system": {"type": "string", "description": "System of the source game (optional)"},
+                "limit": {"type": "integer", "default": 10},
+                "cross_system": {"type": "boolean", "description": "Include games from other systems", "default": True},
+            },
+        },
+        "handler": tool_recommend_similar,
+    },
+    {
+        "name": "recommend_by_preference",
+        "description": "M18 — Get recommendations matching specific criteria (genres, era, developer).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string"},
+                "genres": {"type": "array", "items": {"type": "string"}, "description": "Preferred genres (action, rpg, platformer, etc.)"},
+                "era": {"type": "string", "enum": ["retro_early", "retro_golden", "16bit_era", "3d_revolution", "modern_classic", "modern"]},
+                "developer": {"type": "string"},
+                "limit": {"type": "integer", "default": 15},
+            },
+        },
+        "handler": tool_recommend_by_preference,
+    },
+    {
+        "name": "discover_hidden_gems",
+        "description": "M18 — Find hidden gems: highly rated but less popular games in your collection.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string"},
+                "min_rating": {"type": "number", "default": 70},
+                "limit": {"type": "integer", "default": 15},
+            },
+        },
+        "handler": tool_discover_hidden_gems,
+    },
+    {
+        "name": "analyze_game_collection",
+        "description": "M18 — Analyze collection for genre distribution, era breakdown, top developers, and preference profile.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string", "description": "Filter to system (optional)"},
+            },
+        },
+        "handler": tool_analyze_collection,
+    },
+    {
+        "name": "genre_cluster_report",
+        "description": "M18 — Genre and era cluster report showing game groupings in your collection.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_genre_clusters,
+    },
+    # ── M20 — AI Troubleshooting Assistant ──
+    {
+        "name": "diagnose_problem",
+        "description": "M20 — Describe a problem in plain text and get diagnostic steps, root cause analysis, and suggested fixes.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["description"],
+            "properties": {
+                "description": {"type": "string", "description": "Problem description (e.g. 'RetroArch crashes when loading PS1 games')"},
+            },
+        },
+        "handler": tool_diagnose_problem,
+    },
+    {
+        "name": "diagnose_system",
+        "description": "M20 — Run comprehensive diagnostics on a system (BIOS, emulator, RocketLauncher, paths).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name, e.g. 'PlayStation', 'SNES'"},
+            },
+        },
+        "handler": tool_diagnose_system,
+    },
+    {
+        "name": "parse_error_log",
+        "description": "M20 — Parse an error log, identify issues, and provide diagnostics for each.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["log_text"],
+            "properties": {
+                "log_text": {"type": "string", "description": "Raw log text content to analyze"},
+            },
+        },
+        "handler": tool_parse_error_log,
+    },
+    {
+        "name": "known_issues_kb",
+        "description": "M20 — Get the full common issues knowledge base with categories and fix counts.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_known_issues,
     },
     # ── M61 — Scheduler & Task Automation ──
     {
