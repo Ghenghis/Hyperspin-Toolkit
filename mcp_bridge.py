@@ -954,6 +954,93 @@ def tool_heal_checks(**kwargs) -> dict:
     return {"checks": list_checks(), "repair_prefixes": list_repair_prefixes()}
 
 
+# ── M64 — Drive Fingerprint Engine Handlers ──────────────────────────
+
+def tool_drive_fingerprint(drive_letter: str, **kwargs) -> dict:
+    """M64 — Auto-detect KINHANK variant from any drive letter."""
+    from engines.drive_fingerprint import fingerprint_drive
+    fp = fingerprint_drive(drive_letter)
+    return {
+        "drive": fp.drive_letter,
+        "variant": fp.variant,
+        "variant_name": fp.variant_name,
+        "frontends": fp.frontends,
+        "system_count": fp.system_count,
+        "game_count": fp.game_count,
+        "total_size_gb": fp.total_size_gb,
+        "free_size_gb": fp.free_size_gb,
+        "health": fp.health,
+        "clone_of": fp.clone_of,
+    }
+
+
+def tool_drive_fingerprint_all(**kwargs) -> dict:
+    """M64 — Fingerprint all connected drives and detect clones."""
+    from engines.drive_fingerprint import fingerprint_all_drives, detect_clones
+    fps = fingerprint_all_drives()
+    fps = detect_clones(fps)
+    results = []
+    for fp in fps:
+        results.append({
+            "drive": fp.drive_letter,
+            "variant": fp.variant,
+            "variant_name": fp.variant_name,
+            "system_count": fp.system_count,
+            "game_count": fp.game_count,
+            "clone_of": fp.clone_of,
+        })
+    return {"drives": results, "count": len(results)}
+
+
+# ── M65 — Game List Extractor Handlers ───────────────────────────────
+
+def tool_extract_gamelist(drive_letter: str, variant: str | None = None,
+                          output_csv: str | None = None, **kwargs) -> dict:
+    """M65 — Extract game list from any KINHANK drive variant."""
+    from engines.gamelist_extractor import extract_gamelist
+    result = extract_gamelist(drive_letter, variant)
+    if output_csv and result.entries:
+        result.to_csv(output_csv)
+    return {
+        "drive": result.drive_letter,
+        "variant": result.variant,
+        "systems": result.systems,
+        "games": result.games,
+        "errors": result.errors,
+        "warnings": result.warnings,
+        "summary": result.summary(),
+        "output_csv": output_csv if output_csv and result.entries else None,
+    }
+
+
+# ── M66 — Integrity Checker Handlers ────────────────────────────────
+
+def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
+                         variant: str | None = None,
+                         output_json: str | None = None, **kwargs) -> dict:
+    """M66 — Run integrity checks on a KINHANK drive."""
+    from engines.integrity_checker import check_integrity
+    report = check_integrity(drive_letter, reference_drive, variant)
+    if output_json:
+        report.to_json(output_json)
+    return {
+        "drive": report.drive_letter,
+        "variant": report.variant,
+        "reference": report.reference_drive,
+        "overall_score": report.overall_score,
+        "structure_score": report.structure_score,
+        "content_score": report.content_score,
+        "total_checks": report.total_checks,
+        "passed": report.passed,
+        "failed": report.failed,
+        "warnings": report.warnings,
+        "zero_byte_files": report.zero_byte_files,
+        "missing_dirs": report.missing_dirs,
+        "summary": report.summary(),
+        "output_json": output_json if output_json else None,
+    }
+
+
 # ── MCP Tool Definitions ────────────────────────────────────────────
 
 TOOLS = [
@@ -2082,6 +2169,56 @@ TOOLS = [
         "description": "M63 — List all registered diagnostic checks and repair capabilities.",
         "inputSchema": {"type": "object", "properties": {}},
         "handler": tool_heal_checks,
+    },
+    # ── M64 — Drive Fingerprint Engine ──
+    {
+        "name": "drive_fingerprint",
+        "description": "M64 — Auto-detect KINHANK HDD variant from a drive letter. Returns variant (A/B-A/B-C/C-B/C-D), frontends, system/game counts, health status.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter to fingerprint, e.g. 'D', 'K:'"},
+            },
+        },
+        "handler": tool_drive_fingerprint,
+    },
+    {
+        "name": "drive_fingerprint_all",
+        "description": "M64 — Fingerprint all connected drives and detect KINHANK clones.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_drive_fingerprint_all,
+    },
+    # ── M65 — Game List Extractor ──
+    {
+        "name": "extract_gamelist",
+        "description": "M65 — Extract game list from any KINHANK drive. Parses HyperSpin XML, AttractMode romlists, CORE-TYPE-R dirs, or Batocera ROMs. Outputs standardized CSV.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter, e.g. 'D', 'K'"},
+                "variant": {"type": "string", "description": "Force variant (A, B-A, B-C, C-D) or auto-detect"},
+                "output_csv": {"type": "string", "description": "Path to write CSV output (optional)"},
+            },
+        },
+        "handler": tool_extract_gamelist,
+    },
+    # ── M66 — Integrity Checker ──
+    {
+        "name": "check_integrity",
+        "description": "M66 — Run integrity checks on a KINHANK drive. Checks structure, content completeness, zero-byte files. Optionally compare against a reference drive.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive to check, e.g. 'L'"},
+                "reference_drive": {"type": "string", "description": "Reference drive for comparison, e.g. 'K' (optional)"},
+                "variant": {"type": "string", "description": "Force variant or auto-detect (optional)"},
+                "output_json": {"type": "string", "description": "Path to write JSON report (optional)"},
+            },
+        },
+        "handler": tool_check_integrity,
     },
 ]
 
