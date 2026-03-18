@@ -1041,6 +1041,38 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M58 — Cross-Frontend Import/Export Handlers ─────────────────────
+
+def tool_convert_gamelist(input_path: str, input_format: str,
+                          output_path: str, output_format: str,
+                          system_name: str = "", **kwargs) -> dict:
+    """M58 — Convert a game list between frontend formats."""
+    from engines.frontend_converter import convert
+    return convert(input_path, input_format, output_path, output_format, system_name)
+
+
+def tool_batch_convert(input_dir: str, input_format: str,
+                       output_dir: str, output_format: str, **kwargs) -> dict:
+    """M58 — Batch convert all game list files in a directory."""
+    from engines.frontend_converter import batch_convert
+    return batch_convert(input_dir, input_format, output_dir, output_format)
+
+
+def tool_list_formats(**kwargs) -> dict:
+    """M58 — List all supported frontend formats for conversion."""
+    from engines.frontend_converter import FORMATS
+    return {
+        "formats": list(FORMATS.keys()),
+        "description": {
+            "hyperspin": "HyperSpin XML database (.xml)",
+            "attractmode": "AttractMode romlist (.txt, semicolon-delimited)",
+            "launchbox": "LaunchBox Platform XML (.xml)",
+            "batocera": "Batocera/EmulationStation gamelist.xml",
+            "csv": "M65 standardized CSV (universal interchange)",
+        },
+    }
+
+
 # ── MCP Tool Definitions ────────────────────────────────────────────
 
 TOOLS = [
@@ -2219,6 +2251,44 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M58 — Cross-Frontend Import/Export ──
+    {
+        "name": "convert_gamelist",
+        "description": "M58 — Convert a game list between frontend formats (HyperSpin XML, AttractMode romlist, LaunchBox XML, Batocera gamelist, CSV).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["input_path", "input_format", "output_path", "output_format"],
+            "properties": {
+                "input_path": {"type": "string", "description": "Path to source game list file"},
+                "input_format": {"type": "string", "enum": ["hyperspin", "attractmode", "launchbox", "batocera", "csv"]},
+                "output_path": {"type": "string", "description": "Path to write converted file"},
+                "output_format": {"type": "string", "enum": ["hyperspin", "attractmode", "launchbox", "batocera", "csv"]},
+                "system_name": {"type": "string", "description": "System name override (optional)"},
+            },
+        },
+        "handler": tool_convert_gamelist,
+    },
+    {
+        "name": "batch_convert_gamelists",
+        "description": "M58 — Batch convert all game list files in a directory from one format to another.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["input_dir", "input_format", "output_dir", "output_format"],
+            "properties": {
+                "input_dir": {"type": "string", "description": "Directory containing source files"},
+                "input_format": {"type": "string", "enum": ["hyperspin", "attractmode", "launchbox", "batocera", "csv"]},
+                "output_dir": {"type": "string", "description": "Directory to write converted files"},
+                "output_format": {"type": "string", "enum": ["hyperspin", "attractmode", "launchbox", "batocera", "csv"]},
+            },
+        },
+        "handler": tool_batch_convert,
+    },
+    {
+        "name": "list_conversion_formats",
+        "description": "M58 — List all supported frontend formats for game list conversion.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_list_formats,
     },
 ]
 
