@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using HyperSpinToolkit.Controls;
 using HyperSpinToolkit.Services;
 using HyperSpinToolkit.ViewModels;
 using HyperSpinToolkit.Views;
@@ -10,9 +11,12 @@ public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Show animated arcade splash screen
+        await ArcadeSplashScreen.ShowSplashAsync();
 
         var services = new ServiceCollection();
         ConfigureServices(services);
@@ -44,6 +48,10 @@ public partial class App : Application
         services.AddTransient<AuditPage>();
         services.AddTransient<BackupPage>();
         services.AddTransient<SettingsPage>();
+        services.AddTransient<CollectionBrowserPage>();
+        services.AddTransient<AssetGalleryPage>();
+        services.AddTransient<AgentConsolePage>();
+        services.AddTransient<AIChatPage>();
 
         // Main window singleton
         services.AddSingleton<MainWindow>();
@@ -51,6 +59,8 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        ArcadeInputHandler.Instance.Dispose();
+        ResourceManager.Instance.Dispose();
         Services.GetService<McpBridgeService>()?.Dispose();
         base.OnExit(e);
     }

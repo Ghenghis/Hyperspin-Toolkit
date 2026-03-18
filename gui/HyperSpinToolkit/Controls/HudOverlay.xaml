@@ -1,0 +1,72 @@
+<UserControl x:Class="HyperSpinToolkit.Controls.HudOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:HyperSpinToolkit.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignHeight="36" d:DesignWidth="1200"
+    IsHitTestVisible="False">
+
+    <Border Background="{DynamicResource CabinetDarkBrush}" Opacity="0.92"
+            BorderBrush="{DynamicResource NeonBlueBrush}" BorderThickness="0,1,0,0"
+            Height="36">
+        <Grid Margin="12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Agent status LEDs -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <controls:LedIndicator x:Name="LedBridge" LedState="Green" LabelText="BRG" LedSize="8" Margin="0,0,8,0" />
+                <controls:LedIndicator x:Name="LedGoose" LedState="Off" LabelText="GSE" LedSize="8" Margin="0,0,8,0" />
+                <controls:LedIndicator x:Name="LedNemo" LedState="Off" LabelText="NMC" LedSize="8" />
+            </StackPanel>
+
+            <!-- Drive health mini gauge -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="DRIVES" Style="{DynamicResource ArcadeLabelStyle}" FontSize="9" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <controls:NeonGauge x:Name="DriveGauge" Value="75" Maximum="100" Width="50" Height="16"
+                                    GaugeMode="Bar" StrokeThickness="3" ShowPercentage="False" />
+            </StackPanel>
+
+            <!-- Gamepad indicator -->
+            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                <controls:LedIndicator x:Name="LedGamepad" LedState="Off" LabelText="PAD" LedSize="8" />
+            </StackPanel>
+
+            <!-- Marquee notification area -->
+            <Canvas Grid.Column="6" ClipToBounds="True" VerticalAlignment="Center" Height="16">
+                <TextBlock x:Name="MarqueeText"
+                           Style="{DynamicResource PixelTextStyle}" FontSize="11"
+                           Foreground="{DynamicResource NeonYellowBrush}"
+                           Canvas.Top="0">
+                    <TextBlock.RenderTransform>
+                        <TranslateTransform x:Name="MarqueeTranslate" X="0" />
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </Canvas>
+
+            <!-- System clock -->
+            <TextBlock Grid.Column="8" x:Name="ClockText"
+                       Style="{DynamicResource PixelTextStyle}" FontSize="11"
+                       Foreground="{DynamicResource NeonGreenBrush}"
+                       VerticalAlignment="Center" Text="00:00:00" />
+
+            <!-- Milestone counter -->
+            <TextBlock Grid.Column="10"
+                       Style="{DynamicResource PixelTextStyle}" FontSize="9"
+                       Foreground="{DynamicResource NeonPurpleBrush}"
+                       VerticalAlignment="Center" Text="M59/66" />
+        </Grid>
+    </Border>
+</UserControl>

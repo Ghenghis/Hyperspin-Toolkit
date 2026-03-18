@@ -1,0 +1,77 @@
+<Window x:Class="HyperSpinToolkit.Controls.ArcadeSplashScreen"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+    WindowStartupLocation="CenterScreen"
+    Width="640" Height="420" ResizeMode="NoResize" Topmost="True"
+    ShowInTaskbar="False">
+
+    <Border CornerRadius="8" Background="#FF0A0A14" BorderBrush="#FF00D4FF" BorderThickness="2">
+        <Border.Effect>
+            <DropShadowEffect Color="#FF00D4FF" BlurRadius="30" ShadowDepth="0" Opacity="0.6" />
+        </Border.Effect>
+
+        <Grid Margin="40,30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <TextBlock Grid.Row="0" x:Name="TitleText"
+                       Text="HYPERSPIN EXTREME TOOLKIT"
+                       FontFamily="Consolas" FontSize="24" FontWeight="Bold"
+                       Foreground="#FF00D4FF" HorizontalAlignment="Center"
+                       Opacity="0">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="#FF00D4FF" BlurRadius="15" ShadowDepth="0" Opacity="0.8" />
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <!-- Subtitle -->
+            <TextBlock Grid.Row="2" x:Name="SubtitleText"
+                       Text="v2.0  ·  ARCADE EDITION"
+                       FontFamily="Consolas" FontSize="13"
+                       Foreground="#FF39FF14" HorizontalAlignment="Center"
+                       Opacity="0">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="#FF39FF14" BlurRadius="10" ShadowDepth="0" Opacity="0.6" />
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <!-- Boot log -->
+            <TextBlock Grid.Row="4" x:Name="BootLog"
+                       FontFamily="Consolas" FontSize="11"
+                       Foreground="#FFCCCCCC" LineHeight="18"
+                       Opacity="0.8" Text="" />
+
+            <!-- Progress bar -->
+            <Grid Grid.Row="6">
+                <Border CornerRadius="3" Background="#22FFFFFF" Height="6" />
+                <Border x:Name="ProgressFill" CornerRadius="3" Height="6"
+                        HorizontalAlignment="Left" Width="0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF00D4FF" Offset="0" />
+                            <GradientStop Color="#FFFF2D95" Offset="0.5" />
+                            <GradientStop Color="#FF39FF14" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+            </Grid>
+
+            <!-- Status line -->
+            <TextBlock Grid.Row="8" x:Name="StatusText"
+                       FontFamily="Consolas" FontSize="10"
+                       Foreground="#88FFFFFF" HorizontalAlignment="Center"
+                       Text="INITIALIZING..." />
+        </Grid>
+    </Border>
+</Window>

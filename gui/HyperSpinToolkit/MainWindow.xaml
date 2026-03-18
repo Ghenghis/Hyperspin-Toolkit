@@ -2,9 +2,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:HyperSpinToolkit.Controls"
     xmlns:views="clr-namespace:HyperSpinToolkit.Views" Title="HyperSpin Extreme Toolkit" Width="1280" Height="800" MinWidth="900" MinHeight="600" WindowStartupLocation="CenterScreen" ExtendsContentIntoTitleBar="True">
 
-    <Grid>
+    <DockPanel LastChildFill="True">
+        <!-- HUD overlay bar at bottom -->
+        <controls:HudOverlay x:Name="HudBar" DockPanel.Dock="Bottom" />
+
         <ui:NavigationView x:Name="RootNavigation" PaneDisplayMode="Left" IsPaneOpen="True" OpenPaneLength="220">
 
             <!-- Header shown above nav items -->
@@ -76,5 +80,5 @@
             </ui:NavigationView.FooterMenuItems>
 
         </ui:NavigationView>
-    </Grid>
+    </DockPanel>
 </ui:FluentWindow>

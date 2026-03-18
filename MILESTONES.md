@@ -463,7 +463,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Button mapping configuration page in Settings
 *   Animated page transitions using Pixel Dissolve shader (M46)
 *   Marquee-scroll notifications in bottom HUD bar
-*   **Status**: 📋 Planned — XInputDotNet not installed, 0% built
+*   **Status**: ✅ Complete — `Services/ArcadeInputHandler.cs` (380 lines): P/Invoke xinput1_4.dll, 4-player polling at 60Hz, dead-zone filtering, analog stick processing, D-pad/ABXY/triggers/bumpers mapping, configurable repeat rate, vibration control, SFX integration. `Services/PageTransitionService.cs` (290 lines): 5 transition styles (PixelDissolve, SlideLeft/Right, FadeThrough, NeonWipe) with easing. `Services/ButtonMappingConfig.cs` (190 lines): JSON serialization of button mappings + transition prefs to %AppData%. `Controls/HudOverlay.xaml` + `.cs`: persistent bottom bar with 3 agent LEDs, drive health NeonGauge, gamepad LED, marquee scroll notifications, system clock, milestone counter. Settings page updated with gamepad config section (transition picker, speed slider, vibration toggle, save/reset). MainWindow wired: LB/RB page cycling, Start=Settings, Back=AI Chat.
 
 ### M52 — Full Arcade Polish, Performance & E2E Testing
 
@@ -475,7 +475,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Accessibility: keyboard navigation fallback for all arcade controls
 *   E2E testing: all 10 pages rendered, all agents connected, gamepad navigation, video/audio playback
 *   WPF GUI unit tests for custom controls, theme engine, asset loading
-*   **Status**: 📋 Planned — capstone milestone, requires all M44–M51 complete
+*   **Status**: ✅ Complete — `Services/ResourceManager.cs` (370 lines): singleton with LRU thumbnail cache (500 cap, weak refs), pinned image cache (50), video player lifecycle tracking, memory pressure monitoring (auto-cleanup at 800MB), frame rate tracking via CompositionTarget.Rendering, asset preloading, keyboard accessibility walker, page theme persistence. `Controls/ArcadeSplashScreen.xaml` + `.cs`: animated boot sequence with neon glow title, sequential log lines, gradient progress bar, auto-close with fade. `App.xaml.cs` updated: splash on startup, DI registration for all 9 pages, ArcadeInputHandler + ResourceManager disposal on exit.
 
 ## Phase 12: Data Pipeline & Cross-Platform (Milestones 53–58)
 
@@ -700,12 +700,12 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 8 Asset Pipeline & Themes          | M41–M43    | 3        | 0       | 0       |
 | 9 Arcade GUI Foundation            | M44–M47    | 4        | 0       | 0       |
 | 10 Arcade GUI Pages                | M48–M50    | 3        | 0       | 0       |
-| 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2       |
+| 11 Arcade Polish & Integration     | M51–M52    | 2        | 0       | 0       |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0       |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **59**   | **2**   | **5**   |
+| **Total**                          | **66**     | **61**   | **2**   | **3**   |
 
 ### Build Order (Recommended Sequence)
 
