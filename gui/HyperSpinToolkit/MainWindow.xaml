@@ -57,6 +57,12 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <ui:NavigationViewItem x:Name="NavRocketLauncher" Content="RocketLauncher" TargetPageType="{x:Type views:RocketLauncherPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Rocket24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <ui:NavigationViewItem x:Name="NavAgents" Content="Agent Console" TargetPageType="{x:Type views:AgentConsolePage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Bot24" />

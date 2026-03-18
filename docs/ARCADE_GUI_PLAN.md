@@ -1,7 +1,7 @@
 # Arcade GUI Plan — SOTA C#/WPF Interface
 
 > **Last Updated:** 2026-03-17  
-> **Status:** Design Phase  
+> **Status:** ✅ Engines Complete — `engines/theme_engine.py` + `engines/swf_converter.py` built; WPF GUI ready to scaffold  
 > **Stack:** C# / WPF / .NET 8+ / SharpDX or HelixToolkit (3D) / LibVLCSharp (video)
 
 ---

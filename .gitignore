@@ -36,6 +36,7 @@ coverage.xml
 # Logs
 logs/*.log
 logs/*.json
+logs/*.jsonl
 
 # Data (generated at runtime)
 data/*.db
@@ -46,6 +47,9 @@ gui/HyperSpinToolkit/bin/
 gui/HyperSpinToolkit/obj/
 *.user
 *.suo
+
+# Runtime data
+drives.json
 
 # Misc
 *.bak

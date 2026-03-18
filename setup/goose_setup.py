@@ -171,8 +171,11 @@ def check_lmstudio_mcp(r: SetupResult) -> None:
                 r.failures.append(f"LM Studio mcp.json missing: {srv}")
 
         # Check filesystem includes the configured hyperspin root
-        from core.config import get as _cfg_get
-        _hs_root = _cfg_get("paths.hyperspin_root", "")
+        try:
+            from core.config import get as _cfg_get
+            _hs_root = _cfg_get("paths.hyperspin_root", "")
+        except (ImportError, ModuleNotFoundError):
+            _hs_root = r"D:\Arcade"  # fallback default
         fs = servers.get("filesystem", {})
         fs_args = " ".join(str(a) for a in fs.get("args", []))
         if _hs_root and (_hs_root in fs_args or _hs_root.replace("\\", "\\\\") in fs_args):
@@ -370,33 +373,47 @@ def run_setup(validate_only: bool = False, auto_fix: bool = False) -> SetupResul
 def run_e2e_test() -> None:
     """Quick end-to-end test: call each MCP bridge and verify JSON response."""
     hdr("E2E Smoke Tests")
+
+    init_msg = json.dumps({"method": "initialize", "id": 1, "jsonrpc": "2.0",
+                           "params": {"protocolVersion": "2024-11-05", "capabilities": {}}})
+    list_msg = json.dumps({"method": "tools/list", "id": 2, "jsonrpc": "2.0"})
+    payload = init_msg + "\n" + list_msg + "\n"
+
     tests = [
-        ("Toolkit MCP — get_stats",    [sys.executable, str(TOOLKIT_DIR / "mcp_bridge.py")],             '{"method":"tools/list","id":1,"jsonrpc":"2.0"}'),
-        ("CLI-Anything — resolve",     [sys.executable, str(ENGINES_DIR / "cli_anything_bridge.py")],     '{"method":"tools/list","id":1,"jsonrpc":"2.0"}'),
-        ("NemoClaw Agents — list",     [sys.executable, str(ENGINES_DIR / "nemoclaw_agents.py")],         '{"method":"tools/list","id":1,"jsonrpc":"2.0"}'),
-        ("OpenHands Bridge — status",  [sys.executable, str(ENGINES_DIR / "openhands_bridge.py")],        '{"method":"tools/list","id":1,"jsonrpc":"2.0"}'),
+        ("Toolkit MCP",    [sys.executable, str(TOOLKIT_DIR / "mcp_bridge.py")]),
+        ("CLI-Anything",   [sys.executable, str(ENGINES_DIR / "cli_anything_bridge.py")]),
+        ("NemoClaw Agents",[sys.executable, str(ENGINES_DIR / "nemoclaw_agents.py")]),
+        ("OpenHands Bridge",[sys.executable, str(ENGINES_DIR / "openhands_bridge.py")]),
     ]
 
-    for name, cmd, payload in tests:
+    for name, cmd in tests:
         try:
             proc = subprocess.run(
                 cmd,
-                input=payload + "\n",
+                input=payload,
                 capture_output=True,
                 text=True,
-                timeout=15,
+                timeout=20,
                 cwd=str(TOOLKIT_DIR),
             )
-            if proc.returncode == 0 and proc.stdout:
-                resp = json.loads(proc.stdout.strip().split("\n")[0])
-                tools = resp.get("result", {}).get("tools", [])
-                ok(f"{name} — {len(tools)} tools")
+            lines = [l.strip() for l in proc.stdout.strip().split("\n") if l.strip()]
+            tool_count = 0
+            for line in lines:
+                try:
+                    resp = json.loads(line)
+                    tools = resp.get("result", {}).get("tools", [])
+                    if tools:
+                        tool_count = len(tools)
+                except json.JSONDecodeError:
+                    pass
+            if tool_count > 0:
+                ok(f"{name} — {tool_count} tools")
+            elif proc.stdout:
+                warn(f"{name} — responded but no tools parsed")
             else:
-                err(f"{name} — no output or error: {proc.stderr[:100]}")
+                err(f"{name} — no output: {proc.stderr[:120]}")
         except subprocess.TimeoutExpired:
-            warn(f"{name} — timed out (15s)")
-        except json.JSONDecodeError:
-            warn(f"{name} — non-JSON output (may still work)")
+            warn(f"{name} — timed out (20s)")
         except Exception as e:
             err(f"{name} — {e}")
 

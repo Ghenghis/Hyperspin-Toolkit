@@ -13,7 +13,7 @@
         </div>
     </div>
     <div id="health-summary"
-        style="padding:12px 20px;display:flex;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border-color);">
+        style="padding:12px 20px;display:flex;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
     </div>
     <div class="card-body" id="emu-list">
         <p class="muted">Loading emulator health...</p>
@@ -25,6 +25,11 @@
 <script>
     let allEmus = [];
 
+    // Real-time refresh via WebSocket events
+    onWsEvent('scan.*', () => { loadHealth(); });
+    onWsEvent('update.*', () => { loadHealth(); });
+    onWsEvent('audit.*', () => { loadHealth(); });
+
     async function loadHealth() {
         document.getElementById('emu-list').innerHTML = '<p class="muted">Scanning emulators...</p>';
         try {
@@ -32,11 +37,11 @@
             allEmus = data.emulators || [];
             // Summary bar
             const sumEl = document.getElementById('health-summary');
-            const scoreColor = data.avg_health_score >= 70 ? 'var(--color-good)' : data.avg_health_score >= 40 ? 'var(--color-warn)' : 'var(--color-bad)';
+            const scoreColor = data.avg_health_score >= 70 ? 'var(--success)' : data.avg_health_score >= 40 ? 'var(--warning)' : 'var(--danger)';
             sumEl.innerHTML = `
             <span><strong>${data.total}</strong> <span class="muted">total</span></span>
-            <span style="color:var(--color-good)"><strong>${data.healthy}</strong> <span class="muted">healthy</span></span>
-            <span style="color:var(--color-bad)"><strong>${data.unhealthy}</strong> <span class="muted">need attention</span></span>
+            <span style="color:var(--success)"><strong>${data.healthy}</strong> <span class="muted">healthy</span></span>
+            <span style="color:var(--danger)"><strong>${data.unhealthy}</strong> <span class="muted">need attention</span></span>
             <span style="color:${scoreColor}"><strong>${data.avg_health_score}</strong> <span class="muted">avg score</span></span>
         `;
             renderEmus(allEmus);
@@ -66,15 +71,15 @@
             '<th>Emulator</th><th>Score</th><th>EXE</th><th>Version</th><th>RL Module</th><th>Cfg Issues</th><th>Healthy</th>' +
             '</tr></thead><tbody>';
         for (const e of emus) {
-            const scoreColor = e.health_score >= 70 ? 'var(--color-good)' : e.health_score >= 40 ? 'var(--color-warn)' : 'var(--color-bad)';
+            const scoreColor = e.health_score >= 70 ? 'var(--success)' : e.health_score >= 40 ? 'var(--warning)' : 'var(--danger)';
             const healthy = e.is_healthy
                 ? '<span class="health-pill good">YES</span>'
                 : '<span class="health-pill bad">NO</span>';
-            const exe = e.exe_exists ? '&#10003;' : '<span style="color:var(--color-bad)">&#10007;</span>';
+            const exe = e.exe_exists ? '&#10003;' : '<span style="color:var(--danger)">&#10007;</span>';
             const rl = e.rl_module_exists ? '&#10003;' : '<span class="muted">—</span>';
             const cfg = e.config_issues && e.config_issues.length
-                ? `<span style="color:var(--color-warn)">${e.config_issues.length}</span>`
-                : '<span style="color:var(--color-good)">0</span>';
+                ? `<span style="color:var(--warning)">${e.config_issues.length}</span>`
+                : '<span style="color:var(--success)">0</span>';
             html += `<tr>
             <td><strong>${e.name}</strong></td>
             <td style="color:${scoreColor};font-weight:600;">${e.health_score}</td>

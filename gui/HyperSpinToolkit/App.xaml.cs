@@ -41,6 +41,7 @@ public partial class App : Application
         services.AddTransient<AuditViewModel>();
         services.AddTransient<BackupViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<RocketLauncherViewModel>();
 
         // Pages — transient, resolved lazily by NavigationView via SetServiceProvider
         services.AddTransient<DashboardPage>();
@@ -52,6 +53,7 @@ public partial class App : Application
         services.AddTransient<AssetGalleryPage>();
         services.AddTransient<AgentConsolePage>();
         services.AddTransient<AIChatPage>();
+        services.AddTransient<RocketLauncherPage>();
 
         // Main window singleton
         services.AddSingleton<MainWindow>();

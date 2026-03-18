@@ -26,7 +26,7 @@
           │  HyperSpin   │ │  CLI-  │ │Nemo- │ │  OpenHands  │
           │ Toolkit MCP  │ │Anything│ │ Claw │ │   Bridge    │
           │              │ │ Bridge │ │Agents│ │             │
-          │  14 MCP tools│ │NL→CLI  │ │6 rôles│ │ REST→:3000 │
+          │ 236 MCP tools │ │NL→CLI  │ │6 rôles│ │ REST→:3000 │
           └──────┬───────┘ └────┬───┘ └──┬───┘ └──┬──────────┘
                  │              │         │         │
                  └──────────────┴─────────┴─────────┘
@@ -36,7 +36,7 @@
                     │        Python CLI Engine            │
                     │                                     │
                     │  main.py — 8 command groups         │
-                    │  engines/ — 10+ specialist modules  │
+                    │  engines/ — 58 specialist modules   │
                     └─────────────────┬──────────────────┘
                                       │
                     ┌─────────────────▼──────────────────┐
@@ -73,21 +73,21 @@ Mode:           smart_approve (asks before destructive actions)
 
 **Extensions active:**
 
-| Extension Key | Type | What it provides |
-|--------------|------|-----------------|
-| `hyperspin_toolkit` | stdio MCP | 14 direct toolkit tools |
-| `cli_anything` | stdio MCP | NL → CLI command translation |
-| `nemoclaw_agents` | stdio MCP | 6 specialist reasoning agents |
-| `openhands_bridge` | stdio MCP | Multi-file operations via OpenHands |
-| `skills` | platform | Loads 11 × SKILL.md files |
-| `developer` | builtin | Shell + file system access |
-| `computercontroller` | builtin | Desktop UI automation |
-| `memory` | builtin | Persistent user preferences |
-| `summon` | platform | Sub-agent delegation |
+| Extension Key        | Type      | What it provides                    |
+| -------------------- | --------- | ----------------------------------- |
+| `hyperspin_toolkit`  | stdio MCP | 70+ direct toolkit tools            |
+| `cli_anything`       | stdio MCP | NL → CLI command translation        |
+| `nemoclaw_agents`    | stdio MCP | 6 specialist reasoning agents       |
+| `openhands_bridge`   | stdio MCP | Multi-file operations via OpenHands |
+| `skills`             | platform  | Loads 11 × SKILL.md files           |
+| `developer`          | builtin   | Shell + file system access          |
+| `computercontroller` | builtin   | Desktop UI automation               |
+| `memory`             | builtin   | Persistent user preferences         |
+| `summon`             | platform  | Sub-agent delegation                |
 
 ---
 
-### 2. HyperSpin Toolkit MCP Bridge (14 tools)
+### 2. HyperSpin Toolkit MCP Bridge (70+ tools)
 
 ```
 Script:   D:\hyperspin_toolkit\mcp_bridge.py
@@ -95,22 +95,22 @@ Protocol: JSON-RPC 2.0 over stdio
 Timeout:  600 seconds
 ```
 
-| Tool | Description |
-|------|-------------|
-| `audit_full` | Full ecosystem audit — all 184 systems |
-| `audit_system` | Single system audit by name |
-| `check_all_updates` | Check 20+ emulators vs GitHub releases |
-| `check_emulator_update` | Check one emulator |
-| `optimize_report` | Full space optimization analysis |
-| `find_duplicates` | Hash-based duplicate ROM finder |
-| `find_redundant_emulators` | Multiple-version emulator finder |
-| `find_large_files` | Largest files by size threshold |
-| `discover_tools` | Check MAME, Igir, Flips, 7z, etc. |
-| `backup_create` | Versioned directory backup |
-| `get_stats` | Collection statistics |
-| `disk_usage` | Drive usage summary |
-| `mame_version` | MAME version + path |
-| `mame_listxml` | Generate MAME -listxml XML database |
+| Tool                       | Description                            |
+| -------------------------- | -------------------------------------- |
+| `audit_full`               | Full ecosystem audit — all 184 systems |
+| `audit_system`             | Single system audit by name            |
+| `check_all_updates`        | Check 20+ emulators vs GitHub releases |
+| `check_emulator_update`    | Check one emulator                     |
+| `optimize_report`          | Full space optimization analysis       |
+| `find_duplicates`          | Hash-based duplicate ROM finder        |
+| `find_redundant_emulators` | Multiple-version emulator finder       |
+| `find_large_files`         | Largest files by size threshold        |
+| `discover_tools`           | Check MAME, Igir, Flips, 7z, etc.      |
+| `backup_create`            | Versioned directory backup             |
+| `get_stats`                | Collection statistics                  |
+| `disk_usage`               | Drive usage summary                    |
+| `mame_version`             | MAME version + path                    |
+| `mame_listxml`             | Generate MAME -listxml XML database    |
 
 ---
 
@@ -154,14 +154,14 @@ LLM:      LM Studio (primary) / Ollama (fallback) — NO NVIDIA CLOUD
 
 Each agent has a deep system prompt tuned to its domain. Goose routes tasks by keyword matching, then invokes the agent which reasons with the local LLM and returns `ACTION:`, `WARNING:`, and `NEXT:` items.
 
-| Agent | Model | Handles |
-|-------|-------|---------|
-| `RomSpecialist` | Devstral-24B | ROM validation, hashing, MAME parent/clone relationships |
-| `EmulatorSpecialist` | Devstral-24B | Config, RocketLauncher modules, upgrade safety |
-| `MediaSpecialist` | GLM-4.6V-Flash | Artwork quality, coverage, scraping recommendations |
-| `DatabaseSpecialist` | Qwen3.5-9B Opus | HyperSpin XML, game list sync, MAME listxml |
-| `SpaceOptimizer` | Qwen3.5-9B Opus | Disk analysis, duplicate detection, archive cleanup |
-| `UpdateOrchestrator` | Qwen3.5-27B Opus | Multi-emulator update sequencing, risk scoring |
+| Agent                | Model            | Handles                                                  |
+| -------------------- | ---------------- | -------------------------------------------------------- |
+| `RomSpecialist`      | Devstral-24B     | ROM validation, hashing, MAME parent/clone relationships |
+| `EmulatorSpecialist` | Devstral-24B     | Config, RocketLauncher modules, upgrade safety           |
+| `MediaSpecialist`    | GLM-4.6V-Flash   | Artwork quality, coverage, scraping recommendations      |
+| `DatabaseSpecialist` | Qwen3.5-9B Opus  | HyperSpin XML, game list sync, MAME listxml              |
+| `SpaceOptimizer`     | Qwen3.5-9B Opus  | Disk analysis, duplicate detection, archive cleanup      |
+| `UpdateOrchestrator` | Qwen3.5-27B Opus | Multi-emulator update sequencing, risk scoring           |
 
 **MCP Tools:**
 - `nemoclaw_delegate(task, context?, agent_name?)` — single agent call

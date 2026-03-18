@@ -38,7 +38,9 @@ These phrases reliably activate the correct skill + agent chain:
 
 ---
 
-## MCP Tools (23 total — called by Goose automatically)
+## MCP Tools (70+ total — called by Goose automatically)
+
+> **Note:** The table below shows the original core tools. The full MCP bridge (`mcp_bridge.py`) now includes 70+ tools covering all 66 milestones — ROM audit, media audit, XML tools, emulator health, version tracking, dependency detection, snapshots, rollbacks, event hub, NL query, game recommender, troubleshooter, drive management, BIOS verification, DAT verification, metadata scraping, HyperSpin settings, frontend conversion, RL media/stats, scheduling, agent memory, self-healing, drive fingerprinting, gstack roles, and more. Run `python mcp_bridge.py --list-tools` for the complete list.
 
 | Tool                       | Required Args               | What it does                             |
 | -------------------------- | --------------------------- | ---------------------------------------- |

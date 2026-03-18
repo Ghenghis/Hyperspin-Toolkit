@@ -12,7 +12,7 @@ Full ecosystem management for HyperSpin, RocketLauncher, ROMs, Emulators, and Me
 USER (plain English)
        ↓
    G O O S E  (orchestrator — LM Studio / Devstral-24B)
-       ├── HyperSpin Toolkit MCP  (14 direct tools)
+       ├── HyperSpin Toolkit MCP  (236 direct tools)
        ├── CLI-Anything Bridge    (NL → CLI command translation)
        ├── NemoClaw Agents        (6 specialist reasoning agents)
        └── OpenHands Bridge       (batch file ops / browser automation)
@@ -53,12 +53,12 @@ python setup\goose_setup.py --e2e
 
 ### Required binaries (not included — free downloads)
 
-| Binary                | Where                                                            | Purpose          |
-| --------------------- | ---------------------------------------------------------------- | ---------------- |
-| **Goose v1.27.2**     | `install_goose.ps1` auto-downloads                               | Orchestrator     |
-| **LM Studio**         | [lmstudio.ai](https://lmstudio.ai)                               | Local LLM server |
-| **OpenHands**         | `docker pull docker.all-hands.dev/all-hands-ai/openhands:latest` | Batch file agent |
-| **Ollama** (optional) | [ollama.com](https://ollama.com)                                 | Fallback LLM     |
+| Binary                | Where                                            | Purpose          |
+| --------------------- | ------------------------------------------------ | ---------------- |
+| **Goose v1.27.2**     | `install_goose.ps1` auto-downloads               | Orchestrator     |
+| **LM Studio**         | [lmstudio.ai](https://lmstudio.ai)               | Local LLM server |
+| **OpenHands**         | `docker pull ghcr.io/openhands/openhands:latest` | Batch file agent |
+| **Ollama** (optional) | [ollama.com](https://ollama.com)                 | Fallback LLM     |
 
 ---
 
@@ -71,27 +71,36 @@ D:\hyperspin_toolkit\
 ├── config.json              # Legacy config for PowerShell inventory
 ├── requirements.txt         # Python dependencies
 ├── Launch_Toolkit.bat       # Windows launcher menu
-├── MILESTONES.md            # 35-milestone roadmap
+├── MILESTONES.md            # 66-milestone roadmap (all complete)
 │
 ├── core/                    # Core framework
 │   ├── config.py            # YAML config loader with dot-notation access
 │   ├── database.py          # SQLite database engine (12 tables)
 │   └── logger.py            # Structured JSON logging + audit trail
 │
-├── engines/                 # Processing engines
+├── engines/                 # 58 processing engines
 │   ├── scanner.py           # System/emulator/ROM/media discovery
 │   ├── backup.py            # Versioned incremental backup & recovery
-│   ├── update_manager.py    # Safe update pipeline (snapshot→update→test→commit/rollback)
+│   ├── update_applier.py    # Safe update pipeline (snapshot→update→test→commit/rollback)
 │   ├── auditor.py           # Full ecosystem audit (ROMs, emulators, media, RocketLauncher)
-│   └── ai_engine.py         # AI integration (Ollama, LM Studio, vLLM) + NL query
+│   ├── ai_engine.py         # AI integration (Ollama, LM Studio, vLLM) + NL query
+│   ├── version_tracker.py   # Emulator version tracking & quarantine staging
+│   ├── snapshot_verify.py   # Pre/post-update snapshot & verification
+│   ├── auto_rollback.py     # Automated rollback on failure
+│   ├── dependency_detector.py # DLL conflict detection across emulators
+│   ├── event_hub.py         # Real-time WebSocket event broadcasting
+│   ├── gstack_roles.py      # Role-based workflow agents (CEO/Eng/Staff/QA)
+│   ├── rl_media_manager.py  # RocketLauncher fade/bezel/pause media
+│   ├── rl_stats_keymapper.py # RL statistics, keymappers, MultiGame
+│   └── ...                  # + 44 more engines (see MILESTONES.md)
 │
 ├── agents/                  # AI agent system
 │   └── base_agent.py        # Auditor, Backup, Updater, Researcher agents
 │
 ├── dashboard/               # Web dashboard (FastAPI)
-│   ├── app.py               # REST API + WebSocket backend
-│   ├── templates/           # Jinja2 HTML templates (6 pages)
-│   └── static/              # CSS + JavaScript
+│   ├── app.py               # REST API (89 routes) + WebSocket backend
+│   ├── templates/           # Jinja2 HTML templates (8 pages)
+│   └── static/              # CSS + JavaScript (app.js with WS event dispatching)
 │
 ├── plugins/                 # Plugin system with auto-discovery
 ├── scripts/                 # Setup, repair, and utility scripts
@@ -171,8 +180,8 @@ Every program update follows a strict safety pipeline:
 ## AI Integration
 
 Supports three local LLM providers with automatic fallback:
-- **Ollama** (primary) — `http://localhost:11434`
-- **LM Studio** (secondary) — `http://localhost:1234/v1`
+- **LM Studio** (primary) — `http://localhost:1234/v1`
+- **Ollama** (secondary) — `http://localhost:11434`
 - **vLLM** (tertiary) — `http://localhost:8000/v1`
 
 ### AI Features
@@ -239,12 +248,11 @@ Run the automated repair script to check for common issues:
 powershell -ExecutionPolicy Bypass -File scripts\repair.ps1
 ```
 
-## 35-Milestone Roadmap
+## 66-Milestone Roadmap (All Complete)
 
-See [MILESTONES.md](MILESTONES.md) for the complete enhancement roadmap covering:
-- Foundation (M1–M5): Config, DB, logging, backup, recovery
-- Audit & Discovery (M6–M10): ROM, emulator, media, RL, XML auditing
-- Safe Updates (M11–M15): Update manager, version tracking, rollback
-- AI Integration (M16–M20): LLM layer, ROM ID, recommendations, NL queries
-- Web Dashboard (M21–M25): FastAPI dashboard with full UI
-- Advanced (M26–M35): Dedup, completion tracking, research agent, plugins, sync, benchmarks, health score, agentic orchestrator
+See [MILESTONES.md](MILESTONES.md) for the complete 66-milestone roadmap across 15 phases:
+- **Phase 1–5** (M1–M25): Foundation, Audit, Updates, AI, Web Dashboard
+- **Phase 6–7** (M26–M40): Advanced Features, Agentic AI Stack
+- **Phase 8–11** (M41–M52): Asset Pipeline, Arcade GUI, Polish
+- **Phase 12–13** (M53–M60): Data Pipeline, RocketLauncher Deep Integration
+- **Phase 14–15** (M61–M66): Automation, KINHANK Variant Management

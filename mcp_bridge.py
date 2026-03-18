@@ -1361,6 +1361,35 @@ def tool_delegate_to_agent(agent: str, task: str, context: str = "", **kwargs) -
     return delegate_to_agent(agent, task, context)
 
 
+# ── gstack — Role-Based Workflow Agent Handlers ──────────────────────
+
+def tool_gstack_delegate(task: str, context: str = "", role_name: str = "",
+                         scope_mode: str = "", **kwargs) -> dict:
+    """gstack — Route a task to the best gstack workflow role (CEO, Eng, Review, QA, Ship, Retro, Doc)."""
+    from engines.gstack_roles import delegate_role
+    result = delegate_role(task, context, role_name or None, scope_mode)
+    return result.to_dict()
+
+
+def tool_gstack_pipeline(task: str, context: str = "", skip_ceo: bool = False,
+                         skip_qa: bool = False, **kwargs) -> dict:
+    """gstack — Run full review pipeline (CEO -> Eng -> Review -> QA) with Review Readiness Dashboard."""
+    from engines.gstack_roles import workflow_pipeline
+    results, dashboard = workflow_pipeline(task, context, skip_ceo, skip_qa)
+    return {
+        "results": [r.to_dict() for r in results],
+        "dashboard": dashboard.summary(),
+        "cleared": dashboard.is_cleared,
+    }
+
+
+def tool_gstack_list_roles(**kwargs) -> dict:
+    """gstack — List all available gstack workflow roles and their slash commands."""
+    from engines.gstack_roles import list_roles
+    roles = list_roles()
+    return {"roles": roles, "count": len(roles)}
+
+
 # ── M31 — Multi-Drive Collection Sync Handlers ──────────────────────
 
 def tool_create_sync_pair(name: str, source_dir: str, dest_dir: str,
@@ -1848,14 +1877,6 @@ def tool_verify_all_dats(dat_dir: str = "", roms_root: str = "",
     return report.to_dict()
 
 
-def tool_dat_metadata(dat_path: str, **kwargs) -> dict:
-    """M56 — Parse DAT file metadata (source, version, game/ROM counts)."""
-    from engines.dat_verifier import parse_dat_metadata
-    from pathlib import Path
-    meta = parse_dat_metadata(Path(dat_path))
-    return meta.to_dict()
-
-
 def tool_dat_summary(dat_dir: str, **kwargs) -> dict:
     """M56 — Summarize all DAT files in a directory by source."""
     from engines.dat_verifier import get_dat_summary
@@ -1901,8 +1922,8 @@ def tool_search_indexed_files(query: str, drive_letter: str = "",
     return {"results": results, "count": len(results)}
 
 
-def tool_find_duplicates(drives: list = None, min_size_mb: float = 1.0,
-                         file_types: list = None, **kwargs) -> dict:
+def tool_find_cross_drive_duplicates(drives: list = None, min_size_mb: float = 1.0,
+                                     file_types: list = None, **kwargs) -> dict:
     """M53 — Find duplicate files across indexed drives."""
     from engines.drive_manifest import find_duplicates
     min_bytes = int(min_size_mb * 1024 * 1024)
@@ -1952,6 +1973,83 @@ def tool_list_formats(**kwargs) -> dict:
             "csv": "M65 standardized CSV (universal interchange)",
         },
     }
+
+
+# ── M59 — RocketLauncher Media Manager Handlers ──────────────────────
+
+def tool_rl_media_coverage(rl_root: str | None = None, systems: list | None = None, **kwargs) -> dict:
+    """M59 — Full RL media coverage report across all systems (fade, bezel, pause)."""
+    from engines.rl_media_manager import media_coverage
+    return media_coverage(rl_root, systems)
+
+
+def tool_rl_media_system(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M59 — Detailed media report for a single system (fade layers, bezels, pause assets)."""
+    from engines.rl_media_manager import system_media_detail
+    return system_media_detail(system, rl_root)
+
+
+def tool_rl_media_missing(system: str, media_type: str = "all", rl_root: str | None = None, **kwargs) -> dict:
+    """M59 — Find games missing fade, bezel, or pause media for a system."""
+    from engines.rl_media_manager import find_missing_media
+    return find_missing_media(system, media_type, rl_root)
+
+
+def tool_rl_scan_fade(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M59 — Scan fade images for a single system (layers 1-4)."""
+    from engines.rl_media_manager import scan_fade
+    return scan_fade(system, rl_root)
+
+
+def tool_rl_scan_bezels(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M59 — Scan bezel overlays for a single system with orientation detection."""
+    from engines.rl_media_manager import scan_bezels
+    return scan_bezels(system, rl_root)
+
+
+def tool_rl_scan_pause(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M59 — Scan pause screen assets (guides, controller maps) for a system."""
+    from engines.rl_media_manager import scan_pause
+    return scan_pause(system, rl_root)
+
+
+# ── M60 — RocketLauncher Stats, Keymapper & 7z Handlers ─────────────
+
+def tool_rl_stats_system(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M60 — Parse play statistics for a system (play count, time, last played)."""
+    from engines.rl_stats_keymapper import parse_system_stats
+    return parse_system_stats(system, rl_root)
+
+
+def tool_rl_most_played(rl_root: str | None = None, top_n: int = 25,
+                         systems: list | None = None, **kwargs) -> dict:
+    """M60 — Get most-played games leaderboard across all systems."""
+    from engines.rl_stats_keymapper import most_played
+    return most_played(rl_root, top_n, systems)
+
+
+def tool_rl_keymappers(rl_root: str | None = None, **kwargs) -> dict:
+    """M60 — Scan all keymapper profiles (AHK, Xpadder, JoyToKey)."""
+    from engines.rl_stats_keymapper import scan_keymappers
+    return scan_keymappers(rl_root)
+
+
+def tool_rl_multigame(system: str, rl_root: str | None = None, **kwargs) -> dict:
+    """M60 — Validate MultiGame settings for multi-disc systems."""
+    from engines.rl_stats_keymapper import validate_multigame
+    return validate_multigame(system, rl_root)
+
+
+def tool_rl_7z_settings(rl_root: str | None = None, **kwargs) -> dict:
+    """M60 — Check 7z extraction settings (paths, cache, cleanup)."""
+    from engines.rl_stats_keymapper import check_7z_settings
+    return check_7z_settings(rl_root)
+
+
+def tool_rl_integration_report(rl_root: str | None = None, **kwargs) -> dict:
+    """M60 — Full RocketLauncher integration report (stats + keymapper + 7z)."""
+    from engines.rl_stats_keymapper import rl_integration_report
+    return rl_integration_report(rl_root)
 
 
 # ── MCP Tool Definitions ────────────────────────────────────────────
@@ -4348,18 +4446,6 @@ TOOLS = [
         "handler": tool_verify_all_dats,
     },
     {
-        "name": "dat_metadata",
-        "description": "M56 — Parse a DAT file and return metadata (source, version, game/ROM counts).",
-        "inputSchema": {
-            "type": "object",
-            "required": ["dat_path"],
-            "properties": {
-                "dat_path": {"type": "string", "description": "Path to DAT file"},
-            },
-        },
-        "handler": tool_dat_metadata,
-    },
-    {
         "name": "dat_summary",
         "description": "M56 — Summarize all DAT files in a directory organized by source (No-Intro, Redump, TOSEC).",
         "inputSchema": {
@@ -4439,7 +4525,7 @@ TOOLS = [
                 "file_types": {"type": "array", "items": {"type": "string"}, "description": "Filter by type: rom, disc_image, media, etc."},
             },
         },
-        "handler": tool_find_duplicates,
+        "handler": tool_find_cross_drive_duplicates,
     },
     {
         "name": "drive_index_stats",
@@ -4501,6 +4587,195 @@ TOOLS = [
         "description": "M58 — List all supported frontend formats for game list conversion.",
         "inputSchema": {"type": "object", "properties": {}},
         "handler": tool_list_formats,
+    },
+    # ── M59 — RocketLauncher Media Manager ──
+    {
+        "name": "rl_media_coverage",
+        "description": "M59 — Full RocketLauncher media coverage report: fade, bezel, and pause assets across all systems with coverage percentages.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional, uses config)"},
+                "systems": {"type": "array", "items": {"type": "string"}, "description": "System names to scan (optional, scans all)"},
+            },
+        },
+        "handler": tool_rl_media_coverage,
+    },
+    {
+        "name": "rl_media_system",
+        "description": "M59 — Detailed media report for a single system: fade layers, bezel inventory with orientation, pause categories, INI config.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name, e.g. 'MAME', 'Nintendo 64'"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_media_system,
+    },
+    {
+        "name": "rl_media_missing",
+        "description": "M59 — Find games missing fade, bezel, or pause media for a system. Cross-references ROM list.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "media_type": {"type": "string", "enum": ["fade", "bezels", "pause", "all"], "default": "all"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_media_missing,
+    },
+    {
+        "name": "rl_scan_fade",
+        "description": "M59 — Scan fade images for a system (layers 1-4, PNG validation, dimension checks).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_scan_fade,
+    },
+    {
+        "name": "rl_scan_bezels",
+        "description": "M59 — Scan bezel overlays for a system with orientation detection and background image matching.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_scan_bezels,
+    },
+    {
+        "name": "rl_scan_pause",
+        "description": "M59 — Scan pause screen assets (game guides, controller images, extras) for a system.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_scan_pause,
+    },
+    # ── M60 — RocketLauncher Stats, Keymapper & 7z ──
+    {
+        "name": "rl_stats_system",
+        "description": "M60 — Parse play statistics for a system: play count, total time, last played, leaderboard.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_stats_system,
+    },
+    {
+        "name": "rl_most_played",
+        "description": "M60 — Get most-played games leaderboard across all systems by play count and total time.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+                "top_n": {"type": "integer", "description": "Number of top games to return (default 25)", "default": 25},
+                "systems": {"type": "array", "items": {"type": "string"}, "description": "Filter to specific systems (optional)"},
+            },
+        },
+        "handler": tool_rl_most_played,
+    },
+    {
+        "name": "rl_keymappers",
+        "description": "M60 — Scan all keymapper profiles: AutoHotkey, Xpadder, JoyToKey. Detects unmapped buttons.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_keymappers,
+    },
+    {
+        "name": "rl_multigame",
+        "description": "M60 — Validate MultiGame/multi-disc settings for a system (PS1, Saturn, Sega CD, etc.).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string", "description": "System name (e.g. 'Sony PlayStation')"},
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_multigame,
+    },
+    {
+        "name": "rl_7z_settings",
+        "description": "M60 — Check 7z extraction settings: extract path, temp dir, cache size, cleanup policies.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_7z_settings,
+    },
+    {
+        "name": "rl_integration_report",
+        "description": "M60 — Full RocketLauncher integration report combining play stats, keymapper profiles, and 7z config.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "rl_root": {"type": "string", "description": "RocketLauncher root path (optional)"},
+            },
+        },
+        "handler": tool_rl_integration_report,
+    },
+    # ── gstack — Role-Based Workflow Agent Tools ──
+    {
+        "name": "gstack_delegate",
+        "description": "gstack — Delegate a task to the best gstack role-based workflow agent. Roles: CEOReview (strategic), EngManagerReview (architecture), StaffReview (code review), QALead (testing), ReleaseEngineer (ship), RetroAnalyst (retrospective), DocWriter (documentation). Auto-routes by keyword or specify role_name.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Task description to delegate"},
+                "context": {"type": "string", "description": "Additional context (code, PR diff, etc.)"},
+                "role_name": {"type": "string", "description": "Force a specific role: ceo, eng, review, qa, ship, retro, doc"},
+                "scope_mode": {"type": "string", "description": "Scope override: paranoid, quick, audit, normal"},
+            },
+        },
+        "handler": tool_gstack_delegate,
+    },
+    {
+        "name": "gstack_pipeline",
+        "description": "gstack — Run a full multi-role review pipeline on a task: CEO → Eng Manager → Staff Review → QA Lead. Returns all role outputs plus a Review Readiness Dashboard with pass/fail status.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task"],
+            "properties": {
+                "task": {"type": "string", "description": "Task or PR to run through the pipeline"},
+                "context": {"type": "string", "description": "Code, diff, or additional context"},
+                "skip_ceo": {"type": "boolean", "description": "Skip CEO review step", "default": False},
+                "skip_qa": {"type": "boolean", "description": "Skip QA review step", "default": False},
+            },
+        },
+        "handler": tool_gstack_pipeline,
+    },
+    {
+        "name": "gstack_list_roles",
+        "description": "gstack — List all available gstack workflow roles with their descriptions, slash commands, and cognitive modes.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_gstack_list_roles,
     },
 ]
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     {% block head %}{% endblock %}
 </head>
+
 <body>
     <nav class="sidebar">
         <div class="sidebar-header">
@@ -15,23 +17,26 @@
         </div>
         <ul class="nav-links">
             <li><a href="/" class="nav-link" data-page="dashboard">
-                <span class="icon">📊</span> Dashboard
-            </a></li>
+                    <span class="icon">📊</span> Dashboard
+                </a></li>
             <li><a href="/systems" class="nav-link" data-page="systems">
-                <span class="icon">🎮</span> Systems
-            </a></li>
+                    <span class="icon">🎮</span> Systems
+                </a></li>
             <li><a href="/emulators" class="nav-link" data-page="emulators">
-                <span class="icon">🖥️</span> Emulators
-            </a></li>
+                    <span class="icon">🖥️</span> Emulators
+                </a></li>
             <li><a href="/backups" class="nav-link" data-page="backups">
-                <span class="icon">💾</span> Backups
-            </a></li>
+                    <span class="icon">💾</span> Backups
+                </a></li>
             <li><a href="/updates" class="nav-link" data-page="updates">
-                <span class="icon">🔄</span> Updates
-            </a></li>
+                    <span class="icon">🔄</span> Updates
+                </a></li>
+            <li><a href="/health" class="nav-link" data-page="health">
+                    <span class="icon">🩺</span> Health
+                </a></li>
             <li><a href="/ai" class="nav-link" data-page="ai">
-                <span class="icon">🤖</span> AI Assistant
-            </a></li>
+                    <span class="icon">🤖</span> AI Assistant
+                </a></li>
         </ul>
         <div class="sidebar-footer">
             <div id="health-badge" class="health-badge">
@@ -57,4 +62,5 @@
     <script src="/static/js/app.js"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

@@ -89,56 +89,106 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    loadStats();
-    loadSystems();
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStats();
+        loadSystems();
+        loadRecentActivity();
+    });
 
-async function loadStats() {
-    try {
-        const resp = await fetch('/api/stats');
-        const data = await resp.json();
-        document.getElementById('stat-systems').textContent = (data.total_systems || 0).toLocaleString();
-        document.getElementById('stat-roms').textContent = (data.total_roms || 0).toLocaleString();
-        document.getElementById('stat-emulators').textContent = (data.total_emulators || 0).toLocaleString();
-        document.getElementById('stat-healthy').textContent = (data.healthy_emulators || 0).toLocaleString();
-        document.getElementById('stat-backups').textContent = (data.total_backups || 0).toLocaleString();
-        document.getElementById('stat-updates').textContent = (data.total_updates || 0).toLocaleString();
-        document.getElementById('health-score').textContent = (data.avg_health_score || 0) + '%';
-    } catch(e) {
-        console.error('Failed to load stats:', e);
-    }
-}
+    // Real-time refresh via WebSocket events
+    onWsEvent('update.*', () => { loadStats(); loadRecentActivity(); });
+    onWsEvent('rollback.*', () => { loadStats(); loadRecentActivity(); });
+    onWsEvent('snapshot.*', () => { loadStats(); loadRecentActivity(); });
+    onWsEvent('ws.client_connected', () => { loadRecentActivity(); });
 
-async function loadSystems() {
-    try {
-        const resp = await fetch('/api/systems');
-        const data = await resp.json();
-        const systems = data.systems || [];
-        if (systems.length === 0) {
-            document.getElementById('systems-table-container').innerHTML =
-                '<p class="muted">No systems in database. Run a full audit to discover systems.</p>';
-            return;
+    async function loadStats() {
+        try {
+            const data = await apiGet('/api/stats');
+            document.getElementById('stat-systems').textContent = (data.total_systems || 0).toLocaleString();
+            document.getElementById('stat-roms').textContent = (data.total_roms || 0).toLocaleString();
+            document.getElementById('stat-emulators').textContent = (data.total_emulators || 0).toLocaleString();
+            document.getElementById('stat-healthy').textContent = (data.healthy_emulators || 0).toLocaleString();
+            document.getElementById('stat-backups').textContent = (data.total_backups || 0).toLocaleString();
+            document.getElementById('stat-updates').textContent = (data.total_updates || 0).toLocaleString();
+            document.getElementById('health-score').textContent = (data.avg_health_score || 0) + '%';
+        } catch (e) {
+            console.error('Failed to load stats:', e);
         }
-        let html = '<table class="data-table"><thead><tr>' +
-            '<th>System</th><th>ROMs</th><th>Media</th><th>Health</th><th>Last Audit</th>' +
-            '</tr></thead><tbody>';
-        for (const s of systems.slice(0, 50)) {
-            const healthClass = s.health_score >= 75 ? 'good' : s.health_score >= 50 ? 'warn' : 'bad';
-            html += `<tr>
+    }
+
+    async function loadRecentActivity() {
+        const el = document.getElementById('recent-activity');
+        if (!el) return;
+        try {
+            const data = await apiGet('/api/events/recent?limit=15');
+            const events = data.events || [];
+            if (!events.length) {
+                el.innerHTML = '<p class="muted">No recent activity. Run an audit to get started.</p>';
+                return;
+            }
+            let html = '<div style="max-height:280px;overflow-y:auto;">';
+            for (const ev of events) {
+                const icon = _eventIcon(ev.event || '');
+                html += `<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.83rem;align-items:center;">
+                <span style="font-size:1rem;">${icon}</span>
+                <span class="muted" style="white-space:nowrap;min-width:130px;">${ev.ts || ''}</span>
+                <span style="color:var(--accent);font-weight:600;min-width:150px;">${ev.event || ''}</span>
+                <span class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_eventSummary(ev)}</span>
+            </div>`;
+            }
+            html += '</div>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Event hub unavailable.</p>';
+        }
+    }
+
+    function _eventIcon(event) {
+        if (event.startsWith('update.')) return '🔄';
+        if (event.startsWith('rollback.')) return '↩️';
+        if (event.startsWith('snapshot.')) return '📸';
+        if (event.startsWith('scan.')) return '🔍';
+        if (event.startsWith('ws.')) return '🔌';
+        if (event.startsWith('dashboard.')) return '📊';
+        return '📋';
+    }
+
+    function _eventSummary(ev) {
+        const d = ev.data || {};
+        if (d.emulator) return d.emulator + (d.status ? ' — ' + d.status : '');
+        if (d.message) return d.message;
+        const txt = JSON.stringify(d);
+        return txt.length > 80 ? txt.slice(0, 80) + '…' : txt;
+    }
+
+    async function loadSystems() {
+        try {
+            const data = await apiGet('/api/systems');
+            const systems = data.systems || [];
+            if (systems.length === 0) {
+                document.getElementById('systems-table-container').innerHTML =
+                    '<p class="muted">No systems in database. Run a full audit to discover systems.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>System</th><th>ROMs</th><th>Media</th><th>Health</th><th>Last Audit</th>' +
+                '</tr></thead><tbody>';
+            for (const s of systems.slice(0, 50)) {
+                const healthClass = s.health_score >= 75 ? 'good' : s.health_score >= 50 ? 'warn' : 'bad';
+                html += `<tr>
                 <td>${s.name}</td>
                 <td>${(s.rom_count || 0).toLocaleString()}</td>
                 <td>${(s.media_count || 0).toLocaleString()}</td>
                 <td><span class="health-pill ${healthClass}">${s.health_score || 0}%</span></td>
                 <td>${s.last_audit || 'Never'}</td>
             </tr>`;
+            }
+            html += '</tbody></table>';
+            if (systems.length > 50) html += `<p class="muted">Showing 50 of ${systems.length} systems</p>`;
+            document.getElementById('systems-table-container').innerHTML = html;
+        } catch (e) {
+            console.error('Failed to load systems:', e);
         }
-        html += '</tbody></table>';
-        if (systems.length > 50) html += `<p class="muted">Showing 50 of ${systems.length} systems</p>`;
-        document.getElementById('systems-table-container').innerHTML = html;
-    } catch(e) {
-        console.error('Failed to load systems:', e);
     }
-}
 </script>
 {% endblock %}

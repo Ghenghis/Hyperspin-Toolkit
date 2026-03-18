@@ -25,12 +25,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     checkAIStatus();
+    loadHealthBadge();
 });
 
-// ---- API helpers ----
+// ---- Sidebar health badge (global — loads on every page) ----
+async function loadHealthBadge() {
+    try {
+        const data = await apiGet('/api/stats');
+        const el = document.getElementById('health-score');
+        if (!el) return;
+        const score = data.avg_health_score || 0;
+        el.textContent = score + '%';
+        el.style.color = score >= 75 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+    } catch (e) { /* sidebar badge is non-critical */ }
+}
+
+// ---- API helpers with error body extraction ----
 async function apiGet(url) {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if (!resp.ok) {
+        let detail = `HTTP ${resp.status}`;
+        try { const body = await resp.json(); detail = body.error || detail; } catch (_) {}
+        throw new Error(detail);
+    }
     return resp.json();
 }
 
@@ -40,8 +57,25 @@ async function apiPost(url, body = {}) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if (!resp.ok) {
+        let detail = `HTTP ${resp.status}`;
+        try { const b = await resp.json(); detail = b.error || detail; } catch (_) {}
+        throw new Error(detail);
+    }
     return resp.json();
+}
+
+// ---- Button protection helper ----
+function withButton(btnId, label, asyncFn) {
+    return async function (...args) {
+        const btn = document.getElementById(btnId);
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> ' + label + '...'; }
+        try {
+            await asyncFn(...args);
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = label; }
+        }
+    };
 }
 
 // ---- Full audit ----
@@ -56,6 +90,7 @@ async function runFullAudit() {
     try {
         const data = await apiPost('/api/audit/full');
         showToast('Audit complete!', 'success');
+        loadHealthBadge();
         if (typeof loadStats === 'function') loadStats();
         if (typeof loadSystems === 'function') loadSystems();
     } catch (e) {
@@ -104,8 +139,29 @@ async function checkAI() {
     }
 }
 
-// ---- WebSocket ----
+// ---- WebSocket with event dispatching ----
 let ws = null;
+const _wsHandlers = {};
+
+function onWsEvent(eventType, handler) {
+    if (!_wsHandlers[eventType]) _wsHandlers[eventType] = [];
+    _wsHandlers[eventType].push(handler);
+}
+
+function _dispatchWsEvent(data) {
+    const eventType = data.event || data.type || '';
+    // Exact match handlers
+    if (_wsHandlers[eventType]) {
+        _wsHandlers[eventType].forEach(h => { try { h(data); } catch(_) {} });
+    }
+    // Wildcard prefix handlers (e.g. "update.*" matches "update.applied")
+    for (const pattern of Object.keys(_wsHandlers)) {
+        if (pattern.endsWith('*') && eventType.startsWith(pattern.slice(0, -1))) {
+            _wsHandlers[pattern].forEach(h => { try { h(data); } catch(_) {} });
+        }
+    }
+}
+
 function connectWS() {
     try {
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -113,12 +169,23 @@ function connectWS() {
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                if (data.type === 'audit_progress') {
+                _dispatchWsEvent(data);
+                // Legacy: toast for audit progress
+                if ((data.type === 'audit_progress' || data.event === 'audit_progress') && data.message) {
                     showToast(data.message, 'info');
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) { /* ignore non-JSON */ }
         };
         ws.onclose = () => { setTimeout(connectWS, 5000); };
+        ws.onerror = () => { /* reconnect handled by onclose */ };
     } catch (e) { /* WebSocket not available */ }
 }
 connectWS();
+
+// ---- Register global WS event handlers ----
+onWsEvent('update.*', () => { loadHealthBadge(); });
+onWsEvent('rollback.*', () => { loadHealthBadge(); });
+onWsEvent('snapshot.*', () => { loadHealthBadge(); });
+onWsEvent('broadcast', (data) => {
+    if (data.data && data.data.message) showToast(data.data.message, 'info');
+});

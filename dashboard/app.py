@@ -122,6 +122,11 @@ async def updates_page(request: Request):
     return templates.TemplateResponse("updates.html", {"request": request})
 
 
+@app.get("/health", response_class=HTMLResponse)
+async def health_page(request: Request):
+    return templates.TemplateResponse("health.html", {"request": request})
+
+
 @app.get("/ai", response_class=HTMLResponse)
 async def ai_page(request: Request):
     return templates.TemplateResponse("ai.html", {"request": request})
@@ -290,18 +295,8 @@ async def api_ai_chat(request: Request):
         return JSONResponse({"error": str(exc)}, status_code=500)
 
 
-@app.post("/api/ai/query")
-async def api_ai_query(request: Request):
-    try:
-        body = await request.json()
-        question = body.get("question", "")
-
-        from engines.ai_engine import get_nl_query
-        nlq = get_nl_query()
-        result = nlq.query(question)
-        return {"result": result}
-    except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=500)
+# NOTE: POST /api/ai/query is defined in the M17 section below (engines.nl_query)
+# with audit logging and provider support. Do not duplicate here.
 
 
 # ---------------------------------------------------------------------------
@@ -1096,3 +1091,197 @@ async def api_events_clients():
     """M22 — Get count of connected WebSocket clients."""
     hub = _get_event_hub()
     return {"clients": hub.client_count}
+
+
+# ---------------------------------------------------------------------------
+# API — M59 RocketLauncher Media Manager
+# ---------------------------------------------------------------------------
+
+@app.get("/api/rl/media/coverage")
+async def api_rl_media_coverage(rl_root: str | None = None):
+    """M59 — Full RL media coverage report across all systems."""
+    try:
+        from engines.rl_media_manager import media_coverage
+        return media_coverage(rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/media/system/{system}")
+async def api_rl_media_system(system: str, rl_root: str | None = None):
+    """M59 — Detailed media report for a single system."""
+    try:
+        from engines.rl_media_manager import system_media_detail
+        return system_media_detail(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/media/missing/{system}")
+async def api_rl_media_missing(system: str, media_type: str = "all",
+                                rl_root: str | None = None):
+    """M59 — Find games missing fade, bezel, or pause media."""
+    try:
+        from engines.rl_media_manager import find_missing_media
+        return find_missing_media(system, media_type, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/media/fade/{system}")
+async def api_rl_scan_fade(system: str, rl_root: str | None = None):
+    """M59 — Scan fade images for a system."""
+    try:
+        from engines.rl_media_manager import scan_fade
+        return scan_fade(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/media/bezels/{system}")
+async def api_rl_scan_bezels(system: str, rl_root: str | None = None):
+    """M59 — Scan bezel overlays for a system."""
+    try:
+        from engines.rl_media_manager import scan_bezels
+        return scan_bezels(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/media/pause/{system}")
+async def api_rl_scan_pause(system: str, rl_root: str | None = None):
+    """M59 — Scan pause screen assets for a system."""
+    try:
+        from engines.rl_media_manager import scan_pause
+        return scan_pause(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+# ---------------------------------------------------------------------------
+# API — M60 RocketLauncher Stats, Keymapper & 7z
+# ---------------------------------------------------------------------------
+
+@app.get("/api/rl/stats/{system}")
+async def api_rl_stats_system(system: str, rl_root: str | None = None):
+    """M60 — Parse play statistics for a system."""
+    try:
+        from engines.rl_stats_keymapper import parse_system_stats
+        return parse_system_stats(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/most-played")
+async def api_rl_most_played(top_n: int = 25, rl_root: str | None = None):
+    """M60 — Most-played games leaderboard."""
+    try:
+        from engines.rl_stats_keymapper import most_played
+        return most_played(rl_root, top_n)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/keymappers")
+async def api_rl_keymappers(rl_root: str | None = None):
+    """M60 — Scan all keymapper profiles."""
+    try:
+        from engines.rl_stats_keymapper import scan_keymappers
+        return scan_keymappers(rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/multigame/{system}")
+async def api_rl_multigame(system: str, rl_root: str | None = None):
+    """M60 — Validate MultiGame settings for a system."""
+    try:
+        from engines.rl_stats_keymapper import validate_multigame
+        return validate_multigame(system, rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/7z-settings")
+async def api_rl_7z_settings(rl_root: str | None = None):
+    """M60 — Check 7z extraction settings."""
+    try:
+        from engines.rl_stats_keymapper import check_7z_settings
+        return check_7z_settings(rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.get("/api/rl/integration-report")
+async def api_rl_integration_report(rl_root: str | None = None):
+    """M60 — Full RocketLauncher integration report."""
+    try:
+        from engines.rl_stats_keymapper import rl_integration_report
+        return rl_integration_report(rl_root)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+# ---------------------------------------------------------------------------
+# API — M63 Self-Healing Diagnostics & Repair
+# ---------------------------------------------------------------------------
+
+@app.post("/api/heal/diagnostics")
+async def api_heal_diagnostics():
+    """M63 — Run granular self-healing diagnostics, returning per-category results."""
+    try:
+        from engines.self_healer import run_diagnostics, get_issue_summary
+        report = run_diagnostics()
+        summary = get_issue_summary(report)
+        # Map internal categories to UI categories
+        category_map = {
+            "config": "config",
+            "path": "paths",
+            "settings": "config",
+            "bios": "bios",
+            "permission": "perms",
+            "internal": "config",
+        }
+        ui_categories = {"config": [], "paths": [], "bios": [], "perms": [], "xml": []}
+        for issue in report.issues:
+            ui_cat = category_map.get(issue.category, "config")
+            # XML-related issues go to xml category
+            if "xml" in issue.id.lower() or "database" in issue.id.lower() or "db" in issue.description.lower():
+                ui_cat = "xml"
+            ui_categories[ui_cat].append(issue.to_dict())
+        # Build per-category status
+        results = {}
+        for cat, issues in ui_categories.items():
+            errors = [i for i in issues if i["severity"] == "error"]
+            warnings = [i for i in issues if i["severity"] == "warn"]
+            if errors:
+                results[cat] = {"status": "error", "count": len(issues), "errors": len(errors), "warnings": len(warnings), "issues": issues}
+            elif warnings:
+                results[cat] = {"status": "warn", "count": len(issues), "errors": 0, "warnings": len(warnings), "issues": issues}
+            else:
+                results[cat] = {"status": "ok", "count": len(issues), "errors": 0, "warnings": 0, "issues": issues}
+        return {
+            "scan_time": report.scan_time,
+            "total_issues": report.total_issues,
+            "categories": results,
+        }
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)
+
+
+@app.post("/api/heal/repair")
+async def api_heal_repair(request: Request):
+    """M63 — Run self-healing repairs (dry_run by default)."""
+    try:
+        body = await request.json()
+        from engines.self_healer import heal
+        report = heal(
+            dry_run=body.get("dry_run", True),
+            categories=body.get("categories"),
+            max_repairs=body.get("max_repairs", 50),
+        )
+        hub = _get_event_hub()
+        hub.emit("heal.completed", {"dry_run": report.dry_run, "success": report.total_success, "failed": report.total_failed})
+        return report.to_dict()
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500)

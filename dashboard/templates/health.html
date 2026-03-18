@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% block title %}Health — HyperSpin Extreme Toolkit{% endblock %}
+{% block breadcrumb %}System Health{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">💚</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-overall">--</div>
+            <div class="stat-label">Overall Score</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-emu-healthy">--</div>
+            <div class="stat-label">Healthy Emulators</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-conflicts">--</div>
+            <div class="stat-label">DLL Conflicts</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📸</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-snapshots">--</div>
+            <div class="stat-label">Snapshots</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">↩️</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-rollbacks">--</div>
+            <div class="stat-label">Rollbacks</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-ai">--</div>
+            <div class="stat-label">AI Providers</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2col">
+    <div class="card">
+        <div class="card-header">
+            <h2>Emulator Health</h2>
+            <button class="btn btn-sm" onclick="refreshEmulatorHealth()" id="emu-health-btn">🔄 Refresh</button>
+        </div>
+        <div class="card-body" id="emu-health-container">
+            <p class="muted">Loading emulator health...</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Self-Healing Status</h2>
+            <button class="btn btn-sm btn-primary" onclick="runSelfHeal()" id="heal-btn">🩺 Run Diagnostics</button>
+        </div>
+        <div class="card-body" id="self-heal-container">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                    <span>Config Validation</span>
+                    <span class="health-pill warn" id="heal-config">Pending</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                    <span>Path Integrity</span>
+                    <span class="health-pill warn" id="heal-paths">Pending</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                    <span>BIOS Files</span>
+                    <span class="health-pill warn" id="heal-bios">Pending</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                    <span>Permissions</span>
+                    <span class="health-pill warn" id="heal-perms">Pending</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+                    <span>XML Databases</span>
+                    <span class="health-pill warn" id="heal-xml">Pending</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2col mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Dependency Conflicts</h2>
+            <button class="btn btn-sm" onclick="refreshDeps()" id="deps-btn">🔄 Scan</button>
+        </div>
+        <div class="card-body" id="deps-container">
+            <p class="muted">Loading dependency analysis...</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Version Tracking</h2>
+            <button class="btn btn-sm" onclick="refreshVersions()" id="ver-btn">🔄 Check</button>
+        </div>
+        <div class="card-body" id="versions-container">
+            <p class="muted">Loading version status...</p>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2col mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Snapshot History</h2>
+        </div>
+        <div class="card-body" id="snapshots-container">
+            <p class="muted">Loading snapshots...</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Rollback History</h2>
+        </div>
+        <div class="card-body" id="rollback-container">
+            <p class="muted">Loading rollback history...</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>AI / LLM Provider Status</h2>
+        <button class="btn btn-sm" onclick="refreshAI()" id="ai-btn">📡 Check</button>
+    </div>
+    <div class="card-body" id="ai-container">
+        <p class="muted">Checking AI providers...</p>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>Recent Events</h2>
+    </div>
+    <div class="card-body" id="events-container">
+        <p class="muted">Loading event log...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHealthSummary();
+        loadEmulatorHealth();
+        loadDeps();
+        loadVersions();
+        loadSnapshots();
+        loadRollbacks();
+        loadAIStatus();
+        loadEvents();
+    });
+
+    // Real-time refresh via WebSocket events
+    onWsEvent('update.*', () => { loadHealthSummary(); loadVersions(); loadEvents(); });
+    onWsEvent('rollback.*', () => { loadHealthSummary(); loadRollbacks(); loadEvents(); });
+    onWsEvent('snapshot.*', () => { loadHealthSummary(); loadSnapshots(); loadEvents(); });
+    onWsEvent('scan.*', () => { loadEmulatorHealth(); loadDeps(); loadEvents(); });
+
+    async function loadHealthSummary() {
+        try {
+            const [stats, depSum, snapSum, rbSum, llm] = await Promise.allSettled([
+                apiGet('/api/stats'),
+                apiGet('/api/deps/summary'),
+                apiGet('/api/snapshots/summary'),
+                apiGet('/api/rollback/summary'),
+                apiGet('/api/ai/llm-status'),
+            ]);
+
+            if (stats.status === 'fulfilled') {
+                const d = stats.value;
+                const score = d.avg_health_score || 0;
+                document.getElementById('stat-overall').textContent = score + '%';
+                document.getElementById('stat-overall').style.color =
+                    score >= 75 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+                document.getElementById('stat-emu-healthy').textContent =
+                    (d.healthy_emulators || 0) + '/' + (d.total_emulators || 0);
+            }
+
+            if (depSum.status === 'fulfilled') {
+                document.getElementById('stat-conflicts').textContent =
+                    depSum.value.conflict_count ?? depSum.value.conflicts ?? 0;
+            }
+
+            if (snapSum.status === 'fulfilled') {
+                document.getElementById('stat-snapshots').textContent =
+                    snapSum.value.total_snapshots ?? snapSum.value.count ?? 0;
+            }
+
+            if (rbSum.status === 'fulfilled') {
+                document.getElementById('stat-rollbacks').textContent =
+                    rbSum.value.total_rollbacks ?? rbSum.value.count ?? 0;
+            }
+
+            if (llm.status === 'fulfilled') {
+                const providers = llm.value;
+                const online = Object.values(providers).filter(v => v && v.online).length;
+                const total = Object.keys(providers).filter(k => k !== 'error').length;
+                document.getElementById('stat-ai').textContent = online + '/' + total;
+                document.getElementById('stat-ai').style.color =
+                    online > 0 ? 'var(--success)' : 'var(--danger)';
+            }
+        } catch (e) {
+            console.error('Health summary error:', e);
+        }
+    }
+
+    async function loadEmulatorHealth() {
+        const el = document.getElementById('emu-health-container');
+        try {
+            const data = await apiGet('/api/emulators/health');
+            const emulators = data.emulators || data.results || [];
+            if (!emulators.length) {
+                el.innerHTML = '<p class="muted">No emulators found. Run an audit first.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Emulator</th><th>Status</th><th>Path</th><th>Issues</th>' +
+                '</tr></thead><tbody>';
+            for (const e of emulators.slice(0, 30)) {
+                const healthy = e.is_healthy || e.healthy || false;
+                const issues = e.issue_count || e.issues || 0;
+                html += `<tr>
+                <td><strong>${e.name || e.emulator || '-'}</strong></td>
+                <td><span class="health-pill ${healthy ? 'good' : 'bad'}">${healthy ? 'Healthy' : 'Issues'}</span></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${e.path || ''}">${e.path || '-'}</td>
+                <td>${issues}</td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Failed to load emulator health. Ensure emulators are configured.</p>';
+        }
+    }
+    async function refreshEmulatorHealth() {
+        const btn = document.getElementById('emu-health-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        await loadEmulatorHealth();
+        btn.disabled = false; btn.textContent = '🔄 Refresh';
+    }
+
+    async function runSelfHeal() {
+        const btn = document.getElementById('heal-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Running...';
+        showToast('Running self-healing diagnostics...', 'info');
+
+        const checks = ['config', 'paths', 'bios', 'perms', 'xml'];
+        for (const c of checks) {
+            document.getElementById('heal-' + c).className = 'health-pill warn';
+            document.getElementById('heal-' + c).textContent = 'Checking...';
+        }
+
+        try {
+            const data = await apiPost('/api/heal/diagnostics');
+            const cats = data.categories || {};
+            let totalErrors = 0;
+            let totalWarnings = 0;
+
+            for (const c of checks) {
+                const el = document.getElementById('heal-' + c);
+                const catData = cats[c];
+                if (!catData || catData.status === 'ok') {
+                    el.className = 'health-pill good';
+                    el.textContent = catData && catData.count > 0 ? `OK (${catData.count} info)` : 'OK';
+                } else if (catData.status === 'warn') {
+                    el.className = 'health-pill warn';
+                    el.textContent = `${catData.warnings} warning${catData.warnings !== 1 ? 's' : ''}`;
+                    el.title = (catData.issues || []).map(i => i.description).join('\n');
+                    totalWarnings += catData.warnings;
+                } else if (catData.status === 'error') {
+                    el.className = 'health-pill bad';
+                    el.textContent = `${catData.errors} error${catData.errors !== 1 ? 's' : ''}`;
+                    el.title = (catData.issues || []).map(i => i.description).join('\n');
+                    totalErrors += catData.errors;
+                    totalWarnings += catData.warnings;
+                }
+            }
+
+            if (totalErrors > 0) {
+                showToast(`Diagnostics found ${totalErrors} error(s), ${totalWarnings} warning(s)`, 'error');
+            } else if (totalWarnings > 0) {
+                showToast(`Diagnostics found ${totalWarnings} warning(s) — no critical issues`, 'warning');
+            } else {
+                showToast('Diagnostics complete — no issues detected', 'success');
+            }
+        } catch (e) {
+            for (const c of checks) {
+                document.getElementById('heal-' + c).className = 'health-pill bad';
+                document.getElementById('heal-' + c).textContent = 'Error';
+            }
+            showToast('Diagnostics failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '🩺 Run Diagnostics';
+        }
+    }
+
+    async function loadDeps() {
+        const el = document.getElementById('deps-container');
+        try {
+            const data = await apiGet('/api/deps/summary');
+            const conflicts = data.conflict_count ?? data.conflicts ?? 0;
+            const total = data.total_dlls ?? data.total ?? 0;
+            const emus = data.emulators_scanned ?? data.emulators ?? 0;
+            let html = `<div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;"><span>Emulators Scanned</span><strong>${emus}</strong></div>
+            <div style="display:flex;justify-content:space-between;"><span>Total DLLs</span><strong>${total}</strong></div>
+            <div style="display:flex;justify-content:space-between;"><span>Conflicts Found</span>
+                <strong style="color:${conflicts > 0 ? 'var(--danger)' : 'var(--success)'}">${conflicts}</strong>
+            </div>
+        </div>`;
+            if (conflicts > 0) {
+                html += `<div style="margin-top:12px;"><button class="btn btn-sm btn-danger" onclick="viewConflicts()">View ${conflicts} Conflicts</button></div>`;
+                html += `<div id="conflict-detail" style="display:none;margin-top:12px;"></div>`;
+            }
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Dependency scanner unavailable.</p>';
+        }
+    }
+    async function refreshDeps() {
+        const btn = document.getElementById('deps-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        await loadDeps();
+        btn.disabled = false; btn.textContent = '🔄 Scan';
+    }
+
+    async function viewConflicts() {
+        const el = document.getElementById('conflict-detail');
+        if (!el) return;
+        if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        el.innerHTML = '<p class="muted"><span class="spinner"></span> Loading conflicts...</p>';
+        try {
+            const data = await apiGet('/api/deps/conflicts');
+            const conflicts = data.conflicts || [];
+            if (!conflicts.length) {
+                el.innerHTML = '<p class="muted">No conflict details available.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>DLL</th><th>Emulators</th><th>Versions</th><th>Severity</th>' +
+                '</tr></thead><tbody>';
+            for (const c of conflicts) {
+                const sev = (c.severity || 'medium').toLowerCase();
+                const cls = sev === 'high' ? 'bad' : sev === 'medium' ? 'warn' : 'good';
+                const emus = (c.emulators || []).join(', ') || '-';
+                const vers = (c.versions || []).join(' vs ') || '-';
+                html += `<tr>
+                    <td><strong>${c.dll || c.name || '-'}</strong></td>
+                    <td>${emus}</td>
+                    <td>${vers}</td>
+                    <td><span class="health-pill ${cls}">${c.severity || 'medium'}</span></td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = `<p class="muted">Failed to load conflicts: ${e.message}</p>`;
+        }
+    }
+
+    async function loadVersions() {
+        const el = document.getElementById('versions-container');
+        try {
+            const data = await apiGet('/api/versions/summary');
+            const tracked = data.tracked_count ?? data.tracked ?? 0;
+            const outdated = data.outdated_count ?? data.outdated ?? 0;
+            const quarantined = data.quarantined_count ?? data.quarantined ?? 0;
+            let html = `<div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;"><span>Tracked Emulators</span><strong>${tracked}</strong></div>
+            <div style="display:flex;justify-content:space-between;"><span>Outdated</span>
+                <strong style="color:${outdated > 0 ? 'var(--warning)' : 'var(--success)'}">${outdated}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;"><span>Quarantined Updates</span><strong>${quarantined}</strong></div>
+        </div>`;
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Version tracker unavailable.</p>';
+        }
+    }
+    async function refreshVersions() {
+        const btn = document.getElementById('ver-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        await loadVersions();
+        btn.disabled = false; btn.textContent = '🔄 Check';
+    }
+
+    async function loadSnapshots() {
+        const el = document.getElementById('snapshots-container');
+        try {
+            const data = await apiGet('/api/snapshots/list?limit=10');
+            const snaps = data.snapshots || [];
+            if (!snaps.length) {
+                el.innerHTML = '<p class="muted">No snapshots recorded yet.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Name</th><th>Type</th><th>Files</th><th>Created</th>' +
+                '</tr></thead><tbody>';
+            for (const s of snaps) {
+                html += `<tr>
+                <td>${s.name || '-'}</td>
+                <td><span class="health-pill good">${s.snapshot_type || s.type || '-'}</span></td>
+                <td>${(s.file_count || 0).toLocaleString()}</td>
+                <td>${s.created_at || '-'}</td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Snapshot system unavailable.</p>';
+        }
+    }
+
+    async function loadRollbacks() {
+        const el = document.getElementById('rollback-container');
+        try {
+            const data = await apiGet('/api/rollback/list?limit=10');
+            const rbs = data.rollbacks || [];
+            if (!rbs.length) {
+                el.innerHTML = '<p class="muted">No rollbacks performed yet.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Emulator</th><th>Reason</th><th>Status</th><th>Date</th>' +
+                '</tr></thead><tbody>';
+            for (const r of rbs) {
+                const cls = r.status === 'success' ? 'good' : 'bad';
+                html += `<tr>
+                <td><strong>${r.emulator_name || '-'}</strong></td>
+                <td>${r.trigger_reason || r.reason || '-'}</td>
+                <td><span class="health-pill ${cls}">${r.status || '-'}</span></td>
+                <td>${r.created_at || r.timestamp || '-'}</td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Rollback system unavailable.</p>';
+        }
+    }
+
+    async function loadAIStatus() {
+        const el = document.getElementById('ai-container');
+        try {
+            const [llm, models] = await Promise.allSettled([
+                apiGet('/api/ai/llm-status'),
+                apiGet('/api/ai/models'),
+            ]);
+            let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+
+            if (llm.status === 'fulfilled') {
+                for (const [name, info] of Object.entries(llm.value)) {
+                    if (name === 'error') continue;
+                    const online = info && info.online;
+                    html += `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius);">
+                    <span class="status-dot ${online ? 'online' : 'offline'}"></span>
+                    <div>
+                        <div style="font-weight:600;text-transform:capitalize;">${name}</div>
+                        <div class="muted">${info?.url || '-'}</div>
+                    </div>
+                </div>`;
+                }
+            }
+            html += '</div>';
+
+            if (models.status === 'fulfilled' && models.value.providers) {
+                const total = models.value.total_models || 0;
+                html += `<div style="margin-top:12px;"><span class="muted">Total models available:</span> <strong>${total}</strong></div>`;
+            }
+
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">AI status check failed.</p>';
+        }
+    }
+    async function refreshAI() {
+        const btn = document.getElementById('ai-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        await loadAIStatus();
+        btn.disabled = false; btn.textContent = '📡 Check';
+    }
+
+    async function loadEvents() {
+        const el = document.getElementById('events-container');
+        try {
+            const data = await apiGet('/api/events/recent?limit=20');
+            const events = data.events || [];
+            if (!events.length) {
+                el.innerHTML = '<p class="muted">No recent events.</p>';
+                return;
+            }
+            let html = '<div style="max-height:300px;overflow-y:auto;">';
+            for (const ev of events) {
+                html += `<div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.82rem;">
+                <span class="muted" style="white-space:nowrap;">${ev.ts || ''}</span>
+                <span style="color:var(--accent);font-weight:600;min-width:140px;">${ev.event || ''}</span>
+                <span class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${JSON.stringify(ev.data || {}).slice(0, 80)}</span>
+            </div>`;
+            }
+            html += '</div>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Event hub unavailable.</p>';
+        }
+    }
+</script>
+{% endblock %}

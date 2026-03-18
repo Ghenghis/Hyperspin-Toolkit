@@ -1,0 +1,431 @@
+<ui:Page x:Class="HyperSpinToolkit.Views.RocketLauncherPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:HyperSpinToolkit.Controls"
+    xmlns:effects="clr-namespace:HyperSpinToolkit.Effects"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" Title="RocketLauncher" Background="Transparent" d:DesignHeight="900" d:DesignWidth="1100">
+
+    <Grid>
+        <Border Style="{DynamicResource BackgroundLayerStyle}" />
+        <effects:ParticleCanvas Preset="AmbientStars" MaxParticles="35" SpawnRate="0.8" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+            <StackPanel>
+
+                <!-- ═══ Header ═══════════════════════════════════════════ -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="ROCKETLAUNCHER" Style="{DynamicResource ArcadeTitleStyle}" FontSize="22"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <controls:LedIndicator LedState="Green" LabelText="MEDIA" LedSize="10" Margin="0,0,12,0"/>
+                            <controls:LedIndicator LedState="Green" LabelText="STATS" LedSize="10" Margin="0,0,12,0"/>
+                            <controls:LedIndicator LedState="Green" LabelText="KEYMAPPER" LedSize="10" Margin="0,0,12,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="FULL REPORT" Style="{DynamicResource ArcadeButtonGreenStyle}" Padding="14,8" FontSize="11" Command="{Binding ViewModel.LoadIntegrationReportCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}" VerticalAlignment="Top"/>
+                </Grid>
+
+                <ProgressBar IsIndeterminate="True" Style="{DynamicResource NeonProgressBarStyle}" Margin="0,0,0,16" Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <!-- ═══ System Selector ══════════════════════════════════ -->
+                <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="SYSTEM:" Style="{DynamicResource ArcadeLabelStyle}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1" Style="{DynamicResource ArcadeTextBoxStyle}" Text="{Binding ViewModel.SelectedSystem, UpdateSourceTrigger=PropertyChanged}" Tag="e.g. MAME, Nintendo 64, Sony PlayStation"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,0,0,0">
+                            <Button Content="SCAN MEDIA" Style="{DynamicResource ArcadeButtonStyle}" Padding="12,8" FontSize="11" Command="{Binding ViewModel.LoadSystemMediaCommand}" Margin="0,0,6,0" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            <Button Content="PLAY STATS" Style="{DynamicResource ArcadeButtonPinkStyle}" Padding="12,8" FontSize="11" Command="{Binding ViewModel.LoadSystemStatsCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ═══ Tab Control ══════════════════════════════════════ -->
+                <TabControl SelectedIndex="{Binding ViewModel.SelectedTabIndex}" Style="{DynamicResource ArcadeTabControlStyle}" Margin="0,0,0,20">
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 0: Media Coverage (all systems overview)    -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="COVERAGE" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <UniformGrid Rows="1" Columns="4">
+                                    <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <controls:ScoreCounter TargetValue="{Binding ViewModel.TotalFade}" DigitFontSize="24" Height="32" Width="120"/>
+                                            <TextBlock Text="FADES" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{DynamicResource ArcadeCardGreenStyle}" Margin="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <controls:ScoreCounter TargetValue="{Binding ViewModel.TotalBezels}" DigitFontSize="24" Height="32" Width="120"/>
+                                            <TextBlock Text="BEZELS" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{DynamicResource ArcadeCardPinkStyle}" Margin="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <controls:ScoreCounter TargetValue="{Binding ViewModel.TotalPause}" DigitFontSize="24" Height="32" Width="120"/>
+                                            <TextBlock Text="PAUSE" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <controls:NeonGauge Value="{Binding ViewModel.OverallCoverage}" Maximum="100" Width="60" Height="60" GaugeMode="Circular" ShowPercentage="True" StrokeThickness="4"/>
+                                            <TextBlock Text="COVERAGE" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+                                <Button Grid.Column="1" Content="SCAN ALL" Style="{DynamicResource ArcadeButtonGreenStyle}" Padding="12,8" FontSize="11" VerticalAlignment="Top" Command="{Binding ViewModel.LoadMediaCoverageCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}" Margin="12,0,0,0"/>
+                            </Grid>
+
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.MediaCoverage}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="400">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="System" Binding="{Binding System}" Width="*"/>
+                                        <DataGridTextColumn Header="Fades" Binding="{Binding FadeCount}" Width="65"/>
+                                        <DataGridTextColumn Header="Bezels" Binding="{Binding BezelCount}" Width="65"/>
+                                        <DataGridTextColumn Header="Pause" Binding="{Binding PauseCount}" Width="65"/>
+                                        <DataGridTemplateColumn Header="Coverage" Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding CoverageDisplay}" Foreground="{Binding CoverageColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Issues" Binding="{Binding IssueCount}" Width="60"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 1: Fade Images                              -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="FADE" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.FadeItems}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="500">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="Layer" Binding="{Binding Layer}" Width="55"/>
+                                        <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="180"/>
+                                        <DataGridTextColumn Header="Size" Binding="{Binding Dimensions}" Width="100"/>
+                                        <DataGridTemplateColumn Header="Status" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 2: Bezels                                   -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="BEZELS" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.BezelItems}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="500">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="180"/>
+                                        <DataGridTextColumn Header="Size" Binding="{Binding Dimensions}" Width="100"/>
+                                        <DataGridTextColumn Header="Orient." Binding="{Binding Orientation}" Width="80"/>
+                                        <DataGridTextColumn Header="BG" Binding="{Binding BgDisplay}" Width="50"/>
+                                        <DataGridTemplateColumn Header="Status" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 3: Pause Assets                             -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="PAUSE" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.PauseItems}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="500">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100"/>
+                                        <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="200"/>
+                                        <DataGridTextColumn Header="Type" Binding="{Binding FileType}" Width="70"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 4: Missing Media                            -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="MISSING" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Button Content="FIND MISSING" Style="{DynamicResource ArcadeButtonPinkStyle}" Padding="14,8" FontSize="11" HorizontalAlignment="Left" Margin="0,0,0,12" Command="{Binding ViewModel.LoadMissingMediaCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.MissingMedia}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="500">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTemplateColumn Header="Fade" Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding FadeDisplay}" Foreground="{Binding FadeColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Bezel" Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding BezelDisplay}" Foreground="{Binding BezelColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Pause" Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding PauseDisplay}" Foreground="{Binding PauseColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 5: Play Stats (M60)                         -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="STATS" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <UniformGrid Rows="1" Columns="2" Margin="0,0,0,12">
+                                <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,8,0">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <controls:ScoreCounter TargetValue="{Binding ViewModel.TotalPlays}" DigitFontSize="28" Height="36" Width="140"/>
+                                        <TextBlock Text="TOTAL PLAYS" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{DynamicResource ArcadeCardGreenStyle}" Margin="0">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding ViewModel.TotalPlayTime}" Style="{DynamicResource PixelTextStyle}" FontSize="24" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="TOTAL TIME" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <TextBlock Text="SYSTEM STATS" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,8"/>
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0" Margin="0,0,0,16">
+                                <DataGrid ItemsSource="{Binding ViewModel.GameStats}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="320">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="Plays" Binding="{Binding PlayCount}" Width="60"/>
+                                        <DataGridTextColumn Header="Total Time" Binding="{Binding TotalTime}" Width="100"/>
+                                        <DataGridTextColumn Header="Last Played" Binding="{Binding LastPlayed}" Width="120"/>
+                                        <DataGridTextColumn Header="Avg Session" Binding="{Binding AvgSession}" Width="100"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="MOST PLAYED LEADERBOARD" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                                <Button Grid.Column="1" Content="LOAD TOP 50" Style="{DynamicResource ArcadeButtonStyle}" Padding="12,8" FontSize="11" Command="{Binding ViewModel.LoadMostPlayedCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            </Grid>
+                            <Border Style="{DynamicResource ArcadeCardPinkStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.MostPlayed}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="320">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="System" Binding="{Binding System}" Width="140"/>
+                                        <DataGridTextColumn Header="Plays" Binding="{Binding PlayCount}" Width="60"/>
+                                        <DataGridTextColumn Header="Total Time" Binding="{Binding TotalTime}" Width="100"/>
+                                        <DataGridTextColumn Header="Last Played" Binding="{Binding LastPlayed}" Width="120"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 6: Keymapper Profiles (M60)                 -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="KEYMAPPER" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{DynamicResource ArcadeCardStyle}">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <controls:ScoreCounter TargetValue="{Binding ViewModel.TotalProfiles}" DigitFontSize="28" Height="36" Width="140"/>
+                                        <TextBlock Text="TOTAL PROFILES" Style="{DynamicResource ArcadeLabelStyle}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Button Grid.Column="1" Content="SCAN" Style="{DynamicResource ArcadeButtonGreenStyle}" Padding="14,8" FontSize="11" VerticalAlignment="Center" Margin="12,0,0,0" Command="{Binding ViewModel.LoadKeymappersCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            </Grid>
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.Keymappers}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="500">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Profile" Binding="{Binding ProfileName}" Width="*"/>
+                                        <DataGridTextColumn Header="Type" Binding="{Binding KeymapperType}" Width="100"/>
+                                        <DataGridTextColumn Header="System" Binding="{Binding System}" Width="140"/>
+                                        <DataGridTextColumn Header="Mappings" Binding="{Binding MappingCount}" Width="80"/>
+                                        <DataGridTemplateColumn Header="Status" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 7: MultiGame + 7z (M60)                     -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="MULTI / 7Z" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+
+                            <!-- MultiGame section -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="MULTIGAME VALIDATION" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                                <Button Grid.Column="1" Content="VALIDATE" Style="{DynamicResource ArcadeButtonPinkStyle}" Padding="12,8" FontSize="11" Command="{Binding ViewModel.LoadMultiGameCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            </Grid>
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0" Margin="0,0,0,20">
+                                <DataGrid ItemsSource="{Binding ViewModel.MultiGames}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="280">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                        <DataGridTextColumn Header="Discs" Binding="{Binding DiscCount}" Width="60"/>
+                                        <DataGridTemplateColumn Header="Status" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+
+                            <!-- 7z Settings section -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="7Z EXTRACTION SETTINGS" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                                <Button Grid.Column="1" Content="CHECK" Style="{DynamicResource ArcadeButtonStyle}" Padding="12,8" FontSize="11" Command="{Binding ViewModel.LoadSevenZipCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            </Grid>
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Extract Path:" Style="{DynamicResource ArcadeLabelStyle}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.SevenZipSettings.ExtractPath}" Style="{DynamicResource ConsoleTextStyle}" FontSize="12" Margin="0,0,0,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Temp Dir:" Style="{DynamicResource ArcadeLabelStyle}" Margin="16,0,8,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ViewModel.SevenZipSettings.TempDir}" Style="{DynamicResource ConsoleTextStyle}" FontSize="12" Margin="0,0,0,6"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Cache Size:" Style="{DynamicResource ArcadeLabelStyle}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.SevenZipSettings.CacheSize}" Style="{DynamicResource ConsoleTextStyle}" FontSize="12" Margin="0,0,0,6"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Cleanup:" Style="{DynamicResource ArcadeLabelStyle}" Margin="16,0,8,6"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding ViewModel.SevenZipSettings.CleanupPolicy}" Style="{DynamicResource ConsoleTextStyle}" FontSize="12" Margin="0,0,0,6"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Issues:" Style="{DynamicResource ArcadeLabelStyle}" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.SevenZipSettings.IssueCount}" Style="{DynamicResource ConsoleTextStyle}" FontSize="12"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 7z Issues -->
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0" Visibility="{Binding ViewModel.SevenZipIssues.Count, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <DataGrid ItemsSource="{Binding ViewModel.SevenZipIssues}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="200">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Sev" Width="55">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Severity}" Foreground="{Binding SeverityColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="11"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*"/>
+                                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="140"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ──────────────────────────────────────────────── -->
+                    <!-- TAB 8: Issues Log                               -->
+                    <!-- ──────────────────────────────────────────────── -->
+                    <TabItem Header="ISSUES" Style="{DynamicResource ArcadeTabItemStyle}">
+                        <StackPanel Margin="0,12,0,0">
+                            <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0">
+                                <DataGrid ItemsSource="{Binding ViewModel.MediaIssues}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="36" CanUserResizeRows="False" Background="Transparent" BorderThickness="0" MaxHeight="600">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Sev" Width="55">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Severity}" Foreground="{Binding SeverityColor, Converter={StaticResource HexColorToBrushConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="11"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*"/>
+                                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="160"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                </TabControl>
+
+                <!-- Status -->
+                <TextBlock Text="{Binding ViewModel.StatusText}" Style="{DynamicResource ConsoleTextStyle}" FontSize="11" Margin="0,0,0,8" HorizontalAlignment="Right"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</ui:Page>

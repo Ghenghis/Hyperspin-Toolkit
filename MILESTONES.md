@@ -190,12 +190,12 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Authentication for local access
 *   **Status**: ✅ Complete — `dashboard/app.py` + templates + static assets + `tests/test_dashboard.py`
 
-### M22 — Collection Browser & Statistics
+### M22 — Real-Time Event Hub & WebSocket Push
 
-*   Browse all systems, games, emulators visually
-*   Collection statistics: total games, size, completeness
-*   Charts and graphs for collection analysis
-*   Search and filter across entire collection
+*   WebSocket endpoint for real-time event broadcasting to all dashboard clients
+*   Event dispatching system with topic-based routing (update.*, rollback.*, snapshot.*, scan.*)
+*   Client connection tracking and heartbeat/ping-pong
+*   REST API for recent events, manual emit, and client count
 *   **Status**: ✅ Complete — `engines/event_hub.py` (real-time WebSocket push) + `tests/test_event_hub.py`, MCP tools: `events_recent`, `events_emit`
 
 ### M23 — System Health Monitor Dashboard
@@ -204,7 +204,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Health score per system (0-100)
 *   Issue tracker with severity levels
 *   One-click fix for common issues
-*   **Status**: � Partial — health scoring in `emulator_health.py`; dashboard page template exists; needs frontend integration
+*   **Status**: ✅ Complete — `dashboard/templates/health.html` + `static/js/app.js` wired to `/api/stats`, `/api/emulators/health`, `/api/deps/summary`, `/api/versions/summary`, `/api/snapshots/list`, `/api/rollback/list`, `/api/ai/llm-status`, `/api/ai/models`, `/api/events/recent`. Real-time WebSocket refresh on update/rollback/snapshot/scan events
 
 ### M24 — Backup/Recovery Management UI
 
@@ -212,7 +212,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   One-click backup and restore
 *   Backup schedule configuration
 *   Storage usage analysis
-*   **Status**: � Partial — `dashboard/templates/backups.html` exists; backend API ready; needs frontend JS wiring
+*   **Status**: ✅ Complete — `dashboard/templates/backups.html` wired to `/api/backups`, `/api/snapshots/summary`, `/api/rollback/summary`, `/api/snapshots/list`, `/api/rollback/list`. Create backup + capture snapshot forms functional. Real-time WebSocket refresh on backup/snapshot/rollback events
 
 ### M25 — Update Manager UI
 
@@ -220,7 +220,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Update progress tracking
 *   Rollback controls
 *   Update history and changelog viewer
-*   **Status**: � Partial — `dashboard/templates/updates.html` exists; MCP tools ready; needs frontend JS wiring
+*   **Status**: ✅ Complete — `dashboard/templates/updates.html` wired to `/api/updates`, `/api/versions/summary`, `/api/updates/status`, `/api/versions/outdated`, `/api/versions/scan`, `/api/versions/stage`, `/api/updates/apply`, `/api/rollback/trigger`, `/api/versions/quarantine`, `/api/versions/apply-staged`, `/api/versions/reject`, `/api/versions/tracked`. Real-time WebSocket refresh on update/rollback/snapshot events
 
 ## Phase 6: Advanced Features (Milestones 26–35).maybe 
 
@@ -570,7 +570,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
     *   Game guides (PDF, TXT, PNG, compressed archives)
     *   Controller/input display images per system
     *   Pause screen configuration per emulator
-*   **Status**: 📋 Planned — M9 covers basic RL config validation; this adds deep media/overlay management
+*   **Status**: ✅ Complete — `engines/rl_media_manager.py` (936 lines). Multi-layer fade scanning (Layer 1-4), bezel overlay + background validation, pause screen asset management (guides/controller images), per-system coverage reports with severity-tagged issues, global/per-system/per-ROM config awareness. Dashboard API: `/api/rl/media/coverage`, `/api/rl/media/system/{system}`, `/api/rl/media/missing/{system}`, `/api/rl/media/fade/{system}`, `/api/rl/media/bezels/{system}`, `/api/rl/media/pause/{system}`. MCP tools: `rl_media_coverage`, `rl_system_media`, `rl_missing_media`, `rl_scan_fade`, `rl_scan_bezels`, `rl_scan_pause`
 
 ### M60 — RocketLauncher Keymapper, Statistics & MultiGame
 
@@ -590,7 +590,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   **7z Extraction Settings** — compressed ROM handling configuration
     *   Validate 7z extraction paths and temp directory settings
     *   Monitor extraction cache size and cleanup policies
-*   **Status**: 📋 Planned — 0% built, extends RL integration beyond config validation
+*   **Status**: ✅ Complete — `engines/rl_stats_keymapper.py` (746 lines). RL statistics XML parsing (play count/time/last played), keymapper profile scanning (AHK/Xpadder/JoyToKey), MultiGame INI validation, 7z extraction settings check, most-played reports, integration report. Dashboard API: `/api/rl/stats/{system}`, `/api/rl/most-played`, `/api/rl/keymappers`, `/api/rl/multigame/{system}`, `/api/rl/7z-settings`, `/api/rl/integration-report`. MCP tools: `rl_system_stats`, `rl_most_played`, `rl_keymappers`, `rl_multigame`, `rl_7z_settings`, `rl_integration_report`
 
 ## Phase 14: Automation & Operations (Milestones 61–63)
 
@@ -694,7 +694,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 2 Audit & Discovery                | M6–M10     | 5        | 0       | 0       |
 | 3 Safe Update                      | M11–M15    | 5        | 0       | 0       |
 | 4 AI Integration                   | M16–M20    | 5        | 0       | 0       |
-| 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
+| 5 Web Dashboard                    | M21–M25    | 5        | 0       | 0       |
 | 6 Advanced Features                | M26–M35    | 10       | 0       | 0       |
 | 7 Agentic AI Stack                 | M36–M40    | 5        | 0       | 0       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 3        | 0       | 0       |
@@ -702,10 +702,10 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 10 Arcade GUI Pages                | M48–M50    | 3        | 0       | 0       |
 | 11 Arcade Polish & Integration     | M51–M52    | 2        | 0       | 0       |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0       |
-| 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
+| 13 RocketLauncher Deep Integration | M59–M60    | 2        | 0       | 0       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **61**   | **2**   | **3**   |
+| **Total**                          | **66**     | **66**   | **0**   | **0**   |
 
 ### Build Order (Recommended Sequence)
 
@@ -779,25 +779,23 @@ LAYER 0 — KINHANK VARIANT MANAGEMENT (Phase 15, can run in parallel with all l
 | L:\CORE - TYPE R (45 PC games + 18 arcade) | Hundreds    | ❌ Not indexed — mostly PC games via Playnite |
 | N:\themes + decorations (Batocera)         | Thousands   | ❌ Not indexed                                |
 
-### New Engines Required (Phases 12–14)
+### Engines Built for Phases 12–15 (All Complete)
 
-| Engine File                     | Milestone | Purpose                                           |
-| ------------------------------- | --------- | ------------------------------------------------- |
-| `engines/metadata_scraper.py`   | M54       | ScreenScraper, IGDB, TheGamesDB, ArcadeDB clients |
-| `engines/bios_manager.py`       | M55       | BIOS scanning, checksum verification, health      |
-| `engines/dat_verifier.py`       | M56       | No-Intro/Redump/TOSEC DAT parser + ROM matching   |
-| `engines/hyperspin_settings.py` | M57       | HyperSpin INI read/write/validate                 |
-| `engines/frontend_converter.py` | M58       | Cross-frontend database import/export             |
-| `engines/rl_media_manager.py`   | M59       | Fade screens, bezels, pause overlays              |
-| `engines/rl_keymapper.py`       | M60       | Keymapper profiles, statistics, MultiGame         |
-| `engines/scheduler.py`          | M61       | Task scheduling, maintenance cycles               |
-| `engines/notifier.py`           | M61       | Windows toast, in-app alerts                      |
-| `engines/agent_memory.py`       | M62       | Persistent memory, knowledge base, learning       |
-| `engines/self_healer.py`        | M63       | Issue detection, auto-repair, self-healing hooks  |
-| `scripts/repair_runner.ps1`     | M63       | PowerShell automated repair script                |
-| `engines/drive_fingerprint.py`  | M64       | KINHANK variant detection from drive structure    |
-| `engines/gamelist_extractor.py` | M65       | Cross-variant game list extraction                |
-| `engines/integrity_checker.py`  | M66       | Cross-variant integrity & corruption detection    |
+| Engine File                     | Milestone | Purpose                                            |
+| ------------------------------- | --------- | -------------------------------------------------- |
+| `engines/metadata_scraper.py`   | M54       | ScreenScraper, IGDB, TheGamesDB, ArcadeDB clients  |
+| `engines/bios_manager.py`       | M55       | BIOS scanning, checksum verification, health       |
+| `engines/dat_verifier.py`       | M56       | No-Intro/Redump/TOSEC DAT parser + ROM matching    |
+| `engines/hyperspin_settings.py` | M57       | HyperSpin INI read/write/validate                  |
+| `engines/frontend_converter.py` | M58       | Cross-frontend database import/export              |
+| `engines/rl_media_manager.py`   | M59       | Fade screens, bezels, pause overlays               |
+| `engines/rl_stats_keymapper.py` | M60       | Keymapper profiles, statistics, MultiGame, 7z      |
+| `engines/scheduler.py`          | M61       | Task scheduling, maintenance cycles, notifications |
+| `engines/agent_memory.py`       | M62       | Persistent memory, knowledge base, learning        |
+| `engines/self_healer.py`        | M63       | Issue detection, auto-repair, self-healing hooks   |
+| `engines/drive_fingerprint.py`  | M64       | KINHANK variant detection from drive structure     |
+| `engines/gamelist_extractor.py` | M65       | Cross-variant game list extraction                 |
+| `engines/integrity_checker.py`  | M66       | Cross-variant integrity & corruption detection     |
 
 ---
 

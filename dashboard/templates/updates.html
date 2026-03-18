@@ -3,6 +3,37 @@
 {% block breadcrumb %}Update Manager{% endblock %}
 
 {% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-updates-applied">--</div>
+            <div class="stat-label">Updates Applied</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-outdated">--</div>
+            <div class="stat-label">Outdated</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-quarantined">--</div>
+            <div class="stat-label">Quarantined</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-body">
+            <div class="stat-value" id="stat-tracked">--</div>
+            <div class="stat-label">Tracked Emulators</div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h2>Safe Update Pipeline</h2>
@@ -14,26 +45,62 @@
             the update is applied, verified, and only then committed. If anything fails, an
             automatic rollback restores the previous state.
         </p>
-        <div class="action-grid" style="max-width:500px;">
-            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update register','info')">
-                📝 Register Update
+        <div class="action-grid" style="max-width:600px;">
+            <button class="btn btn-primary" onclick="checkForUpdates()" id="check-btn">
+                🔍 Check for Updates
             </button>
-            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update apply','info')">
+            <button class="btn btn-secondary" onclick="scanVersions()" id="scan-btn">
+                � Scan Versions
+            </button>
+            <button class="btn btn-secondary" onclick="showDownloadDialog()" id="download-btn">
+                ⬇️ Download Update
+            </button>
+            <button class="btn btn-secondary" onclick="showApplyDialog()" id="apply-btn">
                 ⬆️ Apply Update
             </button>
-            <button class="btn btn-secondary" onclick="showToast('Use CLI: python main.py update test','info')">
-                🧪 Test Update
-            </button>
-            <button class="btn btn-danger" onclick="showToast('Use CLI: python main.py update rollback','info')">
+            <button class="btn btn-danger" onclick="showRollbackDialog()" id="rollback-btn">
                 ↩️ Rollback
+            </button>
+            <button class="btn btn-secondary" onclick="viewQuarantine()" id="quarantine-btn">
+                🔒 View Quarantine
             </button>
         </div>
     </div>
 </div>
 
+<div id="action-panel" class="card mt-4" style="display:none;">
+    <div class="card-header">
+        <h2 id="action-title">Action</h2>
+        <button class="btn btn-sm" onclick="closeActionPanel()">✕ Close</button>
+    </div>
+    <div class="card-body" id="action-body"></div>
+</div>
+
 <div class="card mt-4">
-    <div class="card-header"><h2>Update History</h2></div>
+    <div class="card-header">
+        <h2>Available Updates</h2>
+        <button class="btn btn-sm" onclick="checkForUpdates()" id="refresh-avail-btn">🔄 Refresh</button>
+    </div>
+    <div class="card-body" id="available-updates">
+        <p class="muted">Click "Check for Updates" to scan for new versions.</p>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>Update History</h2>
+        <button class="btn btn-sm" onclick="loadHistory()">🔄 Refresh</button>
+    </div>
     <div class="card-body" id="update-history">
+        <p class="muted">Loading...</p>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>Version Tracking</h2>
+    </div>
+    <div class="card-body" id="version-tracking">
         <p class="muted">Loading...</p>
     </div>
 </div>
@@ -41,36 +108,351 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const data = await apiGet('/api/updates');
-        const updates = data.updates || [];
-        if (!updates.length) {
-            document.getElementById('update-history').innerHTML =
-                '<p class="muted">No updates recorded yet.</p>';
-            return;
-        }
-        let html = '<table class="data-table"><thead><tr>' +
-            '<th>Program</th><th>Old Ver</th><th>New Ver</th><th>Status</th><th>Applied</th><th>Notes</th>' +
-            '</tr></thead><tbody>';
-        for (const u of updates) {
-            const sc = {'committed':'good','tested':'good','applied':'warn','rolled_back':'bad','failed':'bad','pending':'warn'};
-            const cls = sc[u.status] || 'warn';
-            html += `<tr>
-                <td><strong>${u.program_name}</strong></td>
-                <td>${u.old_version||'-'}</td>
-                <td>${u.new_version||'-'}</td>
-                <td><span class="health-pill ${cls}">${u.status}</span></td>
-                <td>${u.applied_at||'-'}</td>
-                <td>${u.notes||''}</td>
-            </tr>`;
-        }
-        html += '</tbody></table>';
-        document.getElementById('update-history').innerHTML = html;
-    } catch(e) {
-        document.getElementById('update-history').innerHTML =
-            '<p class="muted">Failed to load update history.</p>';
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSummary();
+        loadHistory();
+        loadVersionTracking();
+    });
+
+    // Real-time refresh via WebSocket events
+    onWsEvent('update.*', () => { loadSummary(); loadHistory(); loadVersionTracking(); });
+    onWsEvent('rollback.*', () => { loadSummary(); loadHistory(); });
+    onWsEvent('snapshot.*', () => { loadSummary(); });
+
+    async function loadSummary() {
+        try {
+            const [updates, verSum, status] = await Promise.allSettled([
+                apiGet('/api/updates'),
+                apiGet('/api/versions/summary'),
+                apiGet('/api/updates/status'),
+            ]);
+            if (updates.status === 'fulfilled') {
+                document.getElementById('stat-updates-applied').textContent =
+                    (updates.value.updates || []).length;
+            }
+            if (verSum.status === 'fulfilled') {
+                const v = verSum.value;
+                document.getElementById('stat-outdated').textContent = v.outdated_count ?? v.outdated ?? 0;
+                document.getElementById('stat-quarantined').textContent = v.quarantined_count ?? v.quarantined ?? 0;
+                document.getElementById('stat-tracked').textContent = v.tracked_count ?? v.tracked ?? 0;
+            }
+        } catch (e) { console.error('Summary error:', e); }
     }
-});
+
+    async function checkForUpdates() {
+        const btn = document.getElementById('check-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Checking...';
+        showToast('Checking for available updates...', 'info');
+
+        const el = document.getElementById('available-updates');
+        try {
+            const data = await apiGet('/api/versions/outdated');
+            const outdated = data.outdated || data.emulators || [];
+            if (!outdated.length) {
+                el.innerHTML = '<p class="muted">All emulators are up to date!</p>';
+                showToast('Everything is up to date!', 'success');
+            } else {
+                let html = '<table class="data-table"><thead><tr>' +
+                    '<th>Emulator</th><th>Current</th><th>Latest</th><th>Action</th>' +
+                    '</tr></thead><tbody>';
+                for (const e of outdated) {
+                    html += `<tr>
+                    <td><strong>${e.name || e.emulator || '-'}</strong></td>
+                    <td>${e.current_version || e.local_version || '-'}</td>
+                    <td style="color:var(--success)">${e.latest_version || e.remote_version || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="downloadUpdate('${e.name || e.emulator}')">
+                            ⬇️ Download
+                        </button>
+                    </td>
+                </tr>`;
+                }
+                html += '</tbody></table>';
+                el.innerHTML = html;
+                showToast(`${outdated.length} update(s) available`, 'info');
+            }
+            loadSummary();
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Failed to check for updates.</p>';
+            showToast('Update check failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '🔍 Check for Updates';
+        }
+    }
+
+    async function scanVersions() {
+        const btn = document.getElementById('scan-btn');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Scanning...';
+        showToast('Scanning emulator versions...', 'info');
+        try {
+            const data = await apiGet('/api/versions/scan');
+            const emus = data.emulators || [];
+            showToast(`Scanned ${emus.length} emulator(s)`, 'success');
+            loadVersionTracking();
+            loadSummary();
+        } catch (e) {
+            showToast('Version scan failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '📡 Scan Versions';
+        }
+    }
+
+    async function downloadUpdate(emuName) {
+        showToast(`Downloading update for ${emuName}...`, 'info');
+        try {
+            const result = await apiPost('/api/versions/stage', { emulator_name: emuName });
+            if (result.error) {
+                showToast('Download failed: ' + result.error, 'error');
+            } else {
+                showToast(`Update for ${emuName} staged to quarantine!`, 'success');
+                loadSummary();
+            }
+        } catch (e) {
+            showToast('Download failed: ' + e.message, 'error');
+        }
+    }
+
+    function showDownloadDialog() {
+        const panel = document.getElementById('action-panel');
+        document.getElementById('action-title').textContent = 'Download Update';
+        document.getElementById('action-body').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+            <label>Emulator Name
+                <input type="text" id="dl-emu" placeholder="e.g. RetroArch" style="width:100%;margin-top:4px;">
+            </label>
+            <button class="btn btn-primary" onclick="doDownload()">⬇️ Download to Quarantine</button>
+        </div>`;
+        panel.style.display = 'block';
+    }
+
+    async function doDownload() {
+        const emu = document.getElementById('dl-emu').value.trim();
+        if (!emu) { showToast('Emulator name required', 'error'); return; }
+        await downloadUpdate(emu);
+        closeActionPanel();
+    }
+
+    function showApplyDialog() {
+        const panel = document.getElementById('action-panel');
+        document.getElementById('action-title').textContent = 'Apply Update';
+        document.getElementById('action-body').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+            <label>Emulator Name
+                <input type="text" id="apply-emu" placeholder="e.g. RetroArch" style="width:100%;margin-top:4px;">
+            </label>
+            <label>Update Source Path
+                <input type="text" id="apply-source" placeholder="Path to update file/dir" style="width:100%;margin-top:4px;">
+            </label>
+            <label>Method
+                <select id="apply-method" style="width:100%;margin-top:4px;">
+                    <option value="auto">Auto</option>
+                    <option value="overwrite">Overwrite</option>
+                    <option value="merge">Merge</option>
+                </select>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="apply-dry" style="width:auto;"> Dry Run (preview only)
+            </label>
+            <button class="btn btn-primary" onclick="doApply()">⬆️ Apply Update</button>
+        </div>`;
+        panel.style.display = 'block';
+    }
+
+    async function doApply() {
+        const emu = document.getElementById('apply-emu').value.trim();
+        const source = document.getElementById('apply-source').value.trim();
+        const method = document.getElementById('apply-method').value;
+        const dryRun = document.getElementById('apply-dry').checked;
+
+        if (!emu || !source) { showToast('Emulator name and source are required', 'error'); return; }
+
+        showToast(`Applying update to ${emu}...`, 'info');
+        try {
+            const result = await apiPost('/api/updates/apply', {
+                emulator_name: emu,
+                update_source: source,
+                method: method,
+                dry_run: dryRun,
+            });
+            if (result.status === 'committed' || result.status === 'applied') {
+                showToast(`Update ${dryRun ? 'preview' : 'applied'} for ${emu}!`, 'success');
+            } else {
+                showToast(`Update result: ${result.status || 'unknown'}`, 'info');
+            }
+            loadHistory();
+            loadSummary();
+        } catch (e) {
+            showToast('Apply failed: ' + e.message, 'error');
+        }
+        closeActionPanel();
+    }
+
+    function showRollbackDialog() {
+        const panel = document.getElementById('action-panel');
+        document.getElementById('action-title').textContent = 'Rollback Update';
+        document.getElementById('action-body').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+            <label>Emulator Name
+                <input type="text" id="rb-emu" placeholder="e.g. RetroArch" style="width:100%;margin-top:4px;">
+            </label>
+            <label>Reason
+                <input type="text" id="rb-reason" value="manual rollback" style="width:100%;margin-top:4px;">
+            </label>
+            <button class="btn btn-danger" onclick="doRollback()">↩️ Trigger Rollback</button>
+        </div>`;
+        panel.style.display = 'block';
+    }
+
+    async function doRollback() {
+        const emu = document.getElementById('rb-emu').value.trim();
+        const reason = document.getElementById('rb-reason').value.trim();
+        if (!emu) { showToast('Emulator name required', 'error'); return; }
+
+        showToast(`Rolling back ${emu}...`, 'info');
+        try {
+            const result = await apiPost('/api/rollback/trigger', {
+                emulator_name: emu,
+                trigger_reason: reason || 'dashboard',
+            });
+            if (result.status === 'success' || result.rolled_back) {
+                showToast(`Rollback for ${emu} complete!`, 'success');
+            } else {
+                showToast(`Rollback result: ${result.status || JSON.stringify(result)}`, 'info');
+            }
+            loadHistory();
+            loadSummary();
+        } catch (e) {
+            showToast('Rollback failed: ' + e.message, 'error');
+        }
+        closeActionPanel();
+    }
+
+    async function viewQuarantine() {
+        const panel = document.getElementById('action-panel');
+        document.getElementById('action-title').textContent = 'Quarantined Updates';
+        document.getElementById('action-body').innerHTML = '<p class="muted">Loading...</p>';
+        panel.style.display = 'block';
+
+        try {
+            const data = await apiGet('/api/versions/quarantine');
+            const items = data.quarantine || [];
+            if (!items.length) {
+                document.getElementById('action-body').innerHTML =
+                    '<p class="muted">No updates in quarantine.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Emulator</th><th>Version</th><th>Status</th><th>Staged</th><th>Actions</th>' +
+                '</tr></thead><tbody>';
+            for (const q of items) {
+                html += `<tr>
+                <td><strong>${q.emulator_name || q.name || '-'}</strong></td>
+                <td>${q.version || '-'}</td>
+                <td><span class="health-pill warn">${q.status || 'staged'}</span></td>
+                <td>${q.created_at || q.staged_at || '-'}</td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn btn-sm btn-success" onclick="applyQuarantined('${q.quarantine_id || q.id}')">Apply</button>
+                    <button class="btn btn-sm btn-danger" onclick="rejectQuarantined('${q.quarantine_id || q.id}')">Reject</button>
+                </td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            document.getElementById('action-body').innerHTML = html;
+        } catch (e) {
+            document.getElementById('action-body').innerHTML =
+                '<p class="muted">Failed to load quarantine.</p>';
+        }
+    }
+
+    async function applyQuarantined(qId) {
+        showToast('Applying quarantined update...', 'info');
+        try {
+            await apiPost('/api/versions/apply-staged', { quarantine_id: qId });
+            showToast('Quarantined update applied!', 'success');
+            viewQuarantine();
+            loadHistory();
+            loadSummary();
+        } catch (e) {
+            showToast('Apply failed: ' + e.message, 'error');
+        }
+    }
+
+    async function rejectQuarantined(qId) {
+        showToast('Rejecting quarantined update...', 'info');
+        try {
+            await apiPost('/api/versions/reject', { quarantine_id: qId });
+            showToast('Update rejected and removed from quarantine.', 'success');
+            viewQuarantine();
+            loadSummary();
+        } catch (e) {
+            showToast('Reject failed: ' + e.message, 'error');
+        }
+    }
+
+    function closeActionPanel() {
+        document.getElementById('action-panel').style.display = 'none';
+    }
+
+    async function loadHistory() {
+        const el = document.getElementById('update-history');
+        try {
+            const data = await apiGet('/api/updates');
+            const updates = data.updates || [];
+            if (!updates.length) {
+                el.innerHTML = '<p class="muted">No updates recorded yet.</p>';
+                return;
+            }
+            const sc = {
+                'committed': 'good', 'tested': 'good', 'applied': 'warn',
+                'rolled_back': 'bad', 'failed': 'bad', 'pending': 'warn'
+            };
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Program</th><th>Old Ver</th><th>New Ver</th><th>Status</th><th>Applied</th><th>Notes</th>' +
+                '</tr></thead><tbody>';
+            for (const u of updates) {
+                const cls = sc[u.status] || 'warn';
+                html += `<tr>
+                <td><strong>${u.program_name || '-'}</strong></td>
+                <td>${u.old_version || '-'}</td>
+                <td>${u.new_version || '-'}</td>
+                <td><span class="health-pill ${cls}">${u.status || '-'}</span></td>
+                <td>${u.applied_at || '-'}</td>
+                <td>${u.notes || ''}</td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Failed to load update history.</p>';
+        }
+    }
+
+    async function loadVersionTracking() {
+        const el = document.getElementById('version-tracking');
+        try {
+            const data = await apiGet('/api/versions/tracked?include_versions=true');
+            const emus = data.emulators || [];
+            if (!emus.length) {
+                el.innerHTML = '<p class="muted">No tracked emulators. Run "Scan Versions" to detect installed versions.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr>' +
+                '<th>Emulator</th><th>Version</th><th>Path</th><th>Last Scanned</th>' +
+                '</tr></thead><tbody>';
+            for (const e of emus.slice(0, 50)) {
+                html += `<tr>
+                <td><strong>${e.name || '-'}</strong></td>
+                <td>${e.version || e.current_version || '-'}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${e.path || ''}">${e.path || '-'}</td>
+                <td>${e.last_scanned || e.updated_at || '-'}</td>
+            </tr>`;
+            }
+            html += '</tbody></table>';
+            if (emus.length > 50) html += `<p class="muted">Showing 50 of ${emus.length}</p>`;
+            el.innerHTML = html;
+        } catch (e) {
+            el.innerHTML = '<p class="muted">Version tracker unavailable.</p>';
+        }
+    }
 </script>
 {% endblock %}
