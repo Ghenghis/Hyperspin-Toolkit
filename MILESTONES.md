@@ -524,7 +524,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Missing ROM reports with game names and expected hashes
 *   Region variant detection and filtering (USA, Europe, Japan priority)
 *   Integration with M6 (ROM Audit) and M27 (Completion Tracker) for unified reporting
-*   **Status**: 📋 Planned — M6 has basic CRC verification; this adds full DAT format support and set management
+*   **Status**: ✅ Complete — `engines/dat_verifier.py` (692 lines). Parses No-Intro/Redump/TOSEC/MAME DAT formats, 1G1R curation with 16-region priority, region variant detection, per-system completion reports, batch verification, DAT directory indexing. MCP tools: `verify_system_dat`, `verify_all_dats`, `dat_metadata`, `dat_summary`, `curate_1g1r`
 
 ### M57 — HyperSpin Settings Manager & HyperHQ Bridge
 
@@ -701,11 +701,11 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 2        | 0       | 4            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 3        | 0       | 3            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **28**   | **2**   | **36**       |
+| **Total**                          | **66**     | **29**   | **2**   | **35**       |
 
 ### Build Order (Recommended Sequence)
 

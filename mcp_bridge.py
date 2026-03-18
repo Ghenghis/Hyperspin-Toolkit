@@ -1041,6 +1041,56 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M56 — DAT File ROM Set Verification Handlers ────────────────────
+
+def tool_verify_system_dat(system: str, rom_dir: str, dat_path: str,
+                           use_sha1: bool = False, compute_1g1r: bool = True,
+                           **kwargs) -> dict:
+    """M56 — Verify a system's ROM set against a DAT file."""
+    from engines.dat_verifier import verify_system
+    result = verify_system(system, rom_dir, dat_path, use_sha1=use_sha1, compute_1g1r=compute_1g1r)
+    return result.to_dict()
+
+
+def tool_verify_all_dats(dat_dir: str = "", roms_root: str = "",
+                         use_sha1: bool = False, compute_1g1r: bool = True,
+                         systems: list = None, **kwargs) -> dict:
+    """M56 — Batch verify all systems with DAT files."""
+    from engines.dat_verifier import verify_all_systems
+    report = verify_all_systems(dat_dir or None, roms_root or None,
+                                use_sha1=use_sha1, compute_1g1r=compute_1g1r, systems=systems)
+    return report.to_dict()
+
+
+def tool_dat_metadata(dat_path: str, **kwargs) -> dict:
+    """M56 — Parse DAT file metadata (source, version, game/ROM counts)."""
+    from engines.dat_verifier import parse_dat_metadata
+    from pathlib import Path
+    meta = parse_dat_metadata(Path(dat_path))
+    return meta.to_dict()
+
+
+def tool_dat_summary(dat_dir: str, **kwargs) -> dict:
+    """M56 — Summarize all DAT files in a directory by source."""
+    from engines.dat_verifier import get_dat_summary
+    return get_dat_summary(dat_dir)
+
+
+def tool_curate_1g1r(dat_path: str, region_priority: list = None,
+                     exclude_nongame: bool = True, **kwargs) -> dict:
+    """M56 — Curate a 1G1R set from a DAT file with region priority."""
+    from engines.dat_verifier import curate_1g1r
+    from engines.rom_audit import parse_dat_file
+    from pathlib import Path
+    entries = parse_dat_file(Path(dat_path))
+    results = curate_1g1r(entries, region_priority, exclude_nongame)
+    return {
+        "total_entries": len(entries),
+        "unique_games": len(results),
+        "games": [r.to_dict() for r in results[:200]],
+    }
+
+
 # ── M53 — Drive Manifest & Deep Indexer Handlers ────────────────────
 
 def tool_index_drive(drive_letter: str, hash_files: bool = False,
@@ -2296,6 +2346,76 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M56 — DAT File ROM Set Verification ──
+    {
+        "name": "verify_system_dat",
+        "description": "M56 — Verify a system's ROM set against a DAT file (No-Intro, Redump, TOSEC). Returns completion stats and 1G1R metrics.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "rom_dir", "dat_path"],
+            "properties": {
+                "system": {"type": "string", "description": "System name, e.g. 'Nintendo - Game Boy Advance'"},
+                "rom_dir": {"type": "string", "description": "Path to ROM directory for this system"},
+                "dat_path": {"type": "string", "description": "Path to DAT file"},
+                "use_sha1": {"type": "boolean", "description": "Also verify SHA1 hashes (slower)", "default": False},
+                "compute_1g1r": {"type": "boolean", "description": "Compute 1G1R completion", "default": True},
+            },
+        },
+        "handler": tool_verify_system_dat,
+    },
+    {
+        "name": "verify_all_dats",
+        "description": "M56 — Batch verify all systems that have both ROM dirs and DAT files. Returns per-system completion.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "dat_dir": {"type": "string", "description": "Directory containing DAT files (default: config)"},
+                "roms_root": {"type": "string", "description": "Root ROM directory (default: config)"},
+                "use_sha1": {"type": "boolean", "default": False},
+                "compute_1g1r": {"type": "boolean", "default": True},
+                "systems": {"type": "array", "items": {"type": "string"}, "description": "Limit to these systems (optional)"},
+            },
+        },
+        "handler": tool_verify_all_dats,
+    },
+    {
+        "name": "dat_metadata",
+        "description": "M56 — Parse a DAT file and return metadata (source, version, game/ROM counts).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_path"],
+            "properties": {
+                "dat_path": {"type": "string", "description": "Path to DAT file"},
+            },
+        },
+        "handler": tool_dat_metadata,
+    },
+    {
+        "name": "dat_summary",
+        "description": "M56 — Summarize all DAT files in a directory organized by source (No-Intro, Redump, TOSEC).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_dir"],
+            "properties": {
+                "dat_dir": {"type": "string", "description": "Directory containing DAT files"},
+            },
+        },
+        "handler": tool_dat_summary,
+    },
+    {
+        "name": "curate_1g1r",
+        "description": "M56 — Curate a 1G1R (1 Game 1 ROM) set from a DAT file with configurable region priority.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["dat_path"],
+            "properties": {
+                "dat_path": {"type": "string", "description": "Path to DAT file"},
+                "region_priority": {"type": "array", "items": {"type": "string"}, "description": "Region priority order (default: USA, World, Europe, Japan, ...)"},
+                "exclude_nongame": {"type": "boolean", "description": "Exclude BIOS, demos, protos", "default": True},
+            },
+        },
+        "handler": tool_curate_1g1r,
     },
     # ── M53 — Drive Manifest & Deep Indexer ──
     {
