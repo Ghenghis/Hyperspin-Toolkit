@@ -511,7 +511,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Report BIOS health status per system (present/missing/wrong checksum)
 *   RetroArch system directory scanning and validation
 *   BIOS path configuration management per emulator
-*   **Status**: 📋 Planned — 0% built, requires `engines/bios_manager.py`
+*   **Status**: ✅ Complete — `engines/bios_manager.py` (705 lines). MD5 verification against known-good hashes for 20+ systems (PS1/PS2/Saturn/Dreamcast/Neo Geo/GBA/NDS/etc.), RetroArch system dir scanning, per-emulator BIOS search, health scoring, custom BIOS DAT loading. MCP tools: `bios_audit`, `bios_audit_system`, `bios_missing_summary`, `bios_list_systems`
 
 ### M56 — DAT File ROM Set Verification (No-Intro, TOSEC, Redump)
 
@@ -537,7 +537,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Manage attract mode / screen saver settings (idle timeout, attract sequence)
 *   Validate HyperSpin settings for consistency and common errors
 *   Provide recommended settings presets (performance, visual quality, cabinet mode)
-*   **Status**: 📋 Planned — 0% built, requires `engines/hyperspin_settings.py`
+*   **Status**: ✅ Complete — `engines/hyperspin_settings.py` (708 lines). Reads/writes HyperSpin.ini and per-system Settings INI files, wheel/navigation/theme/startup/attract mode management, path validation, recommended presets (performance/quality/cabinet). MCP tools: `hs_settings_audit`, `hs_get_setting`, `hs_set_setting`, `hs_apply_preset`, `hs_list_systems`
 
 ### M58 — Cross-Frontend Import/Export Engine
 
@@ -701,11 +701,11 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 3        | 0       | 3            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 5        | 0       | 1            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **29**   | **2**   | **35**       |
+| **Total**                          | **66**     | **31**   | **2**   | **33**       |
 
 ### Build Order (Recommended Sequence)
 
