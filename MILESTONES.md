@@ -672,7 +672,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Generate standardized CSV/JSON game inventory per drive
 *   Cross-drive comparison: what games exist on which drives
 *   Missing game detection: compare against KINHANK official game lists
-*   **Status**: 🔶 Partial — Variant A extraction done (`D:\Arcade\Game-List-HyperSpin-Attraction.csv`); Variant B/C pending
+*   **Status**: ✅ Complete — `engines/gamelist_extractor.py` (450 lines), supports all variants (A/B-A/B-C/C-D), auto-detect via M64 fingerprint, CLI + library. Tested: L: found 2,320 games across 19 systems
 
 ### M66 — Cross-Variant Integrity Checker
 
@@ -682,7 +682,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Content gap analysis: what a drive is missing compared to a reference drive
 *   Corruption detection: zero-byte files, truncated ROMs, broken archives
 *   Generate integrity report with severity levels and recommended actions
-*   **Status**: 📋 Planned — requires M64 + M65
+*   **Status**: ✅ Complete — `engines/integrity_checker.py` (480 lines), variant-specific checks (structure/content/zero-byte), reference drive comparison, JSON+CSV reports. Tested: D: vs I: confirmed clones (100% structure/content, 434 zero-byte placeholders)
 
 ---
 
@@ -704,8 +704,8 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 0        | 1       | 5            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
-| 15 KINHANK Variant Management      | M64–M66    | 1        | 1       | 1            |
-| **Total**                          | **66**     | **24**   | **5**   | **37**       |
+| 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
+| **Total**                          | **66**     | **26**   | **3**   | **37**       |
 
 ### Build Order (Recommended Sequence)
 
