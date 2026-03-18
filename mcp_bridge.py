@@ -1041,6 +1041,51 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M53 — Drive Manifest & Deep Indexer Handlers ────────────────────
+
+def tool_index_drive(drive_letter: str, hash_files: bool = False,
+                     max_depth: int = 0, **kwargs) -> dict:
+    """M53 — Deep scan and index a drive into SQLite."""
+    from engines.drive_manifest import index_drive
+    return index_drive(drive_letter, hash_files=hash_files, max_depth=max_depth)
+
+
+def tool_export_manifest(drive_letter: str, output_path: str = "", **kwargs) -> dict:
+    """M53 — Export drive manifest as JSON."""
+    from engines.drive_manifest import export_manifest
+    path = export_manifest(drive_letter, output_path or None)
+    return {"manifest_path": path}
+
+
+def tool_search_indexed_files(query: str, drive_letter: str = "",
+                              file_type: str = "", limit: int = 50, **kwargs) -> dict:
+    """M53 — Full-text search across indexed drive files."""
+    from engines.drive_manifest import search_files
+    results = search_files(query, drive_letter or None, file_type or None, limit)
+    return {"results": results, "count": len(results)}
+
+
+def tool_find_duplicates(drives: list = None, min_size_mb: float = 1.0,
+                         file_types: list = None, **kwargs) -> dict:
+    """M53 — Find duplicate files across indexed drives."""
+    from engines.drive_manifest import find_duplicates
+    min_bytes = int(min_size_mb * 1024 * 1024)
+    return find_duplicates(drives, min_size_bytes=min_bytes, file_types=file_types)
+
+
+def tool_drive_index_stats(drive_letter: str = "", **kwargs) -> dict:
+    """M53 — Get indexing stats for one or all drives."""
+    from engines.drive_manifest import get_drive_stats
+    stats = get_drive_stats(drive_letter or None)
+    return {"drives": stats, "count": len(stats)}
+
+
+def tool_file_type_breakdown(drive_letter: str, **kwargs) -> dict:
+    """M53 — Get file type breakdown for a drive."""
+    from engines.drive_manifest import file_type_breakdown
+    return file_type_breakdown(drive_letter)
+
+
 # ── M58 — Cross-Frontend Import/Export Handlers ─────────────────────
 
 def tool_convert_gamelist(input_path: str, input_format: str,
@@ -2251,6 +2296,85 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M53 — Drive Manifest & Deep Indexer ──
+    {
+        "name": "index_drive",
+        "description": "M53 — Deep scan and index a drive into SQLite (path, size, type, optional hash). Supports depth limiting.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter to scan, e.g. 'D'"},
+                "hash_files": {"type": "boolean", "description": "Compute partial MD5 per file (slower)", "default": False},
+                "max_depth": {"type": "integer", "description": "Max directory depth (0 = unlimited)", "default": 0},
+            },
+        },
+        "handler": tool_index_drive,
+    },
+    {
+        "name": "export_drive_manifest",
+        "description": "M53 — Export a drive's manifest as JSON to disk (default: <drive>:\\.drive_manifest.json).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter, e.g. 'D'"},
+                "output_path": {"type": "string", "description": "Custom output path (optional)"},
+            },
+        },
+        "handler": tool_export_manifest,
+    },
+    {
+        "name": "search_indexed_files",
+        "description": "M53 — Full-text search across all indexed drive files. Filter by drive and/or file type.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string", "description": "Search term (filename, path fragment)"},
+                "drive_letter": {"type": "string", "description": "Restrict to drive (optional)"},
+                "file_type": {"type": "string", "enum": ["rom", "disc_image", "media", "config", "executable", "archive", "document", "other"]},
+                "limit": {"type": "integer", "description": "Max results (default 50)", "default": 50},
+            },
+        },
+        "handler": tool_search_indexed_files,
+    },
+    {
+        "name": "find_cross_drive_duplicates",
+        "description": "M53 — Find duplicate files across indexed drives by name+size or MD5 hash.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "drives": {"type": "array", "items": {"type": "string"}, "description": "Drive letters to compare (empty = all)"},
+                "min_size_mb": {"type": "number", "description": "Minimum file size in MB (default 1)", "default": 1},
+                "file_types": {"type": "array", "items": {"type": "string"}, "description": "Filter by type: rom, disc_image, media, etc."},
+            },
+        },
+        "handler": tool_find_duplicates,
+    },
+    {
+        "name": "drive_index_stats",
+        "description": "M53 — Get indexing stats (file counts, sizes, types) for one or all indexed drives.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter (optional, empty = all drives)"},
+            },
+        },
+        "handler": tool_drive_index_stats,
+    },
+    {
+        "name": "file_type_breakdown",
+        "description": "M53 — Get file type breakdown (ROM, disc image, media, config, etc.) for a drive.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter, e.g. 'D'"},
+            },
+        },
+        "handler": tool_file_type_breakdown,
     },
     # ── M58 — Cross-Frontend Import/Export ──
     {
