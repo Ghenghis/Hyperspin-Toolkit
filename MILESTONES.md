@@ -500,7 +500,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Scrape media: box art, wheel art, fanart, marquee, snap, video, manual
 *   Store scraped data in SQLite `game_metadata` table
 *   Rate limiting, retry logic, and credential management for all APIs
-*   **Status**: 📋 Planned — M28 (Online Research Agent) covers AI research; this milestone covers structured scraping from game databases
+*   **Status**: ✅ Complete — `engines/metadata_scraper.py` (750 lines). ScreenScraper/TheGamesDB/IGDB/ArcadeDB API integration, SQLite `game_metadata` table, rate limiting + retry logic, credential management (env vars + config file), media download, batch scraping, unified search. MCP tools: `scrape_game_metadata`, `batch_scrape_metadata`, `search_scraped_metadata`, `scrape_stats`, `check_scraper_credentials`, `download_game_media`
 
 ### M55 — BIOS Management & Verification System
 
@@ -701,11 +701,11 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 5        | 0       | 1            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **31**   | **2**   | **33**       |
+| **Total**                          | **66**     | **32**   | **2**   | **32**       |
 
 ### Build Order (Recommended Sequence)
 

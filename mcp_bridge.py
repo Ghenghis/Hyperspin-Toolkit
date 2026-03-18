@@ -1041,6 +1041,54 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M54 — Metadata Scraping Engine Handlers ─────────────────────────
+
+def tool_scrape_game(game_name: str, system: str, sources: list = None,
+                     store: bool = True, **kwargs) -> dict:
+    """M54 — Scrape metadata for a game from configured sources."""
+    from engines.metadata_scraper import scrape_game
+    return scrape_game(game_name, system, sources, store)
+
+
+def tool_batch_scrape(game_names: list, system: str, sources: list = None,
+                      store: bool = True, **kwargs) -> dict:
+    """M54 — Batch scrape metadata for multiple games."""
+    from engines.metadata_scraper import batch_scrape
+    return batch_scrape(game_names, system, sources, store)
+
+
+def tool_search_metadata(query: str, system: str = "", limit: int = 50,
+                         **kwargs) -> dict:
+    """M54 — Search stored metadata by game name."""
+    from engines.metadata_scraper import search_metadata
+    results = search_metadata(query, system or None, limit)
+    return {"results": results, "count": len(results)}
+
+
+def tool_scrape_stats(**kwargs) -> dict:
+    """M54 — Get scraping statistics (total entries, by source, top systems)."""
+    from engines.metadata_scraper import get_scrape_stats
+    return get_scrape_stats()
+
+
+def tool_check_scraper_credentials(**kwargs) -> dict:
+    """M54 — Check which scraping API credentials are configured."""
+    from engines.metadata_scraper import check_credentials
+    return check_credentials()
+
+
+def tool_download_game_media(game_name: str, system: str, output_dir: str,
+                             source: str = "", media_types: list = None,
+                             **kwargs) -> dict:
+    """M54 — Download media files for a game from stored metadata."""
+    from engines.metadata_scraper import get_metadata, download_media
+    meta = get_metadata(game_name, system, source or None)
+    if not meta:
+        return {"error": f"No metadata found for {game_name} ({system}). Scrape first."}
+    downloaded = download_media(meta, output_dir, media_types)
+    return {"game": game_name, "system": system, "downloaded": downloaded}
+
+
 # ── M56 — DAT File ROM Set Verification Handlers ────────────────────
 
 def tool_verify_system_dat(system: str, rom_dir: str, dat_path: str,
@@ -2346,6 +2394,79 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M54 — Metadata Scraping Engine ──
+    {
+        "name": "scrape_game_metadata",
+        "description": "M54 — Scrape metadata for a game from configured sources (ScreenScraper, TheGamesDB, IGDB, ArcadeDB). Requires API credentials.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game_name", "system"],
+            "properties": {
+                "game_name": {"type": "string", "description": "Game/ROM name to search for"},
+                "system": {"type": "string", "description": "System name (e.g. 'SNES', 'PlayStation', 'Arcade')"},
+                "sources": {"type": "array", "items": {"type": "string", "enum": ["screenscraper", "thegamesdb", "igdb", "arcadedb"]}, "description": "Which APIs to query (default: all configured)"},
+                "store": {"type": "boolean", "description": "Store results in SQLite", "default": True},
+            },
+        },
+        "handler": tool_scrape_game,
+    },
+    {
+        "name": "batch_scrape_metadata",
+        "description": "M54 — Batch scrape metadata for multiple games from configured sources.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game_names", "system"],
+            "properties": {
+                "game_names": {"type": "array", "items": {"type": "string"}, "description": "List of game names to scrape"},
+                "system": {"type": "string", "description": "System name"},
+                "sources": {"type": "array", "items": {"type": "string"}, "description": "APIs to query"},
+                "store": {"type": "boolean", "default": True},
+            },
+        },
+        "handler": tool_batch_scrape,
+    },
+    {
+        "name": "search_scraped_metadata",
+        "description": "M54 — Search stored metadata by game name.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string", "description": "Search term (game name)"},
+                "system": {"type": "string", "description": "Filter by system (optional)"},
+                "limit": {"type": "integer", "default": 50},
+            },
+        },
+        "handler": tool_search_metadata,
+    },
+    {
+        "name": "scrape_stats",
+        "description": "M54 — Get scraping statistics (total entries, by source, top systems).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_scrape_stats,
+    },
+    {
+        "name": "check_scraper_credentials",
+        "description": "M54 — Check which scraping API credentials are configured (ScreenScraper, TheGamesDB, IGDB, ArcadeDB).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_check_scraper_credentials,
+    },
+    {
+        "name": "download_game_media",
+        "description": "M54 — Download media files (box art, wheel, fanart, marquee, screenshot, video) for a previously scraped game.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game_name", "system", "output_dir"],
+            "properties": {
+                "game_name": {"type": "string", "description": "Game name"},
+                "system": {"type": "string", "description": "System name"},
+                "output_dir": {"type": "string", "description": "Directory to save media files"},
+                "source": {"type": "string", "description": "Use metadata from this source (optional)"},
+                "media_types": {"type": "array", "items": {"type": "string", "enum": ["box_art", "wheel_art", "fanart", "marquee", "screenshot", "video", "manual"]}, "description": "Which media types to download (default: all)"},
+            },
+        },
+        "handler": tool_download_game_media,
     },
     # ── M56 — DAT File ROM Set Verification ──
     {
