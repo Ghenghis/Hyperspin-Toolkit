@@ -75,7 +75,14 @@
       "capacity_gb": 11176,
       "health_status": "Warning",
       "collection_type": "CORE - TYPE R (LaunchBox/RetroArch-style)",
-      "top_level": ["CORE - TYPE R", "GTA5", "help_faqs", "Installation", "SaveData", "Schedules"],
+      "top_level": [
+        "CORE - TYPE R",
+        "GTA5",
+        "help_faqs",
+        "Installation",
+        "SaveData",
+        "Schedules"
+      ],
       "notes": "User favorite. Contains 'CORE - TYPE R' collection (collections, core, launchers, layouts, meta, settings). Has Warning health — backup to H: is priority.",
       "backup_of": null,
       "backup_target": "H: Retro_14tb (14TB, empty, ready for clone)",
@@ -112,7 +119,13 @@
       "capacity_gb": 18627,
       "health_status": "Healthy",
       "collection_type": "ROM Backup + PC Games",
-      "top_level_categories": ["Switch ROMs", "PC Games (GTA5, Cyberpunk, RDR2, etc.)", "Downloads", "Torrents", "Tools"],
+      "top_level_categories": [
+        "Switch ROMs",
+        "PC Games (GTA5, Cyberpunk, RDR2, etc.)",
+        "Downloads",
+        "Torrents",
+        "Tools"
+      ],
       "notes": "Backup HDD with game ROMs (Switch, PC games). NOT an active gaming collection. Switch games here could be added to whichever drive has room + proper emulator. Needs 22TB backup drive (not yet acquired).",
       "backup_of": null,
       "backup_target": "Need 22TB drive (not acquired)",
@@ -131,7 +144,18 @@
       "capacity_gb": 3726,
       "health_status": "Healthy",
       "collection_type": "Archives / AI Models / Software",
-      "top_level": [".lmstudio", ".ollama", ".windsurf", "Android_(Apk)", "Desktop", "Downloads", "ISO", "Other_Software", "Projects", "RAR_Zip"],
+      "top_level": [
+        ".lmstudio",
+        ".ollama",
+        ".windsurf",
+        "Android_(Apk)",
+        "Desktop",
+        "Downloads",
+        "ISO",
+        "Other_Software",
+        "Projects",
+        "RAR_Zip"
+      ],
       "notes": "Archive drive with AI models (LM Studio, Ollama), software ISOs, Android APKs, projects. 69% free.",
       "backup_of": null,
       "backup_target": null,
@@ -207,28 +231,61 @@
   "collection_types": {
     "HyperSpin + RocketLauncher": {
       "description": "Full HyperSpin frontend with RocketLauncher backend. ROM-per-system folder structure under Arcade/.",
-      "drives": ["D:", "I:"],
-      "identifier_dirs": ["Arcade", "BACKUP FILES - HYPERSPIN & ROCKETLAUNCHER", "HyperSpin_Backups"]
+      "drives": [
+        "D:",
+        "I:"
+      ],
+      "identifier_dirs": [
+        "Arcade",
+        "BACKUP FILES - HYPERSPIN & ROCKETLAUNCHER",
+        "HyperSpin_Backups"
+      ]
     },
     "HyperSpin Attract Mode": {
       "description": "HyperSpin Attraction mode variant with collections/emulators/layouts structure.",
-      "drives": ["K:"],
-      "identifier_dirs": ["Arcade/collections", "Arcade/emulators", "Arcade/layouts"]
+      "drives": [
+        "K:"
+      ],
+      "identifier_dirs": [
+        "Arcade/collections",
+        "Arcade/emulators",
+        "Arcade/layouts"
+      ]
     },
     "CORE - TYPE R": {
       "description": "LaunchBox/RetroArch-style collection with core/, collections/, launchers.windows/, layouts/, meta/ structure.",
-      "drives": ["L:"],
-      "identifier_dirs": ["CORE - TYPE R/collections", "CORE - TYPE R/core", "CORE - TYPE R/launchers.windows"]
+      "drives": [
+        "L:"
+      ],
+      "identifier_dirs": [
+        "CORE - TYPE R/collections",
+        "CORE - TYPE R/core",
+        "CORE - TYPE R/launchers.windows"
+      ]
     },
     "Batocera": {
       "description": "Batocera Linux retro-gaming OS. Boot partition (FAT32) + game data partition (NTFS) with roms/, bios/, themes/.",
-      "drives": ["M:", "N:"],
-      "identifier_dirs": ["roms", "bios", "themes", "decorations"]
+      "drives": [
+        "M:",
+        "N:"
+      ],
+      "identifier_dirs": [
+        "roms",
+        "bios",
+        "themes",
+        "decorations"
+      ]
     },
     "ROM Backup / PC Games": {
       "description": "Bulk ROM backup storage with PC game archives, Switch ROMs, downloads, and tools.",
-      "drives": ["J:"],
-      "identifier_dirs": ["Games", "[=]_Switch_Ebay_[=]", "[=]_Torrents_*"]
+      "drives": [
+        "J:"
+      ],
+      "identifier_dirs": [
+        "Games",
+        "[=]_Switch_Ebay_[=]",
+        "[=]_Torrents_*"
+      ]
     }
   }
 }

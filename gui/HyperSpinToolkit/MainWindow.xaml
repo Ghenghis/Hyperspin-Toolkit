@@ -23,6 +23,18 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <ui:NavigationViewItem x:Name="NavCollection" Content="Collection" TargetPageType="{x:Type views:CollectionBrowserPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Games24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem x:Name="NavGallery" Content="Asset Gallery" TargetPageType="{x:Type views:AssetGalleryPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Image24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <ui:NavigationViewItem x:Name="NavDrives" Content="Drives" TargetPageType="{x:Type views:DrivesPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="HardDrive24" />
@@ -38,6 +50,18 @@
                 <ui:NavigationViewItem x:Name="NavBackup" Content="Backup" TargetPageType="{x:Type views:BackupPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="ArrowDownload24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem x:Name="NavAgents" Content="Agent Console" TargetPageType="{x:Type views:AgentConsolePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Bot24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem x:Name="NavChat" Content="AI Chat" TargetPageType="{x:Type views:AIChatPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Chat24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>

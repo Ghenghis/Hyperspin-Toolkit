@@ -104,14 +104,14 @@ The HyperSpin Toolkit evolves from a CLI/dashboard tool into a **fully agentic p
 
 **Role:** Top-level AI agent that coordinates all other agents and tools.
 
-| Feature | Use in Project |
-|---------|---------------|
-| MCP-native | Direct integration with HyperSpin Toolkit MCP Bridge |
-| Any LLM support | Routes to LM Studio (default), Ollama, or VLLM |
+| Feature            | Use in Project                                        |
+| ------------------ | ----------------------------------------------------- |
+| MCP-native         | Direct integration with HyperSpin Toolkit MCP Bridge  |
+| Any LLM support    | Routes to LM Studio (default), Ollama, or VLLM        |
 | Multi-model config | Use small model for routing, large model for analysis |
-| Desktop + CLI | Both GUI and headless operation modes |
-| Extension system | Custom extensions for drive management, ROM audit |
-| Skill discovery | Reads SKILL.md files from CLI-Anything generated CLIs |
+| Desktop + CLI      | Both GUI and headless operation modes                 |
+| Extension system   | Custom extensions for drive management, ROM audit     |
+| Skill discovery    | Reads SKILL.md files from CLI-Anything generated CLIs |
 
 **Integration Points:**
 - Connects to `mcp_bridge.py` as an MCP server
@@ -136,14 +136,14 @@ goose mcp add hyperspin-toolkit -- python D:\hyperspin_toolkit\mcp_bridge.py
 
 **Role:** Autonomous coding agent that writes, tests, and fixes code inside Docker sandboxes.
 
-| Feature | Use in Project |
-|---------|---------------|
-| Docker sandbox | Safe code execution environment |
-| File editing | Autonomous code changes to toolkit engines |
-| Terminal access | Run pytest, build commands, PowerShell scripts |
-| Web browsing | Research emulator updates, ROM databases |
+| Feature           | Use in Project                                        |
+| ----------------- | ----------------------------------------------------- |
+| Docker sandbox    | Safe code execution environment                       |
+| File editing      | Autonomous code changes to toolkit engines            |
+| Terminal access   | Run pytest, build commands, PowerShell scripts        |
+| Web browsing      | Research emulator updates, ROM databases              |
 | Local LLM support | Works with LM Studio/Ollama via OpenAI-compatible API |
-| Multi-agent | Can spawn sub-agents for parallel tasks |
+| Multi-agent       | Can spawn sub-agents for parallel tasks               |
 
 **Integration Points:**
 - Goose delegates coding tasks to OpenHands
@@ -170,13 +170,13 @@ docker run -it --rm `
 
 **Role:** Manages the lifecycle of specialized AI agents running in OpenShell sandboxes.
 
-| Feature | Use in Project |
-|---------|---------------|
-| Blueprint system | Versioned, immutable agent configurations |
-| Sandbox creation | Isolated containers per agent task |
-| Policy enforcement | Filesystem, network, GPU access control |
-| Inference routing | Routes LLM calls through configured providers |
-| CLI plugin | `nemoclaw onboard`, `nemoclaw status` commands |
+| Feature            | Use in Project                                 |
+| ------------------ | ---------------------------------------------- |
+| Blueprint system   | Versioned, immutable agent configurations      |
+| Sandbox creation   | Isolated containers per agent task             |
+| Policy enforcement | Filesystem, network, GPU access control        |
+| Inference routing  | Routes LLM calls through configured providers  |
+| CLI plugin         | `nemoclaw onboard`, `nemoclaw status` commands |
 
 **Integration Points:**
 - Goose/OpenHands create NemoClaw blueprints for specialized agents
@@ -205,13 +205,13 @@ nemoclaw onboard --blueprint D:\hyperspin_toolkit\blueprints\hyperspin-agent.yam
 
 **Role:** Kernel-level isolation for running untrusted agent code safely.
 
-| Feature | Use in Project |
-|---------|---------------|
-| Container isolation | Agents can't escape sandbox |
-| Filesystem policies | Per-drive read/write/deny rules |
-| Network policies | Only allow required endpoints |
-| GPU passthrough | Local inference inside sandbox |
-| CLI management | `openshell sandbox create/destroy/status` |
+| Feature             | Use in Project                            |
+| ------------------- | ----------------------------------------- |
+| Container isolation | Agents can't escape sandbox               |
+| Filesystem policies | Per-drive read/write/deny rules           |
+| Network policies    | Only allow required endpoints             |
+| GPU passthrough     | Local inference inside sandbox            |
+| CLI management      | `openshell sandbox create/destroy/status` |
 
 **See:** `docs/OPENSHELL_SETUP.md` for full setup and policy configuration.
 
@@ -219,13 +219,13 @@ nemoclaw onboard --blueprint D:\hyperspin_toolkit\blueprints\hyperspin-agent.yam
 
 **Role:** Generates deterministic CLIs + SKILL.md files that make any software agent-controllable.
 
-| Feature | Use in Project |
-|---------|---------------|
+| Feature             | Use in Project                                  |
+| ------------------- | ----------------------------------------------- |
 | Auto-generated CLIs | Wrap HyperSpin, RocketLauncher, MAME, RetroArch |
-| SKILL.md generation | Agents auto-discover available capabilities |
-| 7-phase pipeline | Analyze → Design → Implement → Test → Document |
-| Zero-config install | `pip install cli-anything-<software>` |
-| Session management | Stateful interactions with complex software |
+| SKILL.md generation | Agents auto-discover available capabilities     |
+| 7-phase pipeline    | Analyze → Design → Implement → Test → Document  |
+| Zero-config install | `pip install cli-anything-<software>`           |
+| Session management  | Stateful interactions with complex software     |
 
 **Already on D:\CLI-Anything** — includes generated CLIs for: audacity, blender, comfyui, drawio, gimp, inkscape, kdenlive, libreoffice, mermaid, obs-studio, and more.
 
@@ -256,23 +256,23 @@ cd D:\CLI-Anything
 
 **Role:** Optional high-throughput LLM server for batch operations and multi-agent concurrent inference.
 
-| Feature | Use in Project |
-|---------|---------------|
-| PagedAttention | 3x throughput vs Ollama |
-| OpenAI-compatible API | Drop-in replacement for LM Studio |
-| Batch processing | Efficient for bulk ROM metadata analysis |
-| Multi-GPU support | Scale across available GPUs |
-| Continuous batching | Handle concurrent agent requests |
+| Feature               | Use in Project                           |
+| --------------------- | ---------------------------------------- |
+| PagedAttention        | 3x throughput vs Ollama                  |
+| OpenAI-compatible API | Drop-in replacement for LM Studio        |
+| Batch processing      | Efficient for bulk ROM metadata analysis |
+| Multi-GPU support     | Scale across available GPUs              |
+| Continuous batching   | Handle concurrent agent requests         |
 
 **When to Use VLLM vs LM Studio:**
-| Scenario | Backend |
-|----------|---------|
-| Interactive chat/development | LM Studio (GUI, easy model switching) |
-| Single agent tasks | LM Studio or Ollama |
-| Multi-agent concurrent inference | **VLLM** (handles concurrent requests) |
-| Batch ROM metadata analysis (47K+ items) | **VLLM** (continuous batching) |
-| Asset classification at scale | **VLLM** (throughput) |
-| Quick prototyping | Ollama (CLI, fast model pull) |
+| Scenario                                 | Backend                                |
+| ---------------------------------------- | -------------------------------------- |
+| Interactive chat/development             | LM Studio (GUI, easy model switching)  |
+| Single agent tasks                       | LM Studio or Ollama                    |
+| Multi-agent concurrent inference         | **VLLM** (handles concurrent requests) |
+| Batch ROM metadata analysis (47K+ items) | **VLLM** (continuous batching)         |
+| Asset classification at scale            | **VLLM** (throughput)                  |
+| Quick prototyping                        | Ollama (CLI, fast model pull)          |
 
 **Setup:**
 ```powershell
@@ -361,18 +361,18 @@ User Request: "Audit all ROM collections and find missing media"
 
 ### Seamless Collaboration Pattern
 
-| Step | Actor | Action |
-|------|-------|--------|
-| 1 | **User** | Requests task via Arcade GUI or CLI |
-| 2 | **Goose** | Interprets intent, loads relevant Skills |
-| 3 | **Goose** | Creates execution plan, identifies required agents |
-| 4 | **NemoClaw** | Provisions OpenShell sandboxes per agent |
-| 5 | **Agents** | Execute tasks in isolation (ROM scan, asset audit, etc.) |
-| 6 | **Agents** | Query LM Studio/Ollama/VLLM for AI-powered analysis |
-| 7 | **NemoClaw** | Monitors agent health, restarts on failure |
-| 8 | **Goose** | Aggregates results, detects code changes needed |
-| 9 | **OpenHands** | Implements code changes (new engines, bug fixes, tests) |
-| 10 | **Goose** | Validates changes, reports to user via GUI |
+| Step | Actor         | Action                                                   |
+| ---- | ------------- | -------------------------------------------------------- |
+| 1    | **User**      | Requests task via Arcade GUI or CLI                      |
+| 2    | **Goose**     | Interprets intent, loads relevant Skills                 |
+| 3    | **Goose**     | Creates execution plan, identifies required agents       |
+| 4    | **NemoClaw**  | Provisions OpenShell sandboxes per agent                 |
+| 5    | **Agents**    | Execute tasks in isolation (ROM scan, asset audit, etc.) |
+| 6    | **Agents**    | Query LM Studio/Ollama/VLLM for AI-powered analysis      |
+| 7    | **NemoClaw**  | Monitors agent health, restarts on failure               |
+| 8    | **Goose**     | Aggregates results, detects code changes needed          |
+| 9    | **OpenHands** | Implements code changes (new engines, bug fixes, tests)  |
+| 10   | **Goose**     | Validates changes, reports to user via GUI               |
 
 ---
 
@@ -382,21 +382,21 @@ Skills are the **discovery mechanism** that lets agents know what capabilities a
 
 ### Required Skills for HyperSpin Toolkit
 
-| Skill | Source | Purpose |
-|-------|--------|---------|
-| `hyperspin-management` | CLI-Anything generated | Control HyperSpin frontend |
-| `rocketlauncher-management` | CLI-Anything generated | Control RocketLauncher backend |
-| `mame-control` | CLI-Anything generated | Control MAME emulator |
-| `retroarch-control` | CLI-Anything generated | Control RetroArch cores |
-| `drive-management` | Custom SKILL.md | Drive registry, health, backup ops |
-| `rom-audit` | Custom SKILL.md | ROM scanning, validation, dedup |
-| `asset-audit` | Custom SKILL.md | Media asset scanning, classification |
-| `emulator-health` | Custom SKILL.md | Emulator version tracking, updates |
-| `collection-sync` | Custom SKILL.md | Cross-drive sync operations |
-| `arcade-gui-assets` | Custom SKILL.md | Asset selection for GUI theming |
-| `backup-management` | Custom SKILL.md | Clone, verify, schedule backups |
-| `lm-studio-control` | CLI-Anything generated | Model loading, inference config |
-| `ollama-control` | CLI-Anything generated | Model pull, run, manage |
+| Skill                       | Source                 | Purpose                              |
+| --------------------------- | ---------------------- | ------------------------------------ |
+| `hyperspin-management`      | CLI-Anything generated | Control HyperSpin frontend           |
+| `rocketlauncher-management` | CLI-Anything generated | Control RocketLauncher backend       |
+| `mame-control`              | CLI-Anything generated | Control MAME emulator                |
+| `retroarch-control`         | CLI-Anything generated | Control RetroArch cores              |
+| `drive-management`          | Custom SKILL.md        | Drive registry, health, backup ops   |
+| `rom-audit`                 | Custom SKILL.md        | ROM scanning, validation, dedup      |
+| `asset-audit`               | Custom SKILL.md        | Media asset scanning, classification |
+| `emulator-health`           | Custom SKILL.md        | Emulator version tracking, updates   |
+| `collection-sync`           | Custom SKILL.md        | Cross-drive sync operations          |
+| `arcade-gui-assets`         | Custom SKILL.md        | Asset selection for GUI theming      |
+| `backup-management`         | Custom SKILL.md        | Clone, verify, schedule backups      |
+| `lm-studio-control`         | CLI-Anything generated | Model loading, inference config      |
+| `ollama-control`            | CLI-Anything generated | Model pull, run, manage              |
 
 ### Skill File Format
 
@@ -524,14 +524,14 @@ routing:
 
 ## Security Model
 
-| Layer | Control | Policy |
-|-------|---------|--------|
-| **OpenShell** | Kernel-level isolation | Per-agent filesystem/network/GPU rules |
-| **NemoClaw** | Agent lifecycle | Blueprint-enforced boundaries |
-| **Drive Registry** | Drive identification | Serial-based verification before writes |
-| **Goose** | Task routing | Only delegates to authorized agents |
-| **OpenHands** | Code sandbox | Docker isolation, no host access |
-| **LLM** | Inference routing | Localhost-only, no cloud calls |
+| Layer              | Control                | Policy                                  |
+| ------------------ | ---------------------- | --------------------------------------- |
+| **OpenShell**      | Kernel-level isolation | Per-agent filesystem/network/GPU rules  |
+| **NemoClaw**       | Agent lifecycle        | Blueprint-enforced boundaries           |
+| **Drive Registry** | Drive identification   | Serial-based verification before writes |
+| **Goose**          | Task routing           | Only delegates to authorized agents     |
+| **OpenHands**      | Code sandbox           | Docker isolation, no host access        |
+| **LLM**            | Inference routing      | Localhost-only, no cloud calls          |
 
 ### Critical Safety Rules
 1. **NEVER** allow write access to I:, K:, L:, J: from any agent

@@ -432,14 +432,14 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
     *   Box art display panels (Artwork1-4 layers)
     *   Sound effects on navigation from `Media/{System}/Sound/`
     *   Genre icons, letter art, special art overlays
-*   **Status**: 📋 Planned — Dashboard exists in Fluent style; Collection Browser is 0%
+*   **Status**: ✅ Complete — `DashboardPage.xaml` restyled with VideoBackground, ParticleCanvas (AmbientStars), ScoreCounter stat cards, NeonGauge health meter, LedIndicator bridge status, ArcadeDataGrid drive roles. `CollectionBrowserPage.xaml` (NEW, 170 lines) with video background, wheel art ListBox with virtualization, video preview panel, dual box art panels, system selector with LED/ScoreCounter, search overlay, PREV/LAUNCH/NEXT arcade buttons.
 
 ### M49 — Agent Console, Asset Gallery & AI Chat
 
 *   **Agent Console** (NEW page) — CRT scanline terminal for Goose/NemoClaw/OpenHands output, real-time agent status LEDs, command input with autocomplete
 *   **Asset Gallery** (NEW page) — grid browse/search all 301K+ game assets, filter by type/system/quality, lightbox preview with metadata, drag-to-set as page theme
 *   **AI Chat** (NEW page) — arcade-style chat bubbles with scanline text effect, natural language input to Goose, results displayed as formatted arcade cards
-*   **Status**: 📋 Planned — 0% built, 3 entirely new pages
+*   **Status**: ✅ Complete — 3 new pages: `AgentConsolePage.xaml` (CrtTerminal with 1000-line buffer, 6 agent LED indicators, command input with agent selector, CLEAR/EXPORT buttons), `AssetGalleryPage.xaml` (filter bar: type/system/drive/quality/search, virtualized WrapPanel grid with thumbnails/quality scores/favorites, PIN/FAV/PREVIEW actions), `AIChatPage.xaml` (ParticleCanvas NeonRain, chat bubbles with glow effects, agent/model LED status, mode selector, scrollable message list).
 
 ### M50 — Audit, Backup, Update & Settings Arcade Restyle
 
@@ -449,7 +449,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   **Drive Manager page** — LED indicators per drive, arcade gauge bars, serial-based identification
 *   **Settings page** — retro options menu with joystick-style navigation, sound/theme config
 *   All pages use arcade controls (M45), shaders (M46), sounds (M47)
-*   **Status**: 📋 Planned — existing 5 pages need complete restyle from Fluent → Arcade
+*   **Status**: ✅ Complete — 5 pages restyled Fluent → Arcade: `AuditPage.xaml` (ParticleCanvas, ScoreCounter cards, NeonGauge health, ArcadeDataGrid, arcade buttons), `BackupPage.xaml` (neon cards green/pink, ArcadeDataGrid history, arcade progress bars), `DrivesPage.xaml` (LED indicators, arcade gauge bars, ArcadeDataGrid roles+drives, neon compare/migrate panels), `SettingsPage.xaml` (arcade cards, retro about section with PixelText). `MainWindow.xaml` updated with 4 new nav items (Collection, Asset Gallery, Agent Console, AI Chat).
 
 ## Phase 11: Arcade Polish & Integration (Milestones 51–52)
 
@@ -699,13 +699,13 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 7 Agentic AI Stack                 | M36–M40    | 5        | 0       | 0       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 3        | 0       | 0       |
 | 9 Arcade GUI Foundation            | M44–M47    | 4        | 0       | 0       |
-| 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3       |
+| 10 Arcade GUI Pages                | M48–M50    | 3        | 0       | 0       |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2       |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0       |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **56**   | **2**   | **8**   |
+| **Total**                          | **66**     | **59**   | **2**   | **5**   |
 
 ### Build Order (Recommended Sequence)
 

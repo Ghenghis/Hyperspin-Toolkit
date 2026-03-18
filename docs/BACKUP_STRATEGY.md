@@ -7,14 +7,14 @@
 
 ## Current Backup Status
 
-| Drive | Size | Has Backup? | Backup Target | Method | Status |
-|-------|------|-------------|---------------|--------|--------|
-| I: Primary HyperSpin | 12TB | ✅ D: is clone | D: (12TB, Warning) | Previous clone | Clone has issues |
-| L: CORE - TYPE R | 12TB | ⏳ Pending | H: Retro_14tb (14TB) | HDD Cloner (low-level) | **Priority #1** |
-| K: HyperSpin Attraction | 12TB | ❌ None | Need 14-18TB | TBD | Not started |
-| J: ROM Backup 20TB | 20TB | ❌ None | Need 22TB+ | TBD | Drive not acquired |
-| N: Batocera Games | 2TB | ❌ None | Need 4TB | TBD | Not started |
-| E: Archive2023 | 4TB | ❌ None | Low priority (69% free) | TBD | Not started |
+| Drive                   | Size | Has Backup?   | Backup Target           | Method                 | Status             |
+| ----------------------- | ---- | ------------- | ----------------------- | ---------------------- | ------------------ |
+| I: Primary HyperSpin    | 12TB | ✅ D: is clone | D: (12TB, Warning)      | Previous clone         | Clone has issues   |
+| L: CORE - TYPE R        | 12TB | ⏳ Pending     | H: Retro_14tb (14TB)    | HDD Cloner (low-level) | **Priority #1**    |
+| K: HyperSpin Attraction | 12TB | ❌ None        | Need 14-18TB            | TBD                    | Not started        |
+| J: ROM Backup 20TB      | 20TB | ❌ None        | Need 22TB+              | TBD                    | Drive not acquired |
+| N: Batocera Games       | 2TB  | ❌ None        | Need 4TB                | TBD                    | Not started        |
+| E: Archive2023          | 4TB  | ❌ None        | Low priority (69% free) | TBD                    | Not started        |
 
 ---
 
@@ -58,12 +58,12 @@
 **Target:** Need 22TB+ drive
 
 ### Recommended Drives (22TB Class)
-| Model | Capacity | Interface | Est. Price | Notes |
-|-------|----------|-----------|-----------|-------|
-| WD Red Pro 22TB (WD221KFGX) | 22TB | SATA/USB | ~$400 | NAS-rated, 5-yr warranty |
-| Seagate IronWolf Pro 22TB (ST22000NT001) | 22TB | SATA/USB | ~$380 | NAS-rated, 5-yr warranty |
-| WD Ultrastar HC580 24TB | 24TB | SATA/USB | ~$450 | Enterprise, most headroom |
-| Seagate Exos X24 24TB | 24TB | SATA/USB | ~$440 | Enterprise, 5-yr warranty |
+| Model                                    | Capacity | Interface | Est. Price | Notes                     |
+| ---------------------------------------- | -------- | --------- | ---------- | ------------------------- |
+| WD Red Pro 22TB (WD221KFGX)              | 22TB     | SATA/USB  | ~$400      | NAS-rated, 5-yr warranty  |
+| Seagate IronWolf Pro 22TB (ST22000NT001) | 22TB     | SATA/USB  | ~$380      | NAS-rated, 5-yr warranty  |
+| WD Ultrastar HC580 24TB                  | 24TB     | SATA/USB  | ~$450      | Enterprise, most headroom |
+| Seagate Exos X24 24TB                    | 24TB     | SATA/USB  | ~$440      | Enterprise, 5-yr warranty |
 
 ### Why 22TB+
 - J: is 18,627 GB used → need minimum 20TB backup
@@ -97,11 +97,11 @@ robocopy N:\ E:\Batocera_Backup\ /MIR /MT:8 /R:3 /W:5 /LOG:batocera_backup.log
 ### Sizing Rule
 > **Always buy backup/upgrade drives 2TB larger than the source** to accommodate growth.
 
-| Current Size | Upgrade Range | Purpose |
-|-------------|---------------|---------|
-| 12TB | 14–18TB | All four 12TB drives (D:, I:, K:, L:) |
-| 20TB | 22–24TB | J: backup |
-| 2TB | 4TB | N: Batocera backup |
+| Current Size | Upgrade Range | Purpose                               |
+| ------------ | ------------- | ------------------------------------- |
+| 12TB         | 14–18TB       | All four 12TB drives (D:, I:, K:, L:) |
+| 20TB         | 22–24TB       | J: backup                             |
+| 2TB          | 4TB           | N: Batocera backup                    |
 
 ### Upgrade Procedure (Per Drive)
 
@@ -117,13 +117,13 @@ robocopy N:\ E:\Batocera_Backup\ /MIR /MT:8 /R:3 /W:5 /LOG:batocera_backup.log
    - Old Warning drives → recycle (do NOT trust for data storage)
 
 ### Budget Estimate
-| Item | Qty | Unit Price | Total |
-|------|-----|-----------|-------|
-| 14TB WD/Seagate (for 12TB upgrades) | 4 | ~$220 | ~$880 |
-| 22TB WD/Seagate (for J: backup) | 1 | ~$400 | ~$400 |
-| 4TB external (for N: backup) | 1 | ~$80 | ~$80 |
-| USB 3.0+ enclosures (if needed) | 2 | ~$30 | ~$60 |
-| **Total estimate** | | | **~$1,420** |
+| Item                                | Qty | Unit Price | Total       |
+| ----------------------------------- | --- | ---------- | ----------- |
+| 14TB WD/Seagate (for 12TB upgrades) | 4   | ~$220      | ~$880       |
+| 22TB WD/Seagate (for J: backup)     | 1   | ~$400      | ~$400       |
+| 4TB external (for N: backup)        | 1   | ~$80       | ~$80        |
+| USB 3.0+ enclosures (if needed)     | 2   | ~$30       | ~$60        |
+| **Total estimate**                  |     |            | **~$1,420** |
 
 ---
 

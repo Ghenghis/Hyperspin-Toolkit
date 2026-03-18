@@ -1,224 +1,181 @@
-<ui:Page
-    x:Class="HyperSpinToolkit.Views.DrivesPage"
+<ui:Page x:Class="HyperSpinToolkit.Views.DrivesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:HyperSpinToolkit.Controls"
+    xmlns:effects="clr-namespace:HyperSpinToolkit.Effects"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Title="Drives"
-    d:DesignHeight="900" d:DesignWidth="1060">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" Title="Drives" Background="Transparent" d:DesignHeight="900" d:DesignWidth="1060">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
-        <StackPanel>
+    <Grid>
+        <Border Style="{DynamicResource BackgroundLayerStyle}" />
 
-            <!-- Header -->
-            <Grid Margin="0,0,0,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Drive Management" FontSize="28" FontWeight="SemiBold"/>
-                <ui:Button Grid.Column="1" Content="Scan Drives" VerticalAlignment="Top"
-                           Icon="{ui:SymbolIcon HardDrive24}"
-                           Command="{Binding ViewModel.ScanDrivesCommand}"
-                           IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
-            </Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+            <StackPanel>
 
-            <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,16"
-                         Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
-
-            <!-- Role status strip -->
-            <TextBlock Text="Assigned Roles" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
-            <ui:Card Padding="0" Margin="0,0,0,24">
-                <DataGrid ItemsSource="{Binding ViewModel.RoleStatuses}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                          RowHeight="38" CanUserResizeRows="False"
-                          Background="Transparent" BorderThickness="0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Role"   Binding="{Binding Role}"      Width="100"/>
-                        <DataGridTextColumn Header="Drive"  Binding="{Binding Letter}"     Width="70"/>
-                        <DataGridTextColumn Header="Path"   Binding="{Binding Path}"       Width="*"/>
-                        <DataGridTextColumn Header="Total"  Binding="{Binding TotalHuman}" Width="90"/>
-                        <DataGridTextColumn Header="Free"   Binding="{Binding FreeHuman}"  Width="90"/>
-                        <DataGridTextColumn Header="Used%"  Binding="{Binding UsedPct}"    Width="70"/>
-                        <DataGridTemplateColumn Header="OK" Width="55">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding IsOk, Converter={StaticResource BoolToOkConverter}}"
-                                               Foreground="{Binding IsOk, Converter={StaticResource BoolToColorConverter}}"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               FontWeight="Bold" FontSize="15"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </ui:Card>
-
-            <!-- Scanned drives -->
-            <TextBlock Text="All Connected Drives" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
-            <ui:Card Padding="0" Margin="0,0,0,24">
-                <DataGrid ItemsSource="{Binding ViewModel.Drives}"
-                          SelectedItem="{Binding ViewModel.SelectedDrive}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                          RowHeight="38" CanUserResizeRows="False"
-                          Background="Transparent" BorderThickness="0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Drive"   Binding="{Binding DisplayLetter}" Width="65"/>
-                        <DataGridTextColumn Header="Label"   Binding="{Binding Label}"         Width="140"/>
-                        <DataGridTextColumn Header="Total"   Binding="{Binding TotalHuman}"    Width="90"/>
-                        <DataGridTextColumn Header="Used"    Binding="{Binding UsedHuman}"     Width="90"/>
-                        <DataGridTextColumn Header="Free"    Binding="{Binding FreeHuman}"     Width="90"/>
-                        <DataGridTemplateColumn Header="Arcade?" Width="70">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding IsArcade, Converter={StaticResource BoolToOkConverter}}"
-                                               Foreground="{Binding IsArcade, Converter={StaticResource BoolToColorConverter}}"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               FontWeight="Bold" FontSize="15"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Arcade Root" Binding="{Binding ArcadeRoot}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </ui:Card>
-
-            <!-- Two-column actions -->
-            <Grid Margin="0,0,0,24">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="12" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Assign role -->
-                <ui:Card Grid.Column="0" Padding="20">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Assign Drive Role" FontSize="15" FontWeight="SemiBold"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Role:" VerticalAlignment="Center"/>
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding ViewModel.RoleChoices}"
-                                      SelectedItem="{Binding ViewModel.AssignRole}"/>
-                        </Grid>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Letter:" VerticalAlignment="Center"/>
-                            <ui:TextBox Grid.Column="1"
-                                        Text="{Binding ViewModel.AssignLetter, UpdateSourceTrigger=PropertyChanged}"
-                                        PlaceholderText="e.g. D"/>
-                        </Grid>
-                        <ui:Button Content="Assign"
-                                   Command="{Binding ViewModel.AssignRoleCommand}"
-                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
-                        <TextBlock Text="{Binding ViewModel.AssignResult}" TextWrapping="Wrap"
-                                   Opacity="0.75" FontSize="12"/>
+                <!-- Header -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="DRIVE MANAGEMENT" Style="{DynamicResource ArcadeTitleStyle}" FontSize="22"/>
+                        <TextBlock Text="LED INDICATORS · ARCADE GAUGE BARS · SERIAL ID" Style="{DynamicResource ArcadeLabelStyle}" Margin="0,4,0,0"/>
                     </StackPanel>
-                </ui:Card>
+                    <Button Grid.Column="1" Content="SCAN DRIVES" Style="{DynamicResource ArcadeButtonStyle}" Padding="14,8" FontSize="11" VerticalAlignment="Top" Command="{Binding ViewModel.ScanDrivesCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                </Grid>
 
-                <!-- Health check -->
-                <ui:Card Grid.Column="2" Padding="20">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Drive Health Check" FontSize="15" FontWeight="SemiBold"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Letter:" VerticalAlignment="Center"/>
-                            <ui:TextBox Grid.Column="1"
-                                        Text="{Binding ViewModel.HealthLetter, UpdateSourceTrigger=PropertyChanged}"
-                                        PlaceholderText="e.g. D"/>
-                        </Grid>
-                        <ui:Button Content="Check Health"
-                                   Command="{Binding ViewModel.CheckHealthCommand}"
-                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
-                        <StackPanel Visibility="{Binding ViewModel.HealthResult, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBlock Text="{Binding ViewModel.HealthResult.SmartHealth, StringFormat='SMART: {0}'}"
-                                       Foreground="{Binding ViewModel.HealthResult.StatusColor, Converter={StaticResource HexColorToBrushConverter}}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding ViewModel.HealthResult.TotalGb, StringFormat='Total: {0} GB'}" Opacity="0.7" FontSize="12"/>
-                            <TextBlock Text="{Binding ViewModel.HealthResult.FreeGb, StringFormat='Free: {0} GB'}" Opacity="0.7" FontSize="12"/>
-                            <TextBlock Text="{Binding ViewModel.HealthResult.TemperatureC, StringFormat='Temp: {0}°C'}" Opacity="0.7" FontSize="12"/>
-                            <TextBlock Text="{Binding ViewModel.HealthResult.PowerOnHours, StringFormat='Power-on Hours: {0}'}" Opacity="0.7" FontSize="12"/>
+                <ProgressBar IsIndeterminate="True" Style="{DynamicResource NeonProgressBarStyle}" Margin="0,0,0,16" Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <!-- Role status strip -->
+                <TextBlock Text="ASSIGNED ROLES" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
+                <Border Style="{DynamicResource ArcadeCardStyle}" Padding="0" Margin="0,0,0,24">
+                    <DataGrid ItemsSource="{Binding ViewModel.RoleStatuses}" Style="{DynamicResource ArcadeDataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="38" CanUserResizeRows="False" Background="Transparent" BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="100"/>
+                            <DataGridTextColumn Header="Drive" Binding="{Binding Letter}" Width="70"/>
+                            <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalHuman}" Width="90"/>
+                            <DataGridTextColumn Header="Free" Binding="{Binding FreeHuman}" Width="90"/>
+                            <DataGridTextColumn Header="Used%" Binding="{Binding UsedPct}" Width="70"/>
+                            <DataGridTemplateColumn Header="OK" Width="55">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IsOk, Converter={StaticResource BoolToOkConverter}}" Foreground="{Binding IsOk, Converter={StaticResource BoolToColorConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="15"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <!-- Scanned drives -->
+                <TextBlock Text="ALL CONNECTED DRIVES" Style="{DynamicResource ArcadeSubtitleStyle}" Margin="0,0,0,10"/>
+                <Border Style="{DynamicResource ArcadeCardGreenStyle}" Padding="0" Margin="0,0,0,24">
+                    <DataGrid ItemsSource="{Binding ViewModel.Drives}" Style="{DynamicResource ArcadeDataGridStyle}" SelectedItem="{Binding ViewModel.SelectedDrive}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="38" CanUserResizeRows="False" Background="Transparent" BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Drive" Binding="{Binding DisplayLetter}" Width="65"/>
+                            <DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="140"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalHuman}" Width="90"/>
+                            <DataGridTextColumn Header="Used" Binding="{Binding UsedHuman}" Width="90"/>
+                            <DataGridTextColumn Header="Free" Binding="{Binding FreeHuman}" Width="90"/>
+                            <DataGridTemplateColumn Header="Arcade?" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IsArcade, Converter={StaticResource BoolToOkConverter}}" Foreground="{Binding IsArcade, Converter={StaticResource BoolToColorConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="15"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Arcade Root" Binding="{Binding ArcadeRoot}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <!-- Two-column actions -->
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Assign role -->
+                    <Border Grid.Column="0" Style="{DynamicResource ArcadeCardStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="ASSIGN DRIVE ROLE" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Role:" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding ViewModel.RoleChoices}" SelectedItem="{Binding ViewModel.AssignRole}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Letter:" VerticalAlignment="Center"/>
+                                <ui:TextBox Grid.Column="1" Text="{Binding ViewModel.AssignLetter, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. D"/>
+                            </Grid>
+                            <Button Content="ASSIGN" Style="{DynamicResource ArcadeButtonGreenStyle}" Padding="14,6" Command="{Binding ViewModel.AssignRoleCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            <TextBlock Text="{Binding ViewModel.AssignResult}" TextWrapping="Wrap" Opacity="0.75" FontSize="12"/>
                         </StackPanel>
+                    </Border>
+
+                    <!-- Health check -->
+                    <Border Grid.Column="2" Style="{DynamicResource ArcadeCardPinkStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="DRIVE HEALTH CHECK" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Letter:" VerticalAlignment="Center"/>
+                                <ui:TextBox Grid.Column="1" Text="{Binding ViewModel.HealthLetter, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. D"/>
+                            </Grid>
+                            <Button Content="CHECK HEALTH" Style="{DynamicResource ArcadeButtonPinkStyle}" Padding="14,6" Command="{Binding ViewModel.CheckHealthCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                            <StackPanel Visibility="{Binding ViewModel.HealthResult, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="{Binding ViewModel.HealthResult.SmartHealth, StringFormat='SMART: {0}'}" Foreground="{Binding ViewModel.HealthResult.StatusColor, Converter={StaticResource HexColorToBrushConverter}}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding ViewModel.HealthResult.TotalGb, StringFormat='Total: {0} GB'}" Opacity="0.7" FontSize="12"/>
+                                <TextBlock Text="{Binding ViewModel.HealthResult.FreeGb, StringFormat='Free: {0} GB'}" Opacity="0.7" FontSize="12"/>
+                                <TextBlock Text="{Binding ViewModel.HealthResult.TemperatureC, StringFormat='Temp: {0}°C'}" Opacity="0.7" FontSize="12"/>
+                                <TextBlock Text="{Binding ViewModel.HealthResult.PowerOnHours, StringFormat='Power-on Hours: {0}'}" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Compare -->
+                <Border Style="{DynamicResource ArcadeCardStyle}" Margin="0,0,0,16">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="COMPARE DIRECTORIES" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox PlaceholderText="Source directory" Text="{Binding ViewModel.CompareSource, UpdateSourceTrigger=PropertyChanged}"/>
+                            <ui:TextBox Grid.Column="2" PlaceholderText="Destination directory" Text="{Binding ViewModel.CompareDest, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button Grid.Column="3" Margin="12,0,0,0" Content="COMPARE" Style="{DynamicResource ArcadeButtonStyle}" Padding="14,6" Command="{Binding ViewModel.CompareCommand}" IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                        </Grid>
+                        <TextBlock Text="{Binding ViewModel.CompareResult}" TextWrapping="Wrap" Opacity="0.75" FontFamily="Consolas" FontSize="12" Visibility="{Binding ViewModel.CompareResult, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </StackPanel>
-                </ui:Card>
-            </Grid>
+                </Border>
 
-            <!-- Compare -->
-            <ui:Card Padding="20" Margin="0,0,0,16">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Compare Directories" FontSize="15" FontWeight="SemiBold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <ui:TextBox PlaceholderText="Source directory"
-                                    Text="{Binding ViewModel.CompareSource, UpdateSourceTrigger=PropertyChanged}"/>
-                        <ui:TextBox Grid.Column="2" PlaceholderText="Destination directory"
-                                    Text="{Binding ViewModel.CompareDest, UpdateSourceTrigger=PropertyChanged}"/>
-                        <ui:Button Grid.Column="3" Margin="12,0,0,0" Content="Compare"
-                                   Command="{Binding ViewModel.CompareCommand}"
-                                   IsEnabled="{Binding ViewModel.IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
-                    </Grid>
-                    <TextBlock Text="{Binding ViewModel.CompareResult}" TextWrapping="Wrap"
-                               Opacity="0.75" FontFamily="Consolas" FontSize="12"
-                               Visibility="{Binding ViewModel.CompareResult, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                </StackPanel>
-            </ui:Card>
-
-            <!-- Migrate -->
-            <ui:Card Padding="20" Margin="0,0,0,16">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Migrate / Copy Drive" FontSize="15" FontWeight="SemiBold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <ui:TextBox PlaceholderText="Source root (e.g. D:\Arcade)"
-                                    Text="{Binding ViewModel.MigrateSource, UpdateSourceTrigger=PropertyChanged}"/>
-                        <ui:TextBox Grid.Column="2" PlaceholderText="Destination root (e.g. E:\Arcade)"
-                                    Text="{Binding ViewModel.MigrateDest, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <CheckBox Content="Verify checksums after copy"
-                                  IsChecked="{Binding ViewModel.MigrateVerify}"/>
+                <!-- Migrate -->
+                <Border Style="{DynamicResource ArcadeCardPinkStyle}" Margin="0,0,0,16">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="MIGRATE / COPY DRIVE" Style="{DynamicResource ArcadeSubtitleStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox PlaceholderText="Source root (e.g. D:\Arcade)" Text="{Binding ViewModel.MigrateSource, UpdateSourceTrigger=PropertyChanged}"/>
+                            <ui:TextBox Grid.Column="2" PlaceholderText="Destination root (e.g. E:\Arcade)" Text="{Binding ViewModel.MigrateDest, UpdateSourceTrigger=PropertyChanged}"/>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <CheckBox Content="Verify checksums after copy" IsChecked="{Binding ViewModel.MigrateVerify}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="DRY RUN" Style="{DynamicResource ArcadeButtonStyle}" Padding="14,6" Command="{Binding ViewModel.MigrateDryRunCommand}" IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
+                            <Button Content="START MIGRATION" Style="{DynamicResource ArcadeButtonOrangeStyle}" Padding="14,6" Margin="8,0,0,0" Command="{Binding ViewModel.MigrateCommand}" IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
+                        </StackPanel>
+                        <ProgressBar Value="{Binding ViewModel.MigrateProgress}" Maximum="100" Style="{DynamicResource NeonProgressBarPinkStyle}" Visibility="{Binding ViewModel.IsMigrating, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <TextBlock Text="{Binding ViewModel.MigrateResult}" TextWrapping="Wrap" Opacity="0.75" FontFamily="Consolas" FontSize="12"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <ui:Button Content="Dry Run" Appearance="Secondary"
-                                   Command="{Binding ViewModel.MigrateDryRunCommand}"
-                                   IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
-                        <ui:Button Content="Start Migration" Appearance="Danger"
-                                   Command="{Binding ViewModel.MigrateCommand}"
-                                   IsEnabled="{Binding ViewModel.IsMigrating, Converter={StaticResource InverseBoolConverter}}"/>
-                    </StackPanel>
-                    <ProgressBar Value="{Binding ViewModel.MigrateProgress}" Maximum="100" Height="6"
-                                 Visibility="{Binding ViewModel.IsMigrating, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding ViewModel.MigrateResult}" TextWrapping="Wrap"
-                               Opacity="0.75" FontFamily="Consolas" FontSize="12"/>
-                </StackPanel>
-            </ui:Card>
+                </Border>
 
-            <TextBlock Text="{Binding ViewModel.StatusText}" Opacity="0.55" FontSize="12"
-                       Margin="0,0,0,8" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding ViewModel.StatusText}" Style="{DynamicResource ConsoleTextStyle}" FontSize="11" Margin="0,0,0,8" HorizontalAlignment="Right"/>
 
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </ui:Page>
