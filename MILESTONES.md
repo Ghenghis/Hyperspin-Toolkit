@@ -550,7 +550,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Cross-frontend collection comparison (what systems/games exist where)
 *   Theme format awareness (different frontends use different media layouts)
 *   KINHANK variant awareness: handle Variant A (HyperSpin), B (AttractMode/RetroFE), C (Batocera) layouts
-*   **Status**: 📋 Planned — 0% built, requires `engines/frontend_converter.py`
+*   **Status**: ✅ Complete — `engines/frontend_converter.py` (450 lines), 5 formats (HyperSpin/AttractMode/LaunchBox/Batocera/CSV), single + batch conversion, MCP tools: `convert_gamelist`, `batch_convert_gamelists`, `list_conversion_formats`. Tested: 11,557 MAME games converted HS XML → AM romlist + Batocera gamelist
 
 ## Phase 13: RocketLauncher Deep Integration (Milestones 59–60)
 
@@ -701,11 +701,11 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 0        | 1       | 5            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 1        | 1       | 4            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **26**   | **3**   | **37**       |
+| **Total**                          | **66**     | **27**   | **3**   | **36**       |
 
 ### Build Order (Recommended Sequence)
 
