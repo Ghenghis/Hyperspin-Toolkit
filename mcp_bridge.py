@@ -1041,6 +1041,163 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M41 — Cross-HDD Asset Index & Quality Scoring Handlers ──────────
+
+def tool_scan_drive_assets(drive_letter: str, max_files_per_dir: int = 0, **kwargs) -> dict:
+    """M41 — Scan a drive for all game assets and build the index."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    records = auditor.scan_drive(drive_letter, max_files_per_dir=max_files_per_dir)
+    auditor.save_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    return {"assets_found": len(records), "stats": auditor.get_stats().to_dict()}
+
+
+def tool_scan_all_assets(drive_letters: list = None, max_files_per_dir: int = 0, **kwargs) -> dict:
+    """M41 — Scan all registered gaming drives for assets."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    records = auditor.scan_all_drives(drive_letters=drive_letters, max_files_per_dir=max_files_per_dir)
+    auditor.save_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    return {"assets_found": len(records), "stats": auditor.get_stats().to_dict()}
+
+
+def tool_query_assets(asset_type: str = "", system: str = "", drive_letter: str = "",
+                       min_quality: float = 0.0, gui_page: str = "",
+                       format_filter: str = "", limit: int = 50, **kwargs) -> dict:
+    """M41 — Query the asset index with filters."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    auditor.load_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    results = auditor.query(asset_type=asset_type or None, system=system or None,
+                            drive_letter=drive_letter or None, min_quality=min_quality,
+                            format_filter=format_filter or None, gui_page=gui_page or None,
+                            limit=limit)
+    return {"results": [r.to_dict() for r in results], "count": len(results)}
+
+
+def tool_asset_summary(**kwargs) -> dict:
+    """M41 — Get a summary of the entire asset index."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    auditor.load_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    return auditor.summary()
+
+
+def tool_missing_media_report(**kwargs) -> dict:
+    """M41 — Find systems with missing media types."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    auditor.load_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    report = auditor.missing_media_report()
+    return {"systems_with_gaps": len(report), "report": report}
+
+
+def tool_duplicate_assets(**kwargs) -> dict:
+    """M41 — Find duplicate assets across drives."""
+    from engines.asset_auditor import AssetAuditor
+    auditor = AssetAuditor(registry_path=str(Path(r"D:\hyperspin_toolkit\drive_registry.json")))
+    auditor.load_index(str(Path(r"D:\hyperspin_toolkit\data\asset_index.json")))
+    dupes = auditor.duplicate_assets()
+    return {"duplicate_groups": len(dupes), "duplicates": [{"key": k, "paths": p} for k, p in dupes[:100]]}
+
+
+# ── M42 — SWF Theme Conversion Pipeline Handlers ────────────────────
+
+def tool_swf_check_tools(**kwargs) -> dict:
+    """M42 — Check availability of SWF conversion tools (JPEXS, FFmpeg, Java)."""
+    from engines.swf_converter import check_tools
+    return check_tools()
+
+
+def tool_swf_scan(themes_dir: str, system: str = "", **kwargs) -> dict:
+    """M42 — Scan a directory for SWF theme files."""
+    from engines.swf_converter import scan_swf_themes
+    return scan_swf_themes(themes_dir, system)
+
+
+def tool_swf_queue(swf_paths: list, target_format: str = "mp4",
+                    system: str = "", output_dir: str = "", **kwargs) -> dict:
+    """M42 — Queue SWF files for conversion."""
+    from engines.swf_converter import queue_conversions
+    return queue_conversions(swf_paths, target_format, system, output_dir)
+
+
+def tool_swf_convert(task_id: str = "", batch_size: int = 5, **kwargs) -> dict:
+    """M42 — Execute pending SWF conversions."""
+    from engines.swf_converter import execute_conversion
+    return execute_conversion(task_id, batch_size)
+
+
+def tool_swf_stats(**kwargs) -> dict:
+    """M42 — Get SWF conversion statistics."""
+    from engines.swf_converter import conversion_stats
+    return conversion_stats()
+
+
+def tool_swf_queue_status(status: str = "", limit: int = 50, **kwargs) -> dict:
+    """M42 — Get conversion queue entries."""
+    from engines.swf_converter import get_conversion_queue
+    return get_conversion_queue(status, limit)
+
+
+# ── M43 — Thumbnail Cache & Dynamic Theme Loader Handlers ───────────
+
+def tool_generate_thumbnail(original_path: str, asset_id: str = "",
+                             sizes: list = None, **kwargs) -> dict:
+    """M43 — Generate thumbnails for an image asset."""
+    from engines.theme_engine import generate_thumbnail
+    return generate_thumbnail(original_path, asset_id, sizes)
+
+
+def tool_theme_cache_stats(**kwargs) -> dict:
+    """M43 — Get thumbnail cache statistics."""
+    from engines.theme_engine import get_cache_stats
+    return get_cache_stats()
+
+
+def tool_resolve_best_asset(game: str, asset_type: str, system: str = "", **kwargs) -> dict:
+    """M43 — Find the best asset across all sources using priority chain."""
+    from engines.theme_engine import resolve_best_asset
+    return resolve_best_asset(game, asset_type, system)
+
+
+def tool_get_page_theme_map(page: str, **kwargs) -> dict:
+    """M43 — Get theme mapping for a GUI page (pinned + auto-selected)."""
+    from engines.theme_engine import get_page_theme_map
+    return get_page_theme_map(page)
+
+
+def tool_add_theme_favorite(asset_id: str, path: str, system: str = "",
+                             game: str = "", asset_type: str = "", **kwargs) -> dict:
+    """M43 — Add an asset to theme favorites."""
+    from engines.theme_engine import add_favorite
+    return add_favorite(asset_id, path, system, game, asset_type)
+
+
+def tool_list_theme_favorites(system: str = "", limit: int = 50, **kwargs) -> dict:
+    """M43 — List favorited theme assets."""
+    from engines.theme_engine import list_favorites
+    return list_favorites(system, limit)
+
+
+def tool_pin_theme(page: str, slot: str, asset_id: str, path: str, **kwargs) -> dict:
+    """M43 — Pin an asset to a specific GUI page slot."""
+    from engines.theme_engine import pin_to_page
+    return pin_to_page(page, slot, asset_id, path)
+
+
+def tool_rotate_theme(page: str, slot: str, **kwargs) -> dict:
+    """M43 — Rotate to next theme asset for a page slot."""
+    from engines.theme_engine import rotate_theme
+    return rotate_theme(page, slot)
+
+
+def tool_theme_engine_status(**kwargs) -> dict:
+    """M43 — Get overall theme engine status."""
+    from engines.theme_engine import theme_engine_status
+    return theme_engine_status()
+
+
 # ── M36 — Goose Orchestrator Integration Handlers ───────────────────
 
 def tool_goose_validate_stack(**kwargs) -> dict:
@@ -2975,6 +3132,241 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M41 — Cross-HDD Asset Index & Quality Scoring ──
+    {
+        "name": "scan_drive_assets",
+        "description": "M41 — Scan a drive for all game assets (images, videos, audio, SWF themes) and build the searchable index.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["drive_letter"],
+            "properties": {
+                "drive_letter": {"type": "string", "description": "Drive letter to scan (e.g. 'D')"},
+                "max_files_per_dir": {"type": "integer", "default": 0, "description": "Max files per directory (0=unlimited)"},
+            },
+        },
+        "handler": tool_scan_drive_assets,
+    },
+    {
+        "name": "scan_all_assets",
+        "description": "M41 — Scan all registered gaming drives for assets and build the full cross-HDD index.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "drive_letters": {"type": "array", "items": {"type": "string"}, "description": "Specific drives (empty=all registered)"},
+                "max_files_per_dir": {"type": "integer", "default": 0},
+            },
+        },
+        "handler": tool_scan_all_assets,
+    },
+    {
+        "name": "query_assets",
+        "description": "M41 — Query the asset index with filters (type, system, drive, quality, format, GUI page).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "asset_type": {"type": "string", "description": "Filter: wheel_art, background, box_art, video, audio, theme_anim, fanart, marquee, flyer, snap, etc."},
+                "system": {"type": "string"},
+                "drive_letter": {"type": "string"},
+                "min_quality": {"type": "number", "default": 0},
+                "gui_page": {"type": "string", "description": "Filter by GUI page relevance"},
+                "format_filter": {"type": "string", "description": "File extension filter (e.g. 'png')"},
+                "limit": {"type": "integer", "default": 50},
+            },
+        },
+        "handler": tool_query_assets,
+    },
+    {
+        "name": "asset_summary",
+        "description": "M41 — Get summary of the entire asset index (counts by type, format, drive, top systems).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_asset_summary,
+    },
+    {
+        "name": "missing_media_report",
+        "description": "M41 — Find systems that have some asset types but are missing others (wheel_art, background, video, audio).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_missing_media_report,
+    },
+    {
+        "name": "duplicate_assets",
+        "description": "M41 — Find duplicate assets (same game+type) across different drives.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_duplicate_assets,
+    },
+    # ── M42 — SWF Theme Conversion Pipeline ──
+    {
+        "name": "swf_check_tools",
+        "description": "M42 — Check availability of SWF conversion tools (JPEXS, FFmpeg, Java).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_swf_check_tools,
+    },
+    {
+        "name": "swf_scan",
+        "description": "M42 — Scan a directory for SWF theme files and list them with sizes.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["themes_dir"],
+            "properties": {
+                "themes_dir": {"type": "string", "description": "Directory to scan for .swf files"},
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_swf_scan,
+    },
+    {
+        "name": "swf_queue",
+        "description": "M42 — Queue SWF files for batch conversion to mp4/png/lottie/gif/webm.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["swf_paths"],
+            "properties": {
+                "swf_paths": {"type": "array", "items": {"type": "string"}, "description": "List of SWF file paths"},
+                "target_format": {"type": "string", "enum": ["lottie", "mp4", "png", "gif", "webm"], "default": "mp4"},
+                "system": {"type": "string"},
+                "output_dir": {"type": "string"},
+            },
+        },
+        "handler": tool_swf_queue,
+    },
+    {
+        "name": "swf_convert",
+        "description": "M42 — Execute pending SWF conversions (specific task or next batch).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "task_id": {"type": "string", "description": "Specific task ID (empty=next batch)"},
+                "batch_size": {"type": "integer", "default": 5},
+            },
+        },
+        "handler": tool_swf_convert,
+    },
+    {
+        "name": "swf_stats",
+        "description": "M42 — Get SWF conversion statistics (pending, completed, failed, sizes).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_swf_stats,
+    },
+    {
+        "name": "swf_queue_status",
+        "description": "M42 — Get conversion queue entries with optional status filter.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string", "enum": ["pending", "running", "completed", "failed", "skipped"]},
+                "limit": {"type": "integer", "default": 50},
+            },
+        },
+        "handler": tool_swf_queue_status,
+    },
+    # ── M43 — Thumbnail Cache & Dynamic Theme Loader ──
+    {
+        "name": "generate_thumbnail",
+        "description": "M43 — Generate optimized thumbnails (small/medium/large/grid) for an image asset.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["original_path"],
+            "properties": {
+                "original_path": {"type": "string"},
+                "asset_id": {"type": "string"},
+                "sizes": {"type": "array", "items": {"type": "string"}, "description": "Sizes: small, medium, large, grid"},
+            },
+        },
+        "handler": tool_generate_thumbnail,
+    },
+    {
+        "name": "theme_cache_stats",
+        "description": "M43 — Get thumbnail cache statistics (count, size, directory).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_theme_cache_stats,
+    },
+    {
+        "name": "resolve_best_asset",
+        "description": "M43 — Find the best asset for a game across all sources using priority chain (HyperSpin > AttractMode > LaunchBox > Batocera).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game", "asset_type"],
+            "properties": {
+                "game": {"type": "string"},
+                "asset_type": {"type": "string"},
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_resolve_best_asset,
+    },
+    {
+        "name": "get_page_theme_map",
+        "description": "M43 — Get current theme mapping for a GUI page (which assets fill each slot).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["page"],
+            "properties": {
+                "page": {"type": "string", "description": "Page: dashboard, collection_browser, game_detail, asset_gallery"},
+            },
+        },
+        "handler": tool_get_page_theme_map,
+    },
+    {
+        "name": "add_theme_favorite",
+        "description": "M43 — Add an asset to theme favorites for quick access.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["asset_id", "path"],
+            "properties": {
+                "asset_id": {"type": "string"},
+                "path": {"type": "string"},
+                "system": {"type": "string"},
+                "game": {"type": "string"},
+                "asset_type": {"type": "string"},
+            },
+        },
+        "handler": tool_add_theme_favorite,
+    },
+    {
+        "name": "list_theme_favorites",
+        "description": "M43 — List favorited theme assets.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string"},
+                "limit": {"type": "integer", "default": 50},
+            },
+        },
+        "handler": tool_list_theme_favorites,
+    },
+    {
+        "name": "pin_theme",
+        "description": "M43 — Pin a specific asset to a GUI page slot (overrides auto-selection).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["page", "slot", "asset_id", "path"],
+            "properties": {
+                "page": {"type": "string"},
+                "slot": {"type": "string"},
+                "asset_id": {"type": "string"},
+                "path": {"type": "string"},
+            },
+        },
+        "handler": tool_pin_theme,
+    },
+    {
+        "name": "rotate_theme",
+        "description": "M43 — Rotate to the next theme asset for a page slot (avoids recently shown).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["page", "slot"],
+            "properties": {
+                "page": {"type": "string"},
+                "slot": {"type": "string"},
+            },
+        },
+        "handler": tool_rotate_theme,
+    },
+    {
+        "name": "theme_engine_status",
+        "description": "M43 — Get overall theme engine status (cache, favorites, pinned, page coverage, source priority).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_theme_engine_status,
     },
     # ── M36 — Goose Orchestrator Integration ──
     {

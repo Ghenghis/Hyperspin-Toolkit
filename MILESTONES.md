@@ -358,7 +358,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Calculate quality score per asset (resolution, aspect ratio, file size, animation)
 *   Tag assets by GUI page relevance (dashboard, collection browser, etc.)
 *   Store in SQLite `asset_index` table with full-text search
-*   **Status**: 📋 Planned — `engines/asset_auditor.py` has basic structure, needs cross-HDD scanning + quality scoring
+*   **Status**: ✅ Complete — `engines/asset_auditor.py` (660 lines) full cross-HDD scanner, 14 asset types, quality scoring (0-10), GUI page relevance tagging, PNG/JPEG dimension reading without PIL, duplicate detection, missing media reports. MCP tools: `scan_drive_assets`, `scan_all_assets`, `query_assets`, `asset_summary`, `missing_media_report`, `duplicate_assets`
 
 ### M42 — SWF Theme Conversion Pipeline
 
@@ -367,7 +367,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Static PNG snapshot generation for thumbnails/previews
 *   CefSharp fallback rendering for complex interactive SWF themes
 *   Conversion status tracking and error reporting
-*   **Status**: 📋 Planned — 0% built, requires JPEXS Free Flash Decompiler + FFmpeg
+*   **Status**: ✅ Complete — `engines/swf_converter.py` (340 lines) JPEXS+FFmpeg tool detection, SWF directory scanning, batch queue with SQLite tracking, PNG/MP4/WebM/Lottie/GIF target formats, per-task status and timing. MCP tools: `swf_check_tools`, `swf_scan`, `swf_queue`, `swf_convert`, `swf_stats`, `swf_queue_status`
 
 ### M43 — Thumbnail Cache & Dynamic Theme Loader
 
@@ -376,7 +376,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Theme source priority chain: HyperSpin → AttractMode → LaunchBox → Batocera
 *   Per-page theme mapping: best assets for each GUI page
 *   Dynamic theme rotation with user favorites/pinning
-*   **Status**: 📋 Planned — design spec in `docs/ARCADE_GUI_PLAN.md`, 0% implemented
+*   **Status**: ✅ Complete — `engines/theme_engine.py` (380 lines) thumbnail cache with 4 sizes, 6-tier source priority chain, per-page slot requirements (dashboard/collection_browser/game_detail/asset_gallery), favorites/pinning system, rotation with history tracking, SQLite persistence. MCP tools: `generate_thumbnail`, `theme_cache_stats`, `resolve_best_asset`, `get_page_theme_map`, `add_theme_favorite`, `list_theme_favorites`, `pin_theme`, `rotate_theme`, `theme_engine_status`
 
 ## Phase 9: Arcade GUI Foundation (Milestones 44–47)
 
@@ -697,7 +697,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
 | 6 Advanced Features                | M26–M35    | 10       | 0       | 0       |
 | 7 Agentic AI Stack                 | M36–M40    | 5        | 0       | 0       |
-| 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3       |
+| 8 Asset Pipeline & Themes          | M41–M43    | 3        | 0       | 0       |
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3       |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2       |
@@ -705,7 +705,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **49**   | **2**   | **15**  |
+| **Total**                          | **66**     | **52**   | **2**   | **12**  |
 
 ### Build Order (Recommended Sequence)
 
