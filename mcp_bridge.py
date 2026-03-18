@@ -1041,6 +1041,121 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M61 — Scheduler & Task Automation Handlers ──────────────────────
+
+def tool_list_scheduled_tasks(category: str = "", enabled_only: bool = False,
+                              **kwargs) -> dict:
+    """M61 — List all scheduled tasks."""
+    from engines.scheduler import list_tasks
+    tasks = list_tasks(category or None, enabled_only)
+    return {"tasks": [t.to_dict() for t in tasks], "count": len(tasks)}
+
+
+def tool_run_scheduled_task(task_id: str, force: bool = True, **kwargs) -> dict:
+    """M61 — Run a scheduled task immediately."""
+    from engines.scheduler import run_task
+    run = run_task(task_id, force)
+    return run.to_dict()
+
+
+def tool_create_scheduled_task(task_id: str, name: str, engine: str, action: str,
+                               interval: str = "daily", description: str = "",
+                               category: str = "general", parameters: dict = None,
+                               **kwargs) -> dict:
+    """M61 — Create or update a scheduled task."""
+    from engines.scheduler import create_task, ScheduledTask
+    task = ScheduledTask(
+        task_id=task_id, name=name, engine=engine, action=action,
+        interval=interval, description=description, category=category,
+        parameters=parameters or {},
+    )
+    result = create_task(task)
+    return result.to_dict()
+
+
+def tool_scheduler_status(**kwargs) -> dict:
+    """M61 — Get scheduler status (tasks, due, recent runs, notifications)."""
+    from engines.scheduler import get_scheduler_status
+    return get_scheduler_status()
+
+
+def tool_run_maintenance_cycle(cycle: str = "night", **kwargs) -> dict:
+    """M61 — Run a maintenance cycle (night, pre_session, post_update)."""
+    from engines.scheduler import run_maintenance_cycle
+    return run_maintenance_cycle(cycle)
+
+
+def tool_get_notifications(unread_only: bool = True, level: str = "",
+                           limit: int = 20, **kwargs) -> dict:
+    """M61 — Get notifications."""
+    from engines.scheduler import get_notifications
+    notifs = get_notifications(unread_only, level or None, limit)
+    return {"notifications": [n.to_dict() for n in notifs], "count": len(notifs)}
+
+
+def tool_install_default_tasks(**kwargs) -> dict:
+    """M61 — Install all default scheduled tasks."""
+    from engines.scheduler import install_default_tasks
+    n = install_default_tasks()
+    return {"installed": n}
+
+
+# ── M62 — Agent Memory & Knowledge Base Handlers ────────────────────
+
+def tool_store_memory(category: str, subject: str, key: str, value: str,
+                      confidence: float = 1.0, source: str = "",
+                      tags: str = "", **kwargs) -> dict:
+    """M62 — Store or update a memory entry."""
+    from engines.agent_memory import store_memory
+    mem = store_memory(category, subject, key, value, confidence, source, tags)
+    return mem.to_dict()
+
+
+def tool_search_memories(query: str, category: str = "", subject: str = "",
+                         limit: int = 20, **kwargs) -> dict:
+    """M62 — Full-text search across agent memories."""
+    from engines.agent_memory import search_memories
+    results = search_memories(query, category, subject, limit)
+    return {"memories": [m.to_dict() for m in results], "count": len(results)}
+
+
+def tool_memory_stats(**kwargs) -> dict:
+    """M62 — Get memory database statistics."""
+    from engines.agent_memory import get_memory_stats
+    return get_memory_stats()
+
+
+def tool_store_recommendation(category: str, subject: str,
+                              recommendation: str, reason: str = "",
+                              **kwargs) -> dict:
+    """M62 — Store a recommendation for user review."""
+    from engines.agent_memory import store_recommendation
+    rec_id = store_recommendation(category, subject, recommendation, reason)
+    return {"rec_id": rec_id}
+
+
+def tool_respond_recommendation(rec_id: int, accepted: bool,
+                                feedback: str = "", **kwargs) -> dict:
+    """M62 — Record user response to a recommendation."""
+    from engines.agent_memory import respond_to_recommendation
+    ok = respond_to_recommendation(rec_id, accepted, feedback)
+    return {"success": ok}
+
+
+def tool_get_quirks(emulator: str = "", **kwargs) -> dict:
+    """M62 — Get emulator quirks database."""
+    from engines.agent_memory import get_quirks
+    quirks = get_quirks(emulator)
+    return {"quirks": quirks, "count": len(quirks)}
+
+
+def tool_export_knowledge(output_path: str = "", **kwargs) -> dict:
+    """M62 — Export all agent memories to JSON."""
+    from engines.agent_memory import export_knowledge
+    path = export_knowledge(output_path or None)
+    return {"path": path}
+
+
 # ── M54 — Metadata Scraping Engine Handlers ─────────────────────────
 
 def tool_scrape_game(game_name: str, system: str, sources: list = None,
@@ -2394,6 +2509,179 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M61 — Scheduler & Task Automation ──
+    {
+        "name": "list_scheduled_tasks",
+        "description": "M61 — List all scheduled tasks with status and next run time.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "category": {"type": "string", "enum": ["audit", "backup", "health", "cleanup", "update", "general"], "description": "Filter by category (optional)"},
+                "enabled_only": {"type": "boolean", "default": False},
+            },
+        },
+        "handler": tool_list_scheduled_tasks,
+    },
+    {
+        "name": "run_scheduled_task",
+        "description": "M61 — Run a scheduled task immediately by ID.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task_id"],
+            "properties": {
+                "task_id": {"type": "string", "description": "Task ID to run"},
+                "force": {"type": "boolean", "default": True},
+            },
+        },
+        "handler": tool_run_scheduled_task,
+    },
+    {
+        "name": "create_scheduled_task",
+        "description": "M61 — Create or update a scheduled task.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["task_id", "name", "engine", "action"],
+            "properties": {
+                "task_id": {"type": "string", "description": "Unique task ID"},
+                "name": {"type": "string", "description": "Human-readable name"},
+                "engine": {"type": "string", "description": "Engine module name"},
+                "action": {"type": "string", "description": "Function name in engine"},
+                "interval": {"type": "string", "enum": ["manual", "hourly", "daily", "weekly", "monthly", "on_startup", "on_idle"], "default": "daily"},
+                "description": {"type": "string"},
+                "category": {"type": "string", "enum": ["audit", "backup", "health", "cleanup", "update", "general"]},
+                "parameters": {"type": "object", "description": "Parameters to pass to the action"},
+            },
+        },
+        "handler": tool_create_scheduled_task,
+    },
+    {
+        "name": "scheduler_status",
+        "description": "M61 — Get scheduler status (total/enabled/due tasks, recent runs, unread notifications).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_scheduler_status,
+    },
+    {
+        "name": "run_maintenance_cycle",
+        "description": "M61 — Run a predefined maintenance cycle (night=full audit+cleanup+backup, pre_session=quick check, post_update=verify).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["cycle"],
+            "properties": {
+                "cycle": {"type": "string", "enum": ["night", "pre_session", "post_update"]},
+            },
+        },
+        "handler": tool_run_maintenance_cycle,
+    },
+    {
+        "name": "get_notifications",
+        "description": "M61 — Get notifications from the scheduler/task system.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "unread_only": {"type": "boolean", "default": True},
+                "level": {"type": "string", "enum": ["info", "warning", "error", "critical"]},
+                "limit": {"type": "integer", "default": 20},
+            },
+        },
+        "handler": tool_get_notifications,
+    },
+    {
+        "name": "install_default_tasks",
+        "description": "M61 — Install all default scheduled tasks (daily audit, weekly health, backup, etc.).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_install_default_tasks,
+    },
+    # ── M62 — Agent Memory & Knowledge Base ──
+    {
+        "name": "store_memory",
+        "description": "M62 — Store or update an agent memory entry (observation, quirk, compatibility, preference).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["category", "subject", "key", "value"],
+            "properties": {
+                "category": {"type": "string", "enum": ["observation", "quirk", "compatibility", "preference", "correction", "tip"]},
+                "subject": {"type": "string", "description": "System, emulator, or topic"},
+                "key": {"type": "string", "description": "Concise identifier"},
+                "value": {"type": "string", "description": "The knowledge content"},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1, "default": 1.0},
+                "source": {"type": "string"},
+                "tags": {"type": "string", "description": "Comma-separated tags"},
+            },
+        },
+        "handler": tool_store_memory,
+    },
+    {
+        "name": "search_memories",
+        "description": "M62 — Full-text search across agent memories (FTS5).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string"},
+                "category": {"type": "string"},
+                "subject": {"type": "string"},
+                "limit": {"type": "integer", "default": 20},
+            },
+        },
+        "handler": tool_search_memories,
+    },
+    {
+        "name": "memory_stats",
+        "description": "M62 — Get memory database statistics (counts, categories, recommendation acceptance rate).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_memory_stats,
+    },
+    {
+        "name": "store_recommendation",
+        "description": "M62 — Store a recommendation for user review.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["category", "subject", "recommendation"],
+            "properties": {
+                "category": {"type": "string", "enum": ["repair", "config", "download", "cleanup"]},
+                "subject": {"type": "string"},
+                "recommendation": {"type": "string"},
+                "reason": {"type": "string"},
+            },
+        },
+        "handler": tool_store_recommendation,
+    },
+    {
+        "name": "respond_recommendation",
+        "description": "M62 — Record user acceptance/rejection of a recommendation (feeds adaptive learning).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["rec_id", "accepted"],
+            "properties": {
+                "rec_id": {"type": "integer"},
+                "accepted": {"type": "boolean"},
+                "feedback": {"type": "string"},
+            },
+        },
+        "handler": tool_respond_recommendation,
+    },
+    {
+        "name": "get_emulator_quirks",
+        "description": "M62 — Get known emulator quirks/issues from the knowledge base.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "emulator": {"type": "string", "description": "Filter by emulator (optional)"},
+            },
+        },
+        "handler": tool_get_quirks,
+    },
+    {
+        "name": "export_knowledge",
+        "description": "M62 — Export all agent memories to a JSON file.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "output_path": {"type": "string", "description": "Output file path (optional)"},
+            },
+        },
+        "handler": tool_export_knowledge,
     },
     # ── M54 — Metadata Scraping Engine ──
     {

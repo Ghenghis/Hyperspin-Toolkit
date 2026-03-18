@@ -610,7 +610,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
     *   "Night mode" — run full audit + cleanup + backup while idle
     *   Post-update verification cycle
     *   Pre-session health check (quick validation before gaming)
-*   **Status**: 📋 Planned — 0% built, requires `engines/scheduler.py` + `engines/notifier.py`
+*   **Status**: ✅ Complete — `engines/scheduler.py` (580 lines). SQLite task/run/notification tables, cron-like scheduling (hourly/daily/weekly/monthly), dynamic task action resolution, maintenance cycles (night/pre_session/post_update), Windows toast notifications, 7 default tasks. MCP tools: `list_scheduled_tasks`, `run_scheduled_task`, `create_scheduled_task`, `scheduler_status`, `run_maintenance_cycle`, `get_notifications`, `install_default_tasks`
 
 ### M62 — Agent Memory, Learning & Knowledge Base
 
@@ -627,7 +627,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
     *   Learn from user acceptance/rejection of recommendations
     *   Prioritize actions based on historical effectiveness
     *   Personalized health scoring weights based on user's collection focus
-*   **Status**: 📋 Planned — M35 mentions learning; this provides the concrete implementation
+*   **Status**: ✅ Complete — `engines/agent_memory.py` (620 lines). SQLite with FTS5 full-text search, memory CRUD (observation/quirk/compatibility/preference/correction/tip), emulator quirks DB, ROM compatibility notes, user preference learning, session history, recommendation tracking with accept/reject + adaptive learning, knowledge export/import. MCP tools: `store_memory`, `search_memories`, `memory_stats`, `store_recommendation`, `respond_recommendation`, `get_emulator_quirks`, `export_knowledge`
 
 ### M63 — Automated Repair & Self-Healing Framework
 
@@ -703,9 +703,9 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
 | 12 Data Pipeline & Cross-Platform  | M53–M58    | 6        | 0       | 0            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
-| 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
+| 14 Automation & Operations         | M61–M63    | 3        | 0       | 0            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **32**   | **2**   | **32**       |
+| **Total**                          | **66**     | **34**   | **2**   | **30**       |
 
 ### Build Order (Recommended Sequence)
 
