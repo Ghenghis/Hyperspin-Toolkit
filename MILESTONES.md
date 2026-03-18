@@ -230,7 +230,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Region variant identification (US, EU, JP)
 *   Cleanup wizard with safe deletion
 *   Space savings calculator
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/duplicate_detector.py` (500 lines). CRC32/MD5 hashing, region variant detection (12 regions), name/hash/name+size matching, safe quarantine cleanup, space savings calculator, cross-directory scanning. MCP tools: `detect_duplicate_roms`, `detect_region_variants`, `duplicate_space_savings`
 
 ### M27 — ROM Set Completion Tracker
 
@@ -238,7 +238,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Missing ROM lists with download size estimates
 *   Priority scoring (popular vs obscure titles)
 *   Collection goal setting and progress tracking
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/rom_completion.py` (530 lines). DAT file parsing (XML + CLRMAMEPro), per-system completion %, region breakdown, priority scoring (popular titles), SQLite snapshots + history, collection goals with progress tracking. MCP tools: `check_rom_completion`, `completion_overview`, `get_missing_roms`, `set_collection_goal`, `check_goal_progress`
 
 ### M28 — Online Research Agent
 
@@ -246,7 +246,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Emulator update checking from official sources
 *   Community tip aggregation
 *   AI-summarized research reports
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/research_agent.py` (430 lines). 14 emulator GitHub release tracking, game research (local metadata + agent memory + compatibility), system research (BIOS + quirks + diagnostics), community tip storage/retrieval. MCP tools: `check_emulator_updates`, `research_game`, `research_system`, `store_community_tip`, `list_known_emulators`
 
 ### M29 — Automated Report Generator
 
@@ -254,7 +254,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   PDF/HTML export of full collection inventory
 *   Change reports (what changed since last audit)
 *   Executive summary with AI-generated insights
-*   **Status**: 📋 Planned
+*   **Status**: ✅ Complete — `engines/report_generator.py` (470 lines). Markdown/JSON/HTML output, collection health reports (BIOS+completion+scheduler+memory), per-system reports, comparison reports, arcade-themed HTML with neon styling. MCP tools: `generate_health_report`, `generate_system_report`, `list_reports`
 
 ### M30 — Plugin System for Custom Extensions
 
@@ -695,7 +695,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 3 Safe Update                      | M11–M15    | 5        | 0       | 0       |
 | 4 AI Integration                   | M16–M20    | 5        | 0       | 0       |
 | 5 Web Dashboard                    | M21–M25    | 2        | 3       | 0       |
-| 6 Advanced Features                | M26–M35    | 2        | 0       | 8       |
+| 6 Advanced Features                | M26–M35    | 6        | 0       | 4       |
 | 7 Agentic AI Stack                 | M36–M40    | 0        | 0       | 5       |
 | 8 Asset Pipeline & Themes          | M41–M43    | 0        | 0       | 3       |
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4       |
@@ -705,7 +705,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2       |
 | 14 Automation & Operations         | M61–M63    | 3        | 0       | 0       |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0       |
-| **Total**                          | **66**     | **36**   | **2**   | **28**  |
+| **Total**                          | **66**     | **40**   | **2**   | **24**  |
 
 ### Build Order (Recommended Sequence)
 

@@ -1041,6 +1041,122 @@ def tool_check_integrity(drive_letter: str, reference_drive: str | None = None,
     }
 
 
+# ── M26 — Duplicate ROM Detection & Cleanup Handlers ────────────────
+
+def tool_detect_duplicates(rom_dirs: list, systems: list = None,
+                           use_hashes: bool = False, method: str = "name",
+                           **kwargs) -> dict:
+    """M26 — Detect duplicate ROMs across directories."""
+    from engines.duplicate_detector import detect_duplicates
+    return detect_duplicates(rom_dirs, systems, use_hashes, method)
+
+
+def tool_detect_region_variants(rom_dir: str, system: str = "",
+                                 **kwargs) -> dict:
+    """M26 — Find region variants of the same game."""
+    from engines.duplicate_detector import detect_region_variants
+    return detect_region_variants(rom_dir, system)
+
+
+def tool_space_savings(rom_dirs: list, systems: list = None,
+                       **kwargs) -> dict:
+    """M26 — Calculate potential space savings from duplicate cleanup."""
+    from engines.duplicate_detector import space_savings_report
+    return space_savings_report(rom_dirs, systems)
+
+
+# ── M27 — ROM Set Completion Tracker Handlers ───────────────────────
+
+def tool_check_completion(system: str, rom_dir: str, dat_path: str = "",
+                          **kwargs) -> dict:
+    """M27 — Check ROM set completion against DAT file."""
+    from engines.rom_completion import check_completion
+    return check_completion(system, rom_dir, dat_path)
+
+
+def tool_completion_overview(**kwargs) -> dict:
+    """M27 — Get completion overview across all tracked systems."""
+    from engines.rom_completion import completion_overview
+    return completion_overview()
+
+
+def tool_get_missing_roms(system: str, limit: int = 50,
+                          region: str = "", min_priority: float = 0,
+                          **kwargs) -> dict:
+    """M27 — Get missing ROMs for a system sorted by priority."""
+    from engines.rom_completion import get_missing_roms
+    return get_missing_roms(system, limit, region, min_priority)
+
+
+def tool_set_collection_goal(system: str, target_pct: float = 100.0,
+                              priority: str = "medium", **kwargs) -> dict:
+    """M27 — Set a collection goal for a system."""
+    from engines.rom_completion import set_goal
+    goal = set_goal(system, target_pct, priority=priority)
+    return goal.to_dict()
+
+
+def tool_check_goal_progress(**kwargs) -> dict:
+    """M27 — Check progress on all active collection goals."""
+    from engines.rom_completion import check_goal_progress
+    return check_goal_progress()
+
+
+# ── M28 — Online Research Agent Handlers ────────────────────────────
+
+def tool_check_emulator_updates(emulators: list = None, **kwargs) -> dict:
+    """M28 — Check for emulator updates via GitHub releases."""
+    from engines.research_agent import check_emulator_updates
+    return check_emulator_updates(emulators)
+
+
+def tool_research_game(game_name: str, system: str = "", **kwargs) -> dict:
+    """M28 — Research a game using local and online sources."""
+    from engines.research_agent import research_game
+    return research_game(game_name, system)
+
+
+def tool_research_system(system: str, **kwargs) -> dict:
+    """M28 — Research a system (BIOS, quirks, diagnostics, completion)."""
+    from engines.research_agent import research_system
+    return research_system(system)
+
+
+def tool_store_community_tip(topic: str, tip: str, source: str = "community",
+                              **kwargs) -> dict:
+    """M28 — Store a community tip in agent memory."""
+    from engines.research_agent import store_community_tip
+    return store_community_tip(topic, tip, source)
+
+
+def tool_get_emulator_list(**kwargs) -> dict:
+    """M28 — Get list of known emulators with update sources."""
+    from engines.research_agent import get_emulator_list
+    return get_emulator_list()
+
+
+# ── M29 — Automated Report Generator Handlers ──────────────────────
+
+def tool_generate_health_report(format: str = "markdown",
+                                 output_path: str = "", **kwargs) -> dict:
+    """M29 — Generate comprehensive collection health report."""
+    from engines.report_generator import generate_health_report
+    return generate_health_report(format, output_path)
+
+
+def tool_generate_system_report(system: str, format: str = "markdown",
+                                 output_path: str = "", **kwargs) -> dict:
+    """M29 — Generate detailed report for a single system."""
+    from engines.report_generator import generate_system_report
+    return generate_system_report(system, format, output_path)
+
+
+def tool_list_reports(limit: int = 20, **kwargs) -> dict:
+    """M29 — List previously generated reports."""
+    from engines.report_generator import list_reports
+    return list_reports(limit)
+
+
 # ── M18 — AI Game Recommendation Engine Handlers ────────────────────
 
 def tool_recommend_similar(game_name: str, system: str = "",
@@ -2572,6 +2688,199 @@ TOOLS = [
             },
         },
         "handler": tool_check_integrity,
+    },
+    # ── M26 — Duplicate ROM Detection & Cleanup ──
+    {
+        "name": "detect_duplicate_roms",
+        "description": "M26 — Detect duplicate ROMs across one or more directories by name, hash, or name+size.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["rom_dirs"],
+            "properties": {
+                "rom_dirs": {"type": "array", "items": {"type": "string"}, "description": "ROM directories to scan"},
+                "systems": {"type": "array", "items": {"type": "string"}, "description": "System names for each dir"},
+                "use_hashes": {"type": "boolean", "default": False, "description": "Compute MD5 for exact matching"},
+                "method": {"type": "string", "enum": ["name", "hash", "name+size", "all"], "default": "name"},
+            },
+        },
+        "handler": tool_detect_duplicates,
+    },
+    {
+        "name": "detect_region_variants",
+        "description": "M26 — Find region variants (USA, EUR, JP) of the same game in a directory.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["rom_dir"],
+            "properties": {
+                "rom_dir": {"type": "string"},
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_detect_region_variants,
+    },
+    {
+        "name": "duplicate_space_savings",
+        "description": "M26 — Calculate potential space savings from removing duplicate ROMs.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["rom_dirs"],
+            "properties": {
+                "rom_dirs": {"type": "array", "items": {"type": "string"}},
+                "systems": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+        "handler": tool_space_savings,
+    },
+    # ── M27 — ROM Set Completion Tracker ──
+    {
+        "name": "check_rom_completion",
+        "description": "M27 — Check ROM set completion for a system against a DAT file.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system", "rom_dir"],
+            "properties": {
+                "system": {"type": "string"},
+                "rom_dir": {"type": "string", "description": "Directory containing ROMs"},
+                "dat_path": {"type": "string", "description": "Path to DAT file (auto-detected if empty)"},
+            },
+        },
+        "handler": tool_check_completion,
+    },
+    {
+        "name": "completion_overview",
+        "description": "M27 — Get completion overview across all tracked systems.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_completion_overview,
+    },
+    {
+        "name": "get_missing_roms",
+        "description": "M27 — Get missing ROMs for a system sorted by priority (popular titles first).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string"},
+                "limit": {"type": "integer", "default": 50},
+                "region": {"type": "string", "description": "Filter by region (USA, Europe, Japan)"},
+                "min_priority": {"type": "number", "default": 0},
+            },
+        },
+        "handler": tool_get_missing_roms,
+    },
+    {
+        "name": "set_collection_goal",
+        "description": "M27 — Set a collection completion goal for a system.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string"},
+                "target_pct": {"type": "number", "default": 100},
+                "priority": {"type": "string", "enum": ["high", "medium", "low"]},
+            },
+        },
+        "handler": tool_set_collection_goal,
+    },
+    {
+        "name": "check_goal_progress",
+        "description": "M27 — Check progress on all active collection goals.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_check_goal_progress,
+    },
+    # ── M28 — Online Research Agent ──
+    {
+        "name": "check_emulator_updates",
+        "description": "M28 — Check for emulator updates via GitHub API (RetroArch, PCSX2, Dolphin, MAME, etc.).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "emulators": {"type": "array", "items": {"type": "string"}, "description": "Emulator names (default: all known)"},
+            },
+        },
+        "handler": tool_check_emulator_updates,
+    },
+    {
+        "name": "research_game",
+        "description": "M28 — Research a game using local metadata, agent memory, and compatibility notes.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["game_name"],
+            "properties": {
+                "game_name": {"type": "string"},
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_research_game,
+    },
+    {
+        "name": "research_system",
+        "description": "M28 — Research a system (BIOS requirements, known quirks, diagnostics, missing ROMs).",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string"},
+            },
+        },
+        "handler": tool_research_system,
+    },
+    {
+        "name": "store_community_tip",
+        "description": "M28 — Store a community tip in the knowledge base.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["topic", "tip"],
+            "properties": {
+                "topic": {"type": "string", "description": "What the tip is about"},
+                "tip": {"type": "string", "description": "The tip content"},
+                "source": {"type": "string", "default": "community"},
+            },
+        },
+        "handler": tool_store_community_tip,
+    },
+    {
+        "name": "list_known_emulators",
+        "description": "M28 — List all known emulators with update sources and system types.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_get_emulator_list,
+    },
+    # ── M29 — Automated Report Generator ──
+    {
+        "name": "generate_health_report",
+        "description": "M29 — Generate comprehensive collection health report (BIOS, completion, scheduler, memory).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "format": {"type": "string", "enum": ["markdown", "json", "html"], "default": "markdown"},
+                "output_path": {"type": "string", "description": "Custom output path (optional)"},
+            },
+        },
+        "handler": tool_generate_health_report,
+    },
+    {
+        "name": "generate_system_report",
+        "description": "M29 — Generate detailed report for a single system.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["system"],
+            "properties": {
+                "system": {"type": "string"},
+                "format": {"type": "string", "enum": ["markdown", "json", "html"], "default": "markdown"},
+                "output_path": {"type": "string"},
+            },
+        },
+        "handler": tool_generate_system_report,
+    },
+    {
+        "name": "list_reports",
+        "description": "M29 — List previously generated reports.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "default": 20},
+            },
+        },
+        "handler": tool_list_reports,
     },
     # ── M18 — AI Game Recommendation Engine ──
     {
