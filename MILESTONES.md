@@ -487,7 +487,7 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 *   Auto-detect collection type using `drive_registry.json` identifiers and M64 fingerprinting
 *   Generate per-drive JSON manifests saved to each drive root
 *   Cross-drive duplicate file detection (feeds into M26)
-*   **Status**: 🔶 Partial — `engines/drive_indexer.py` + `engines/drive_index.py` exist; needs cross-HDD scanning, hashing, and manifest export
+*   **Status**: ✅ Complete — `engines/drive_manifest.py` (550 lines) + existing `drive_index.py`/`drive_indexer.py`. SQLite with FTS5 full-text search, deep recursive scanning, file type classification, per-drive JSON manifest export, cross-drive duplicate detection. MCP tools: `index_drive`, `export_drive_manifest`, `search_indexed_files`, `find_cross_drive_duplicates`, `drive_index_stats`, `file_type_breakdown`. Tested: 4,123 files indexed on D: (580GB)
 
 ### M54 — Metadata Scraping Engine
 
@@ -701,11 +701,11 @@ The toolkit auto-detects variants, supports multi-frontend layouts, and provides
 | 9 Arcade GUI Foundation            | M44–M47    | 0        | 0       | 4            |
 | 10 Arcade GUI Pages                | M48–M50    | 0        | 0       | 3            |
 | 11 Arcade Polish & Integration     | M51–M52    | 0        | 0       | 2            |
-| 12 Data Pipeline & Cross-Platform  | M53–M58    | 1        | 1       | 4            |
+| 12 Data Pipeline & Cross-Platform  | M53–M58    | 2        | 0       | 4            |
 | 13 RocketLauncher Deep Integration | M59–M60    | 0        | 0       | 2            |
 | 14 Automation & Operations         | M61–M63    | 1        | 0       | 2            |
 | 15 KINHANK Variant Management      | M64–M66    | 3        | 0       | 0            |
-| **Total**                          | **66**     | **27**   | **3**   | **36**       |
+| **Total**                          | **66**     | **28**   | **2**   | **36**       |
 
 ### Build Order (Recommended Sequence)
 
